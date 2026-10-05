@@ -1,0 +1,12 @@
+{
+    "name": "{{ studly }}",
+    "alias": "{{ alias }}",
+    "description": "",
+    "version": "1.0.0",
+    "priority": 0,
+    "providers": [
+        "Themes\\{{ studly }}\\Providers\\ThemeServiceProvider"
+    ],
+    "aliases": {},
+    "files": []
+}

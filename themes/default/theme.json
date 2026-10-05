@@ -1,0 +1,12 @@
+{
+    "name": "Default",
+    "alias": "default",
+    "description": "Default blog theme built with Blade and Tailwind CSS",
+    "version": "1.0.0",
+    "priority": 0,
+    "providers": [
+        "Themes\\Default\\Providers\\ThemeServiceProvider"
+    ],
+    "aliases": {},
+    "files": []
+}

@@ -1,0 +1,78 @@
+import { useState } from 'react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { ArrowLeft } from 'lucide-react';
+import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import Button from '@/components/ui/Button';
+import { route } from '@/lib/route';
+import { useTranslation } from '@/hooks/useTranslation';
+import type { SharedProps } from '@/types';
+import CategoryForm from '../components/CategoryForm';
+import { firstError } from '../lib';
+import type { AdminCategory, CategoryPayload } from '../types';
+
+interface CategoryFormPageProps {
+    title: string;
+    category: AdminCategory | null;
+    categories: AdminCategory[];
+}
+
+export default function CategoryFormPage({ title, category, categories }: CategoryFormPageProps) {
+    const { t } = useTranslation();
+    const { website_id: websiteId } = usePage<SharedProps>().props;
+
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const backUrl = route('admin.blog.categories.index', { websiteId });
+
+    const submit = (payload: CategoryPayload) => {
+        setError(null);
+
+        const url = category
+            ? route('admin.blog.categories.update', { websiteId, category: category.id })
+            : route('admin.blog.categories.store', { websiteId });
+
+        const options = {
+            preserveScroll: true,
+            onStart: () => setProcessing(true),
+            onFinish: () => setProcessing(false),
+            onError: (errors: Record<string, string>) => setError(firstError(errors)),
+        };
+
+        if (category) {
+            router.put(url, payload as unknown as Parameters<typeof router.put>[1], options);
+        } else {
+            router.post(url, payload as unknown as Parameters<typeof router.post>[1], options);
+        }
+    };
+
+    return (
+        <AdminLayout title={title}>
+            <div className="mb-6 flex flex-col gap-3">
+                <Link href={backUrl} className="w-fit">
+                    <Button variant="ghost" size="sm" className="-ml-2" leftIcon={<ArrowLeft className="h-4 w-4" />}>
+                        {t('blog.categories.form.back', 'Back to categories')}
+                    </Button>
+                </Link>
+
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+                    <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                        {t('blog.categories.form.subtitle', 'Fill in the category details below.')}
+                    </p>
+                </div>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <CategoryForm
+                    category={category}
+                    categories={categories}
+                    isSubmitting={processing}
+                    error={error}
+                    onSubmit={submit}
+                    onCancel={() => router.visit(backUrl)}
+                />
+            </div>
+        </AdminLayout>
+    );
+}
