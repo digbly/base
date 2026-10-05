@@ -37,7 +37,7 @@ class AdminNavigationControllerTest extends TestCase
         $data = $this->getJson($this->url())->assertOk()->json('data');
 
         $this->assertSame('dashboard', $data[0]['id']);
-        $this->assertSame('/dashboard', $data[0]['to']);
+        $this->assertSame('/', $data[0]['to']);
         $this->assertSame('layout-dashboard', $data[0]['icon']);
         $this->assertSame('dashboard.view', $data[0]['permission']);
 

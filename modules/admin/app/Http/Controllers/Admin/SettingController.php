@@ -24,12 +24,10 @@ class SettingController extends Controller
         operationId: 'admin.settings.index',
         tags: ['Admin Settings'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Settings of the website',
+                description: 'Settings',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'data', type: SettingResource::class),
@@ -50,8 +48,6 @@ class SettingController extends Controller
         operationId: 'admin.settings.update',
         tags: ['Admin Settings'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { SharedProps } from '@/types';
 import CategoryForm from '../components/CategoryForm';
 import { firstError } from '../lib';
 import type { AdminCategory, CategoryPayload } from '../types';

@@ -188,7 +188,7 @@ during navigation.
 ## Navigation and titles
 
 The website-admin sidebar is **dynamic**: the frontend fetches it from
-`GET /api/v1/admin/websites/{website}/navigation`. It is not declared in the
+`GET /api/v1/admin/navigation`. It is not declared in the
 frontend modules.
 
 Backend registration (in the owning module's service provider, e.g.
@@ -239,9 +239,10 @@ Frontend:
 
 Backend contract (`modules/auth`):
 
-- The permission catalog is declared in code via `Modules\Auth\Enums\Permission`,
-  `App\Enums\MenuPermission` and `App\Enums\WebsitePermission`, then registered
-  in `App\Providers\PermissionServiceProvider` through `App\Support\PermissionRegistry`.
+- The permission catalog is declared in code via the module permission enums
+  (`Modules\Auth\Enums\Permission`, `Modules\Admin\Enums\*`,
+  `Modules\Blog\Enums\Permission`, ...), then registered in
+  `App\Providers\PermissionServiceProvider` through `App\Support\PermissionRegistry`.
   Run `php artisan permission:generate` to persist the catalog as Spatie
   permissions (the provider itself never writes to the database).
 - Permission resolution is lenient: assigning a permission that has not been
@@ -257,7 +258,7 @@ Backend contract (`modules/auth`):
   user payload.
 
 If a module introduces a new permission, add it to the relevant enum
-(`Permission`, `MenuPermission`, `WebsitePermission`) and use the same string on
+(`Permission`, `MenuPermission`, `PagePermission`) and use the same string on
 the backend menu item and `handle.permission`; register it in
 `PermissionServiceProvider` and run `permission:generate`.
 When the module adds admin-only API endpoints, enforce the permission

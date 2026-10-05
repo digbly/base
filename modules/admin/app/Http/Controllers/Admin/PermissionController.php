@@ -16,8 +16,6 @@ class PermissionController extends Controller
         operationId: 'admin.permissions.index',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(
                 response: 200,

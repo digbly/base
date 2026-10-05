@@ -16,7 +16,7 @@ class SettingController extends Controller
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Settings exposed to the public API for the current website and locale',
+                description: 'Settings exposed to the public API for the current locale',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'data', type: SettingResource::class),

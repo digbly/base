@@ -18,8 +18,6 @@ class CustomizeController extends Controller
         operationId: 'customize.index',
         tags: ['Customize'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(response: 200, description: 'Customizer payload'),
             new OA\Response(response: 403, description: 'Forbidden'),
@@ -38,8 +36,6 @@ class CustomizeController extends Controller
         operationId: 'customize.update',
         tags: ['Customize'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [
@@ -94,8 +90,6 @@ class CustomizeController extends Controller
         operationId: 'customize.widgets',
         tags: ['Customize'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(response: 200, description: 'Widget payload'),
         ]

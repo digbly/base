@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { FolderTree, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
@@ -7,7 +7,6 @@ import ErrorAlert from '@/components/ui/ErrorAlert';
 import Input from '@/components/ui/Input';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { SharedProps } from '@/types';
 import Badge from '@/components/ui/Badge';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Pagination from '../components/Pagination';

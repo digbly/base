@@ -39,7 +39,7 @@ class MenuRepository implements MenuContract
                 }
 
                 $data['key'] = $key;
-                $prefix = $data['prefix'] ?? 'admin';
+                $prefix = $data['prefix'] ?? config('app.admin_prefix', 'admin');
 
                 if (! isset($data['url'])) {
                     $data['url'] = $key === 'dashboard'
@@ -48,7 +48,7 @@ class MenuRepository implements MenuContract
                 } else {
                     $data['url'] = isset($data['prefix'])
                         ? url($data['prefix'].'/'.ltrim($data['url'], '/'))
-                        : url(config('app.admin_prefix', 'admin').'/'.ltrim($data['url'], '/'));
+                        : admin_url($data['url']);
                 }
 
                 $data['target'] ??= '_self';

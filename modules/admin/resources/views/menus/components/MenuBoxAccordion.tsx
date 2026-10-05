@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ChevronDown, Loader2, Plus, Search } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useTranslation } from '@/hooks/useTranslation';
 import { route } from '@/lib/route';
-import type { SharedProps } from '@/types';
 import type { MenuBox, MenuBoxItem, MenuItem } from '../types';
 
 interface MenuBoxAccordionProps {

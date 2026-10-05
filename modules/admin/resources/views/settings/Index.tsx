@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
 import { Globe, Save } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
@@ -10,7 +9,6 @@ import type { MediaItemSummary } from '../components/MediaPickerModal';
 import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { SharedProps } from '@/types';
 
 interface SettingsProps {
     title: string;

@@ -16,7 +16,7 @@ class PageController extends Controller
 {
     #[OA\Get(
         path: '/api/v1/admin/pages',
-        summary: 'List pages of a website',
+        summary: 'List pages',
         operationId: 'pages.index',
         tags: ['Pages'],
         security: [['bearerAuth' => []]],
@@ -63,8 +63,6 @@ class PageController extends Controller
         operationId: 'pages.store',
         tags: ['Pages'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

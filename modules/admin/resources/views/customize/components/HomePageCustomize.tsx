@@ -1,9 +1,7 @@
-import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowDown, ArrowUp, ChevronDown, Trash2 } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { route } from '@/lib/route';
-import type { SharedProps } from '@/types';
 import type {
     BlockDefinition,
     PageBlockItem,

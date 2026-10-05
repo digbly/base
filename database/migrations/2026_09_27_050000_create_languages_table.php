@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unique(['code']);
         });
 
-        DB::table('languages')->insert([
+        DB::table('languages')->insertOrIgnore([
             [
                 'code' => 'en',
                 'name' => 'English',

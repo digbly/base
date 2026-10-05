@@ -94,8 +94,6 @@ class CategoryController extends Controller
         operationId: 'admin.blog.categories.store',
         tags: ['Admin Blog Categories'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

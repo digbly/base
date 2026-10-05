@@ -86,6 +86,7 @@ class CustomizeApiTest extends TestCase
         $response = $this->getJson($this->customizeUrl())->assertOk();
 
         $response->assertJsonPath('data.theme', 'default')
+            ->assertJsonPath('data.previewUrl', url('/'))
             ->assertJsonFragment(['id' => $page->id, 'title' => 'About'])
             ->assertJsonFragment(['key' => 'site_identity'])
             ->assertJsonFragment(['key' => 'home_page'])

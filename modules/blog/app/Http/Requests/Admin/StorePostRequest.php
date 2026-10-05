@@ -54,7 +54,7 @@ class StorePostRequest extends FormRequest
             'status' => ['required', Rule::enum(PostStatus::class)],
             'user_id' => ['nullable', 'uuid', 'exists:users,id'],
             'categories' => ['nullable', 'array'],
-            'categories.*' => $this->existsInWebsite('post_categories'),
+            'categories.*' => Rule::exists('post_categories', 'id'),
             'translations' => ['required', 'array', 'min:1'],
             'translations.*.locale' => ['required', 'string', 'max:5', 'distinct'],
             'translations.*.title' => ['required', 'string', 'max:255'],

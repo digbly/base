@@ -73,7 +73,7 @@ class DatabaseActivator implements ActivatorInterface
     }
 
     /**
-     * Get the enabled module statuses from the current website settings.
+     * Get the enabled module statuses from the settings.
      */
     public function getModulesStatuses(): array
     {

@@ -21,8 +21,6 @@ class MenuController extends Controller
         operationId: 'menus.index',
         tags: ['Menus'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -82,8 +80,6 @@ class MenuController extends Controller
         operationId: 'menus.boxes',
         tags: ['Menus'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(response: 200, description: 'Menu boxes'),
         ]
@@ -124,8 +120,6 @@ class MenuController extends Controller
         operationId: 'menus.locations',
         tags: ['Menus'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(response: 200, description: 'Menu locations'),
         ]
@@ -143,8 +137,6 @@ class MenuController extends Controller
         operationId: 'menus.store',
         tags: ['Menus'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

@@ -1,4 +1,4 @@
-import { Link, router, usePage } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, Save } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
@@ -8,7 +8,6 @@ import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
 import { EMAIL_PATTERN, MIN_PASSWORD_LENGTH } from '@/lib/validation';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { SharedProps } from '@/types';
 
 interface UserFormProps {
     title: string;

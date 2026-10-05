@@ -25,7 +25,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth:web'])
     ->prefix(config('app.admin_prefix', 'admin'))
     ->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/', [DashboardController::class, 'index'])
+            ->middleware(RequireAdminPermission::class.':'.Permission::DashboardView->value)
+            ->name('admin.dashboard');
 
         Route::middleware(RequireAdminPermission::class.':'.Permission::SettingsManage->value)
             ->group(function () {

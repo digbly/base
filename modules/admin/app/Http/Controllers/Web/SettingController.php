@@ -13,7 +13,7 @@ use Modules\Admin\Support\MediaPreviewResolver;
 class SettingController extends AdminSettingController
 {
     /**
-     * Show the website settings form.
+     * Show the settings form.
      */
     public function edit(AdminTranslations $translations): Response
     {

@@ -20,8 +20,6 @@ class RoleController extends Controller
         operationId: 'admin.roles.index',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -82,8 +80,6 @@ class RoleController extends Controller
         operationId: 'admin.roles.store',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

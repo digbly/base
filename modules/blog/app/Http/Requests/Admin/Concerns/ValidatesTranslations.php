@@ -4,18 +4,9 @@ namespace Modules\Blog\Http\Requests\Admin\Concerns;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rule;
 
 trait ValidatesTranslations
 {
-    /**
-     * @return array<int, mixed>
-     */
-    protected function existsInWebsite(string $table): array
-    {
-        return [Rule::exists($table, 'id')];
-    }
-
     /**
      * Reject duplicate translation slugs, ignoring the translations of the
      * record being updated.

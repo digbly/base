@@ -10,7 +10,7 @@ use Throwable;
 class DatabaseActivator implements ThemeActivator
 {
     /**
-     * Setting key that stores the active theme name for the current website.
+     * Setting key that stores the active theme name.
      */
     protected string $key;
 
@@ -72,7 +72,7 @@ class DatabaseActivator implements ThemeActivator
     }
 
     /**
-     * Get the name of the active theme for the current website.
+     * Get the name of the active theme.
      */
     public function activeTheme(): ?string
     {

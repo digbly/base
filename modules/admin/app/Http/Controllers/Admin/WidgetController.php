@@ -19,8 +19,6 @@ class WidgetController extends Controller
         operationId: 'widgets.index',
         tags: ['Widgets'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(response: 200, description: 'Widget index payload'),
         ]

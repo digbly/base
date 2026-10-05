@@ -1,7 +1,5 @@
-import { usePage } from '@inertiajs/react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { SharedProps } from '@/types';
 import WidgetsEditor from './components/WidgetsEditor';
 import type { SidebarDefinition, SidebarWidgetItem, WidgetDefinition } from './types';
 

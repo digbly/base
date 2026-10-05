@@ -23,8 +23,8 @@ return [
     | Default Theme
     |--------------------------------------------------------------------------
     |
-    | The theme alias used when a website does not define its own theme or when
-    | the configured theme is missing/disabled.
+    | The theme alias used when no active theme is stored or when the configured
+    | theme is missing/disabled.
     |
     */
 
@@ -95,8 +95,8 @@ return [
     |
     | The file activator stores activation statuses in a JSON file, the same
     | way nwidart/laravel-modules stores module statuses. The database activator
-    | stores the active theme name in the current website settings, so each
-    | website can only have one active theme at a time.
+    | stores the active theme name in the settings, so only one theme can be
+    | active at a time.
     |
     */
 

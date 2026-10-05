@@ -15,7 +15,13 @@ function joinUrl(base: string, to?: string | null): string {
         return base;
     }
 
-    return `${base.replace(/\/$/, '')}/${to.replace(/^\//, '')}`;
+    const path = to.replace(/^\//, '');
+
+    if (path === '') {
+        return base;
+    }
+
+    return `${base.replace(/\/$/, '')}/${path}`;
 }
 
 function normalizePath(url: string): string {

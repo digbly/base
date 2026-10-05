@@ -18,8 +18,6 @@ class NavigationController extends Controller
         operationId: 'navigation.index',
         tags: ['Navigation'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         responses: [
             new OA\Response(
                 response: 200,

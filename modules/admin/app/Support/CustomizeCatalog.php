@@ -53,6 +53,7 @@ class CustomizeCatalog
             'pageTemplates' => $this->pageTemplatesPayload(),
             'availableBlocks' => $this->availableBlocksPayload(),
             'homePageBlocks' => $homePageId ? $this->pageBlocksPayload((string) $homePageId) : [],
+            'previewUrl' => url('/'),
             'theme' => theme_name(),
         ];
     }

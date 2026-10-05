@@ -86,7 +86,7 @@ class AdminServiceProvider extends ModuleServiceProvider
 
         Menu::make('dashboard', fn () => [
             'label' => __('admin.nav.dashboard'),
-            'to' => '/dashboard',
+            'to' => '/',
             'icon' => 'layout-dashboard',
             'permission' => AuthPermission::DashboardView->value,
             'position' => $position,

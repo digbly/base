@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ImageOff, Loader2, Search } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import Input from '@/components/ui/Input';
 import { route } from '@/lib/route';
-import type { SharedProps } from '@/types';
 
 export interface MediaItemSummary {
     id: string;

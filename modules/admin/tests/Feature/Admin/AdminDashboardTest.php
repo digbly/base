@@ -2,9 +2,11 @@
 
 namespace Modules\Admin\Tests\Feature\Admin;
 
+use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
+use Modules\Auth\Enums\Permission;
 use Modules\Auth\Models\User;
 
 class AdminDashboardTest extends TestCase
@@ -38,9 +40,13 @@ class AdminDashboardTest extends TestCase
             );
     }
 
-    public function test_regular_user_can_view_dashboard(): void
+    public function test_user_with_dashboard_permission_can_view_dashboard(): void
     {
+        $role = Role::findOrCreate('dashboard-viewer', 'api');
+        $role->syncPermissions([Permission::DashboardView->value]);
+
         $user = User::factory()->create();
+        $user->assignRole($role);
 
         $this->actingAs($user, 'web')
             ->get('/admin')
@@ -48,5 +54,14 @@ class AdminDashboardTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Admin::dashboard/Index', false)
             );
+    }
+
+    public function test_user_without_permission_is_forbidden(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'web')
+            ->get('/admin')
+            ->assertForbidden();
     }
 }

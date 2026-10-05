@@ -11,13 +11,13 @@ class LanguageController extends Controller
 {
     #[OA\Get(
         path: '/api/v1/languages',
-        summary: 'List languages of the current website',
+        summary: 'List languages',
         operationId: 'languages.index',
         tags: ['Languages'],
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Languages available for the current website',
+                description: 'Languages available for the site',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'data', type: 'array', items: new OA\Items(type: LanguageResource::class)),

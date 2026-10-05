@@ -160,6 +160,32 @@ class UsersPageTest extends TestCase
             ->assertSessionHasErrors('user');
     }
 
+    public function test_user_cannot_delete_self(): void
+    {
+        $actor = $this->userWithPermission();
+
+        $this->actingAs($actor, 'web')
+            ->delete('/admin/users/'.$actor->id)
+            ->assertSessionHasErrors('user');
+
+        $this->assertNotSoftDeleted('users', ['id' => $actor->id]);
+    }
+
+    public function test_user_cannot_remove_own_management_permission(): void
+    {
+        $actor = $this->userWithPermission();
+
+        $this->actingAs($actor, 'web')
+            ->put('/admin/users/'.$actor->id, [
+                'name' => $actor->name,
+                'email' => $actor->email,
+                'roles' => [],
+            ])
+            ->assertSessionHasErrors('roles');
+
+        $this->assertTrue($actor->fresh()->hasRole('user-manager'));
+    }
+
     protected function userWithPermission(): User
     {
         $role = Role::findOrCreate('user-manager', 'api');

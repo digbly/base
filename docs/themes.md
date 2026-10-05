@@ -33,7 +33,7 @@ app/
     Theme.php                    # package object (≈ Nwidart\Modules\Module)
     FileRepository.php           # scans themes (≈ Nwidart\Modules\FileRepository)
     FileActivator.php            # statuses.json (≈ Nwidart\Modules\FileActivator)
-    DatabaseActivator.php        # active theme name stored in website settings
+    DatabaseActivator.php        # active theme name stored in settings
     ThemeManager.php             # resolves + activates the active theme
     ThemesServiceProvider.php    # container bindings + boot
     Exceptions/ThemeNotFoundException.php
@@ -105,7 +105,7 @@ Stubs live in `resources/stubs/themes`.
 ```
 
 - `name` is the identity used by the activator (the active theme name stored
-  in website settings, or `themes/statuses.json` with the file activator).
+  in settings, or `themes/statuses.json` with the file activator).
 - `alias` is the lowercase key used for namespaces, config and helpers. Falls
   back to `name` when omitted.
 - `priority` orders registration (`FileRepository::getOrdered()`).
@@ -146,14 +146,13 @@ then falls back to the first enabled theme, or `null` when no theme is enabled.
 app(App\Themes\ThemeManager::class)->activate('another');
 ```
 
-In console (no request/website) resolution falls back to the default theme.
+In console (no request) resolution falls back to the default theme.
 
 ## Activation
 
-The default **database** activator stores the active theme name in the current
-website's settings (`theme` key), so **each website can only have one active
-theme at a time**. A theme is enabled only when it is the stored active theme;
-every other theme is disabled.
+The default **database** activator stores the active theme name in the settings
+(`theme` key), so **only one theme can be active at a time**. A theme is enabled
+only when it is the stored active theme; every other theme is disabled.
 
 ```php
 app('themes')->findOrFail('Default')->enable();   // sets the active theme
@@ -312,7 +311,6 @@ php artisan tinker --execute="var_dump(app('themes')->allEnabled(), theme_name()
 ## Relationship with modules
 
 Modules and themes are independent registries. Modules provide backend features
-and namespaced views/routes; themes provide the public presentation layer per
-website. A module view is always resolved from its own namespace, so adding a
+and namespaced views/routes; themes provide the public presentation layer. A module view is always resolved from its own namespace, so adding a
 theme never changes module behavior. This is the isolation guarantee that keeps
 the two systems composable.

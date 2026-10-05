@@ -84,8 +84,6 @@ class LanguageController extends Controller
         operationId: 'admin.languages.store',
         tags: ['Admin Languages'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

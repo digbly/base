@@ -116,8 +116,6 @@ class UserController extends Controller
         operationId: 'admin.users.store',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

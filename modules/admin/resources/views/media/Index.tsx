@@ -1,5 +1,5 @@
 import { useRef, useState, type DragEvent, type FormEvent } from 'react';
-import { router, usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
 import { Copy, ExternalLink, FileText, FolderOpen, Image as ImageIcon, Search, Trash2, UploadCloud } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
@@ -9,7 +9,6 @@ import Modal from '@/components/ui/Modal';
 import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
-import type { SharedProps } from '@/types';
 
 interface MediaRow {
     id: string;

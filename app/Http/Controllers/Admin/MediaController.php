@@ -114,8 +114,6 @@ class MediaController extends Controller
         operationId: 'admin.media.store',
         tags: ['Admin Media'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [

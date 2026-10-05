@@ -20,7 +20,7 @@ class Language extends Model
     ];
 
     /**
-     * All languages of the current website keyed by their code.
+     * All languages keyed by their code.
      */
     public static function languages(): Collection
     {
@@ -49,7 +49,7 @@ class Language extends Model
     }
 
     /**
-     * The default language code for the current website.
+     * The default language code.
      */
     public static function default(): string
     {

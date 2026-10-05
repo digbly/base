@@ -106,8 +106,6 @@ class PostController extends Controller
         operationId: 'admin.blog.posts.store',
         tags: ['Admin Blog Posts'],
         security: [['bearerAuth' => []]],
-        parameters: [
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: [
