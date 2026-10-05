@@ -12,7 +12,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Admin\Http\Controllers\Web\Concerns\AuthorizesAdmin;
 use Modules\Blog\Enums\Permission;
-use Modules\Blog\Http\Controllers\Admin\Concerns\SyncsTranslations;
+use Modules\Blog\Http\Controllers\Concerns\SyncsTranslations;
 use Modules\Blog\Http\Requests\Admin\IndexCategoryRequest;
 use Modules\Blog\Http\Requests\Admin\StoreCategoryRequest;
 use Modules\Blog\Http\Requests\Admin\UpdateCategoryRequest;

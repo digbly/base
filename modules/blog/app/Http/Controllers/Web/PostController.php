@@ -12,7 +12,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Admin\Http\Controllers\Web\Concerns\AuthorizesAdmin;
 use Modules\Blog\Enums\Permission;
-use Modules\Blog\Http\Controllers\Admin\Concerns\SyncsTranslations;
+use Modules\Blog\Http\Controllers\Concerns\SyncsTranslations;
 use Modules\Blog\Http\Requests\Admin\IndexPostRequest;
 use Modules\Blog\Http\Requests\Admin\StorePostRequest;
 use Modules\Blog\Http\Requests\Admin\UpdatePostRequest;

@@ -9,6 +9,9 @@ use OpenApi\Attributes as OA;
     title: 'AI Website API Documentation',
     description: 'API documentation for AI Website backend service'
 )]
+#[OA\PathItem(
+    path: '/up',
+)]
 #[OA\SecurityScheme(
     securityScheme: 'bearerAuth',
     type: 'http',
