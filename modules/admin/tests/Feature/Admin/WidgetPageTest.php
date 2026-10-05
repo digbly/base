@@ -119,6 +119,29 @@ class WidgetPageTest extends TestCase
         $this->assertSame(2, ThemeSidebar::query()->where('widget', 'recent-posts')->count());
     }
 
+    public function test_update_claims_legacy_null_theme_widgets_instead_of_duplicating(): void
+    {
+        $legacy = ThemeSidebar::create([
+            'sidebar' => 'sidebar',
+            'widget' => 'recent-posts',
+            'data' => ['limit' => 1],
+            'theme' => null,
+            'display_order' => 1,
+        ]);
+
+        $this->actingAs($this->admin(), 'web')
+            ->put($this->base().'/sidebar', [
+                'locale' => 'en',
+                'content' => [
+                    ['id' => $legacy->id, 'widget' => 'recent-posts', 'label' => 'Legacy', 'data' => ['limit' => 7]],
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertSame(1, ThemeSidebar::query()->where('widget', 'recent-posts')->count());
+        $this->assertSame(7, $legacy->fresh()->data['limit']);
+    }
+
     public function test_update_rejects_unknown_sidebar(): void
     {
         $this->actingAs($this->admin(), 'web')

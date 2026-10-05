@@ -91,7 +91,8 @@ class AppServiceProvider extends ServiceProvider
         // Key login attempts by email + IP so one attacker cannot lock out an
         // account for everyone, while still slowing credential stuffing.
         RateLimiter::for('login', function (Request $request) {
-            $email = Str::transliterate(Str::lower((string) $request->input('email')));
+            $email = $request->input('email');
+            $email = is_string($email) ? Str::transliterate(Str::lower($email)) : '';
 
             return Limit::perMinute(5)->by($email.'|'.$request->ip());
         });

@@ -62,6 +62,12 @@ class WebAuthTest extends TestCase
         ])->assertTooManyRequests();
     }
 
+    public function test_login_with_non_scalar_email_is_rejected_not_crashed(): void
+    {
+        $this->post('/login', ['email' => ['x'], 'password' => 'secret'])
+            ->assertSessionHasErrors('email');
+    }
+
     public function test_register_validation_fails_for_duplicate_email(): void
     {
         User::factory()->create(['email' => 'taken@example.com']);
