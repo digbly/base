@@ -9,7 +9,7 @@ class MenuTreeTest extends TestCase
 {
     public function test_tree_builds_nested_items_sorted_by_priority(): void
     {
-        $repository = new MenuRepository();
+        $repository = new MenuRepository;
         $repository->make('blog', fn () => ['label' => 'Blog', 'position' => 'admin', 'priority' => 20]);
         $repository->make('posts', fn () => [
             'label' => 'Posts',
@@ -37,7 +37,7 @@ class MenuTreeTest extends TestCase
 
     public function test_tree_filters_by_position_and_promotes_orphans_to_roots(): void
     {
-        $repository = new MenuRepository();
+        $repository = new MenuRepository;
         $repository->make('dashboard', fn () => ['label' => 'Dashboard', 'to' => '/dashboard']);
         $repository->make('orphan', fn () => [
             'label' => 'Orphan',
@@ -55,7 +55,7 @@ class MenuTreeTest extends TestCase
 
     public function test_tree_applies_defaults(): void
     {
-        $repository = new MenuRepository();
+        $repository = new MenuRepository;
         $repository->make('media', fn () => ['label' => 'Media', 'position' => 'admin']);
 
         $item = $repository->tree('admin')->first();

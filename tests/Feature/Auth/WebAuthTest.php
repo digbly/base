@@ -45,6 +45,23 @@ class WebAuthTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'new-user@example.com']);
     }
 
+    public function test_login_attempts_are_rate_limited(): void
+    {
+        User::factory()->create(['email' => 'limited@example.com']);
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post('/login', [
+                'email' => 'limited@example.com',
+                'password' => 'wrong-password',
+            ])->assertRedirect();
+        }
+
+        $this->post('/login', [
+            'email' => 'limited@example.com',
+            'password' => 'wrong-password',
+        ])->assertTooManyRequests();
+    }
+
     public function test_register_validation_fails_for_duplicate_email(): void
     {
         User::factory()->create(['email' => 'taken@example.com']);

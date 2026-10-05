@@ -45,7 +45,10 @@ class UpdateSidebarWidgets
                 ];
 
                 $existing = ! empty($content['id'])
-                    ? ThemeSidebar::query()->find($content['id'])
+                    ? ThemeSidebar::query()
+                        ->where('sidebar', $sidebar)
+                        ->where('theme', $theme)
+                        ->find($content['id'])
                     : null;
 
                 if ($existing !== null) {
@@ -64,6 +67,7 @@ class UpdateSidebarWidgets
 
             ThemeSidebar::query()
                 ->whereSidebar($sidebar)
+                ->where('theme', $theme)
                 ->whereNotIn('id', $keptIds)
                 ->delete();
         });

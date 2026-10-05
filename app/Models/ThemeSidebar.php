@@ -29,7 +29,6 @@ class ThemeSidebar extends Model implements TranslatableContract
     public array $translatedAttributes = [
         'label',
         'fields',
-        'locale',
     ];
 
     public function scopeWhereSidebar(Builder $builder, string $sidebar): Builder

@@ -12,6 +12,14 @@ class SettingRepository implements SettingContract
 {
     protected ?string $locale = null;
 
+    /**
+     * Per-request memo of resolved configs, keyed by locale, so repeated `get()`
+     * calls do not rebuild the collection on every read.
+     *
+     * @var array<string, Collection<string, mixed>>
+     */
+    protected array $configsMemo = [];
+
     public function __construct(
         protected CacheRepository $cache
     ) {
@@ -150,6 +158,12 @@ class SettingRepository implements SettingContract
 
     public function configs(): Collection
     {
+        $locale = $this->locale ?? app()->getLocale();
+
+        if (isset($this->configsMemo[$locale])) {
+            return $this->configsMemo[$locale];
+        }
+
         $settings = $this->cache->remember($this->cacheKey(), 3600, function () {
             return SettingModel::query()
                 ->with('translations')
@@ -157,15 +171,15 @@ class SettingRepository implements SettingContract
                 ->all();
         });
 
-        $locale = $this->locale ?? app()->getLocale();
+        return $this->configsMemo[$locale] = (new Collection($settings))->mapWithKeys(
+            function (SettingModel $item) use ($locale) {
+                $value = $item->translatable
+                    ? $item->translate($locale)?->lang_value
+                    : $item->value;
 
-        return (new Collection($settings))->mapWithKeys(function (SettingModel $item) use ($locale) {
-            $value = $item->translatable
-                ? $item->translate($locale)?->lang_value
-                : $item->value;
-
-            return [$item->code => $value];
-        });
+                return [$item->code => $value];
+            }
+        );
     }
 
     protected function cacheKey(): string
@@ -176,5 +190,6 @@ class SettingRepository implements SettingContract
     protected function flushCache(): void
     {
         $this->cache->forget($this->cacheKey());
+        $this->configsMemo = [];
     }
 }

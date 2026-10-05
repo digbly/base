@@ -95,6 +95,30 @@ class WidgetPageTest extends TestCase
         $this->assertSame(5, $recent->fresh()->data['limit']);
     }
 
+    public function test_update_does_not_hijack_widgets_from_another_theme(): void
+    {
+        $foreign = ThemeSidebar::create([
+            'sidebar' => 'sidebar',
+            'widget' => 'recent-posts',
+            'data' => ['limit' => 1],
+            'theme' => 'other',
+            'display_order' => 1,
+        ]);
+
+        $this->actingAs($this->admin(), 'web')
+            ->put($this->base().'/sidebar', [
+                'locale' => 'en',
+                'content' => [
+                    ['id' => $foreign->id, 'widget' => 'recent-posts', 'label' => 'Hijack', 'data' => ['limit' => 9]],
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertSame('other', $foreign->fresh()->theme);
+        $this->assertSame(1, $foreign->fresh()->data['limit']);
+        $this->assertSame(2, ThemeSidebar::query()->where('widget', 'recent-posts')->count());
+    }
+
     public function test_update_rejects_unknown_sidebar(): void
     {
         $this->actingAs($this->admin(), 'web')

@@ -10,6 +10,14 @@ use Illuminate\Support\Collection;
 
 class ThemeSettingRepository implements ThemeSettingContract
 {
+    /**
+     * Per-request memo of resolved configs so repeated `get()` calls do not
+     * rebuild the collection on every read.
+     *
+     * @var Collection<string, mixed>|null
+     */
+    protected ?Collection $configsMemo = null;
+
     public function __construct(
         protected CacheRepository $cache
     ) {
@@ -121,13 +129,17 @@ class ThemeSettingRepository implements ThemeSettingContract
 
     public function configs(): Collection
     {
+        if ($this->configsMemo !== null) {
+            return $this->configsMemo;
+        }
+
         $settings = $this->cache->remember($this->cacheKey(), 3600, function () {
             return ThemeSettingModel::query()
                 ->get()
                 ->all();
         });
 
-        return (new Collection($settings))->mapWithKeys(
+        return $this->configsMemo = (new Collection($settings))->mapWithKeys(
             fn (ThemeSettingModel $item) => [$item->code => $item->value]
         );
     }
@@ -140,5 +152,6 @@ class ThemeSettingRepository implements ThemeSettingContract
     protected function flushCache(): void
     {
         $this->cache->forget($this->cacheKey());
+        $this->configsMemo = null;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\MediaItem;
+use App\Support\DatePathGenerator;
 use Spatie\ImageOptimizer\Optimizers\Avifenc;
 use Spatie\ImageOptimizer\Optimizers\Cwebp;
 use Spatie\ImageOptimizer\Optimizers\Gifsicle;
@@ -14,17 +16,15 @@ use Spatie\MediaLibrary\Conversions\ImageGenerators\Svg;
 use Spatie\MediaLibrary\Conversions\ImageGenerators\Video;
 use Spatie\MediaLibrary\Conversions\ImageGenerators\Webp;
 use Spatie\MediaLibrary\Conversions\Jobs\PerformConversionsJob;
-
 use Spatie\MediaLibrary\Downloaders\DefaultDownloader;
 use Spatie\MediaLibrary\MediaCollections\FileAdder;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\MediaCollections\Models\Observers\MediaObserver;
 use Spatie\MediaLibrary\ResponsiveImages\Jobs\GenerateResponsiveImagesJob;
 use Spatie\MediaLibrary\ResponsiveImages\TinyPlaceholderGenerator\Blurred;
 use Spatie\MediaLibrary\ResponsiveImages\WidthCalculator\FileSizeOptimizedWidthCalculator;
 use Spatie\MediaLibrary\Support\FileNamer\DefaultFileNamer;
 use Spatie\MediaLibrary\Support\FileRemover\DefaultFileRemover;
-use App\Models\MediaItem;
-use App\Support\DatePathGenerator;
 use Spatie\MediaLibrary\Support\PathGenerator\DefaultPathGenerator;
 use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 use Spatie\MediaLibraryPro\Models\TemporaryUpload;
@@ -101,7 +101,7 @@ return [
     /*
      * The fully qualified class name of the media model.
      */
-    'media_model' => Spatie\MediaLibrary\MediaCollections\Models\Media::class,
+    'media_model' => Media::class,
 
     /*
      * The fully qualified class name of the media observer.

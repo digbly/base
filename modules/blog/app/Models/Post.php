@@ -35,7 +35,6 @@ class Post extends Model implements TranslatableContract
         'description',
         'content',
         'slug',
-        'locale',
     ];
 
     public function categories(): BelongsToMany

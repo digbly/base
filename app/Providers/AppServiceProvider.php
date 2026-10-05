@@ -28,6 +28,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 use Modules\Auth\Models\OAuthClient;
 
@@ -85,6 +86,14 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Key login attempts by email + IP so one attacker cannot lock out an
+        // account for everyone, while still slowing credential stuffing.
+        RateLimiter::for('login', function (Request $request) {
+            $email = Str::transliterate(Str::lower((string) $request->input('email')));
+
+            return Limit::perMinute(5)->by($email.'|'.$request->ip());
         });
     }
 }

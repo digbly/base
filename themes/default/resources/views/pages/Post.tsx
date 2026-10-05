@@ -2,7 +2,8 @@ import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/AppLayout';
 import CommentForm from '@/components/comments/CommentForm';
 import CommentList from '@/components/comments/CommentList';
-import type { Category, Comment, Post as PostType, Widget } from '@/types';
+import Pagination from '@/components/Pagination';
+import type { Category, Comment, Paginated, Post as PostType, Widget } from '@/types';
 
 interface PostProps {
     siteName: string;
@@ -10,7 +11,7 @@ interface PostProps {
     navCategories: Category[];
     sidebarWidgets: Widget[];
     post: PostType;
-    comments: Comment[];
+    comments: Paginated<Comment>;
     commentStatus: string | null;
 }
 
@@ -83,7 +84,7 @@ export default function Post({
 
                 <section id="comments" className="mt-12 border-t border-slate-200 pt-8">
                     <h2 className="text-lg font-bold text-slate-900">
-                        {messages.comments} <span className="text-slate-400">({comments.length})</span>
+                        {messages.comments} <span className="text-slate-400">({comments.total})</span>
                     </h2>
 
                     {commentStatus && (
@@ -93,8 +94,10 @@ export default function Post({
                     )}
 
                     <div className="mt-6">
-                        <CommentList postId={post.id} comments={comments} />
+                        <CommentList postId={post.id} comments={comments.data} />
                     </div>
+
+                    <Pagination paginator={comments} />
 
                     <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-5">
                         <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-900">

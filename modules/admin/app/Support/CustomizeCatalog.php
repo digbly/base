@@ -136,6 +136,7 @@ class CustomizeCatalog
     {
         return Page::query()
             ->with('translations')
+            ->limit(500)
             ->get()
             ->map(fn (Page $page) => [
                 'id' => $page->id,

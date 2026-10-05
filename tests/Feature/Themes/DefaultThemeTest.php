@@ -124,8 +124,9 @@ class DefaultThemeTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Post', false)
                 ->where('post.title', 'Read me')
-                ->has('comments', 1)
-                ->where('comments.0.content', 'Approved comment'));
+                ->has('comments.data', 1)
+                ->where('comments.total', 1)
+                ->where('comments.data.0.content', 'Approved comment'));
     }
 
     public function test_category_page_lists_its_posts(): void

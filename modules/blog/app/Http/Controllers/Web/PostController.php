@@ -148,6 +148,7 @@ class PostController extends Controller
             ->with('translations')
             ->withCount('posts')
             ->orderByDesc('created_at')
+            ->limit(500)
             ->get();
     }
 

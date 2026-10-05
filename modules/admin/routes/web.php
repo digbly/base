@@ -6,7 +6,6 @@ use Modules\Admin\Enums\MenuPermission;
 use Modules\Admin\Enums\PagePermission;
 use Modules\Admin\Enums\ThemePermission;
 use Modules\Admin\Enums\WidgetPermission;
-use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Admin\Http\Controllers\Web\CustomizeController;
 use Modules\Admin\Http\Controllers\Web\DashboardController;
 use Modules\Admin\Http\Controllers\Web\MediaController;
@@ -17,10 +16,6 @@ use Modules\Admin\Http\Controllers\Web\UserController;
 use Modules\Admin\Http\Controllers\Web\WidgetController;
 use Modules\Admin\Http\Middleware\RequireAdminPermission;
 use Modules\Auth\Enums\Permission;
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('admins', AdminController::class)->names('admin');
-});
 
 Route::middleware(['auth:web'])
     ->prefix(config('app.admin_prefix', 'admin'))

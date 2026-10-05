@@ -6,6 +6,7 @@ use App\Facades\Menu;
 use App\Support\AdminTranslations;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Middleware;
 
@@ -119,15 +120,21 @@ class HandleInertiaRequests extends Middleware
         $translations = app(AdminTranslations::class);
         $translations->registerNamespaces();
 
-        $payload = [];
+        return Cache::remember(
+            'inertia.translations.'.app()->getLocale(),
+            now()->addHour(),
+            function () use ($translations): array {
+                $payload = [];
 
-        foreach (array_keys($translations->namespaces()) as $namespace) {
-            $lines = trans($translations->translationKey($namespace));
+                foreach (array_keys($translations->namespaces()) as $namespace) {
+                    $lines = trans($translations->translationKey($namespace));
 
-            $payload[$namespace] = is_array($lines) ? $lines : [];
-        }
+                    $payload[$namespace] = is_array($lines) ? $lines : [];
+                }
 
-        return $payload;
+                return $payload;
+            }
+        );
     }
 
     /**
@@ -137,9 +144,16 @@ class HandleInertiaRequests extends Middleware
      */
     protected function routes(): array
     {
-        return collect(Route::getRoutes()->getRoutes())
-            ->filter(fn ($route) => $route->getName() !== null)
-            ->mapWithKeys(fn ($route) => [$route->getName() => '/'.ltrim($route->uri(), '/')])
-            ->all();
+        // Bounded cache: the route map only changes when a theme or module is
+        // activated, so a short TTL keeps it fresh without rebuilding it on
+        // every response.
+        return Cache::remember(
+            'inertia.routes.'.(theme_name() ?? 'default'),
+            now()->addMinutes(5),
+            fn (): array => collect(Route::getRoutes()->getRoutes())
+                ->filter(fn ($route) => $route->getName() !== null)
+                ->mapWithKeys(fn ($route) => [$route->getName() => '/'.ltrim($route->uri(), '/')])
+                ->all()
+        );
     }
 }

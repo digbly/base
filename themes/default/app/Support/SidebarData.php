@@ -12,12 +12,13 @@ class SidebarData
     /**
      * @return Collection<int, Category>
      */
-    public function categories(): Collection
+    public function categories(int $limit = 100): Collection
     {
         return Category::query()
             ->with('translations')
             ->withCount(['posts' => fn (Builder $query) => $query->published()])
             ->orderBy('created_at')
+            ->limit(max(1, $limit))
             ->get();
     }
 

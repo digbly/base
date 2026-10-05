@@ -33,7 +33,6 @@ class Category extends Model implements TranslatableContract
         'name',
         'description',
         'slug',
-        'locale',
     ];
 
     public function children(): HasMany

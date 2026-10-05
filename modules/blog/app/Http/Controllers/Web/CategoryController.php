@@ -130,6 +130,7 @@ class CategoryController extends Controller
             ->with('translations')
             ->withCount('posts')
             ->orderByDesc('created_at')
+            ->limit(500)
             ->get();
     }
 

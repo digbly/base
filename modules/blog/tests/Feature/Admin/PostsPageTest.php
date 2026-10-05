@@ -8,6 +8,7 @@ use Modules\Auth\Models\User;
 use Modules\Blog\Enums\PostStatus;
 use Modules\Blog\Models\Category;
 use Modules\Blog\Models\Post;
+use Modules\Blog\Models\PostTranslation;
 use Modules\Blog\Tests\TestCase;
 
 class PostsPageTest extends TestCase
@@ -97,6 +98,29 @@ class PostsPageTest extends TestCase
             ->assertRedirect(route('admin.blog.posts.index'));
 
         $this->assertDatabaseHas('post_translations', ['slug' => 'hello-world', 'title' => 'Hello world']);
+    }
+
+    public function test_post_content_is_sanitized_on_store(): void
+    {
+        $this->actingAs($this->admin(), 'web')
+            ->post($this->base(), [
+                'status' => PostStatus::Published->value,
+                'translations' => [
+                    [
+                        'locale' => 'en',
+                        'title' => 'XSS attempt',
+                        'slug' => 'xss-attempt',
+                        'content' => '<p onclick="evil()">Hi</p><script>alert(1)</script>',
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('admin.blog.posts.index'));
+
+        $content = PostTranslation::query()->where('slug', 'xss-attempt')->value('content');
+
+        $this->assertStringNotContainsString('<script', $content);
+        $this->assertStringNotContainsString('onclick', $content);
+        $this->assertStringContainsString('Hi', $content);
     }
 
     public function test_store_validates_translations(): void

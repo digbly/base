@@ -4,7 +4,7 @@ namespace Themes\Default\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
 use Inertia\Response;
-use Modules\Blog\Models\Post;
+use Modules\Blog\Jobs\IncrementPostViews;
 use Themes\Default\Http\Controllers\Concerns\ListsPosts;
 use Themes\Default\Support\PostPresenter;
 
@@ -18,9 +18,7 @@ class PostController extends Controller
             ->whereHas('translations', fn (Builder $query) => $query->where('slug', $slug))
             ->firstOrFail();
 
-        Post::query()
-            ->whereKey($post->getKey())
-            ->increment('views');
+        IncrementPostViews::dispatch($post->getKey());
 
         $post->views++;
 
@@ -30,14 +28,13 @@ class PostController extends Controller
             ->with(['replies' => fn ($query) => $query->approved()->with('author')])
             ->with('author')
             ->latest()
-            ->get();
+            ->paginate((int) config('default.per_page', 20))
+            ->withQueryString()
+            ->through(fn ($comment) => PostPresenter::comment($comment));
 
         return $this->render('Post', [
             'post' => PostPresenter::post($post, true),
-            'comments' => $comments
-                ->map(fn ($comment) => PostPresenter::comment($comment))
-                ->values()
-                ->all(),
+            'comments' => $comments,
             'commentStatus' => session('comment_status'),
         ]);
     }
