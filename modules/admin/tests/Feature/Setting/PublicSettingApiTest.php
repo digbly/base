@@ -10,13 +10,6 @@ class PublicSettingApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        config(['app.website_id' => null]);
-    }
-
     public function test_it_returns_public_settings_with_defaults(): void
     {
         $this->getJson('/api/v1/settings')

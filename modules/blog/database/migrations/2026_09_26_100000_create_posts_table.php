@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('website_id')->nullable()->index();
             $table->string('status', 20)->default('draft');
             $table->unsignedBigInteger('views')->default(0);
             $table->uuid('user_id')->nullable();
@@ -27,7 +26,6 @@ return new class extends Migration
 
         Schema::create('post_translations', function (Blueprint $table) {
             $table->id();
-            $table->uuid('website_id')->nullable()->index();
             $table->string('title');
             $table->string('slug', 190)->index();
             $table->text('description')->nullable();
@@ -36,7 +34,7 @@ return new class extends Migration
             $table->uuid('post_id');
             $table->timestamps();
 
-            $table->unique(['website_id', 'slug']);
+            $table->unique(['slug']);
             $table->unique(['post_id', 'locale']);
 
             $table->foreign('post_id')

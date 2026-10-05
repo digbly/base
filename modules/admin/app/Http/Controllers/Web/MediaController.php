@@ -20,7 +20,7 @@ class MediaController extends Controller
 {
     use AuthorizesAdmin;
 
-    public function index(string $websiteId, IndexMediaRequest $request): Response
+    public function index(IndexMediaRequest $request): Response
     {
         $filters = $request->validated() + [
             'search' => null,
@@ -79,7 +79,7 @@ class MediaController extends Controller
     /**
      * JSON feed for the media picker (session-authenticated).
      */
-    public function list(string $websiteId, IndexMediaRequest $request): AnonymousResourceCollection
+    public function list(IndexMediaRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
 
@@ -110,7 +110,7 @@ class MediaController extends Controller
         return MediaResource::collection($items);
     }
 
-    public function store(string $websiteId, StoreMediaRequest $request): RedirectResponse
+    public function store(StoreMediaRequest $request): RedirectResponse
     {
         $data = $request->validated();
         $files = $request->file('files') ?? array_filter([$request->file('file')]);
@@ -132,14 +132,14 @@ class MediaController extends Controller
         return back()->with('success', __('admin.media.notices.uploaded'));
     }
 
-    public function update(string $websiteId, UpdateMediaRequest $request, MediaItem $media): RedirectResponse
+    public function update(UpdateMediaRequest $request, MediaItem $media): RedirectResponse
     {
         $media->update($request->validated());
 
         return back()->with('success', __('admin.media.notices.updated'));
     }
 
-    public function destroy(string $websiteId, MediaItem $media): RedirectResponse
+    public function destroy(MediaItem $media): RedirectResponse
     {
         $media->delete();
 

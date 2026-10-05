@@ -17,8 +17,6 @@ class ThemeDatabaseActivatorTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        config(['app.website_id' => 'test-website']);
     }
 
     protected function activator(): DatabaseActivator

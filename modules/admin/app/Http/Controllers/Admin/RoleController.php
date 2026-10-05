@@ -10,19 +10,17 @@ use Illuminate\Validation\ValidationException;
 use Modules\Admin\Http\Requests\Admin\StoreRoleRequest;
 use Modules\Admin\Http\Requests\Admin\UpdateRoleRequest;
 use Modules\Admin\Http\Resources\RoleResource;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class RoleController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/roles',
+        path: '/api/v1/admin/roles',
         summary: 'List Roles',
         operationId: 'admin.roles.index',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
             new OA\Response(
@@ -41,7 +39,7 @@ class RoleController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website): AnonymousResourceCollection
+    public function index(): AnonymousResourceCollection
     {
         $roles = Role::query()
             ->with('permissions')
@@ -52,13 +50,12 @@ class RoleController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/roles/{id}',
+        path: '/api/v1/admin/roles/{id}',
         summary: 'Show Role',
         operationId: 'admin.roles.show',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -74,19 +71,18 @@ class RoleController extends Controller
             new OA\Response(response: 404, description: 'Role not found'),
         ]
     )]
-    public function show(Website $website, Role $role): RoleResource
+    public function show(Role $role): RoleResource
     {
         return RoleResource::make($role->load('permissions'));
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/roles',
+        path: '/api/v1/admin/roles',
         summary: 'Create Role',
         operationId: 'admin.roles.store',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -110,14 +106,13 @@ class RoleController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Website $website, StoreRoleRequest $request): RoleResource
+    public function store(StoreRoleRequest $request): RoleResource
     {
         $data = $request->validated();
 
         $role = Role::query()->create([
             'name' => $data['name'],
             'guard_name' => config('auth.defaults.guard'),
-            'website_id' => $website->id,
         ]);
 
         $role->syncPermissions($data['permissions'] ?? []);
@@ -126,13 +121,12 @@ class RoleController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/roles/{id}',
+        path: '/api/v1/admin/roles/{id}',
         summary: 'Update Role',
         operationId: 'admin.roles.update',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         requestBody: new OA\RequestBody(
@@ -158,7 +152,7 @@ class RoleController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, UpdateRoleRequest $request, Role $role): RoleResource
+    public function update(UpdateRoleRequest $request, Role $role): RoleResource
     {
         $data = $request->validated();
 
@@ -172,13 +166,12 @@ class RoleController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/roles/{id}',
+        path: '/api/v1/admin/roles/{id}',
         summary: 'Delete Role',
         operationId: 'admin.roles.destroy',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -187,7 +180,7 @@ class RoleController extends Controller
             new OA\Response(response: 422, description: 'Role is assigned to users'),
         ]
     )]
-    public function destroy(Website $website, Role $role): JsonResponse
+    public function destroy(Role $role): JsonResponse
     {
         if ($role->users()->exists()) {
             throw ValidationException::withMessages([

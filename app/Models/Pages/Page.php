@@ -8,18 +8,16 @@ use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Network\Traits\Networkable;
 
 class Page extends Model implements TranslatableContract
 {
-    use HasUuids, Networkable, Translatable;
+    use HasUuids, Translatable;
 
     protected $table = 'pages';
 
     protected $fillable = [
         'status',
         'template',
-        'website_id',
     ];
 
     public array $translatedAttributes = [

@@ -51,13 +51,12 @@ const pageLabel = (label: string): string => label.replace(/&laquo;/g, '«').rep
 
 export default function Users({ title, users, filters, roles }: UsersProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
     const [resetTarget, setResetTarget] = useState<UserRow | null>(null);
 
-    const indexUrl = route('admin.users.index', { websiteId });
+    const indexUrl = route('admin.users.index');
 
     const applyFilters = (overrides: Record<string, string | null> = {}) => {
         const params: Record<string, string> = {};
@@ -87,7 +86,7 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
         }
 
         return submitForm(
-            route('admin.users.password', { websiteId, user: resetTarget.id }),
+            route('admin.users.password', { user: resetTarget.id }),
             data,
             {
                 method: 'put',
@@ -105,7 +104,7 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
             return;
         }
 
-        router.delete(route('admin.users.destroy', { websiteId, user: deleteTarget.id }), {
+        router.delete(route('admin.users.destroy', { user: deleteTarget.id }), {
             preserveScroll: true,
             onFinish: () => setDeleteTarget(null),
         });
@@ -115,7 +114,7 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
         <AdminLayout title={title}>
             <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-2xl font-bold">{title}</h1>
-                <Link href={route('admin.users.create', { websiteId })}>
+                <Link href={route('admin.users.create')}>
                     <Button leftIcon={<Plus className="h-4 w-4" />}>{t('admin.users.addUser', 'Add user')}</Button>
                 </Link>
             </div>
@@ -225,7 +224,7 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
                                                 title={t('admin.users.actions.restore', 'Restore')}
                                                 onClick={() =>
                                                     router.post(
-                                                        route('admin.users.restore', { websiteId, user: user.id }),
+                                                        route('admin.users.restore', { user: user.id }),
                                                         {},
                                                         { preserveScroll: true }
                                                     )
@@ -237,7 +236,7 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
                                         ) : (
                                             <>
                                                 <Link
-                                                    href={route('admin.users.edit', { websiteId, user: user.id })}
+                                                    href={route('admin.users.edit', { user: user.id })}
                                                     title={t('admin.users.actions.edit', 'Edit')}
                                                     className="rounded p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                                                 >
@@ -258,7 +257,6 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
                                                         onClick={() =>
                                                             router.post(
                                                                 route('admin.users.resend-verification', {
-                                                                    websiteId,
                                                                     user: user.id,
                                                                 }),
                                                                 {},

@@ -10,19 +10,17 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Modules\Admin\Http\Requests\Admin\IndexPageRequest;
 use Modules\Admin\Http\Requests\Admin\PageRequest;
 use Modules\Admin\Http\Resources\PageResource;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class PageController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/pages',
+        path: '/api/v1/admin/pages',
         summary: 'List pages of a website',
         operationId: 'pages.index',
         tags: ['Pages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['published', 'draft'])),
             new OA\Parameter(name: 'per_page', in: 'query', required: false, schema: new OA\Schema(type: 'integer')),
@@ -33,7 +31,7 @@ class PageController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website, IndexPageRequest $request): AnonymousResourceCollection
+    public function index(IndexPageRequest $request): AnonymousResourceCollection
     {
         app()->setLocale($request->getPreferredLanguage(['en', 'vi']));
 
@@ -60,13 +58,12 @@ class PageController extends Controller
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/pages',
+        path: '/api/v1/admin/pages',
         summary: 'Create a page',
         operationId: 'pages.store',
         tags: ['Pages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -82,7 +79,7 @@ class PageController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Website $website, PageRequest $request): JsonResponse
+    public function store(PageRequest $request): JsonResponse
     {
         $data = $request->validated();
         $locale = $data['locale'] ?? app()->getLocale();
@@ -100,13 +97,12 @@ class PageController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/pages/{page}',
+        path: '/api/v1/admin/pages/{page}',
         summary: 'Show a page',
         operationId: 'pages.show',
         tags: ['Pages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'page', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -114,7 +110,7 @@ class PageController extends Controller
             new OA\Response(response: 404, description: 'Not found'),
         ]
     )]
-    public function show(Website $website, Page $page): JsonResponse
+    public function show(Page $page): JsonResponse
     {
         return response()->json([
             'data' => PageResource::make($page->load('translations'))->resolve(),
@@ -122,13 +118,12 @@ class PageController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/pages/{page}',
+        path: '/api/v1/admin/pages/{page}',
         summary: 'Update a page',
         operationId: 'pages.update',
         tags: ['Pages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'page', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
@@ -145,7 +140,7 @@ class PageController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, PageRequest $request, Page $page): JsonResponse
+    public function update(PageRequest $request, Page $page): JsonResponse
     {
         $data = $request->validated();
         $locale = $data['locale'] ?? app()->getLocale();
@@ -166,20 +161,19 @@ class PageController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/pages/{page}',
+        path: '/api/v1/admin/pages/{page}',
         summary: 'Delete a page',
         operationId: 'pages.destroy',
         tags: ['Pages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'page', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
             new OA\Response(response: 200, description: 'Page deleted'),
         ]
     )]
-    public function destroy(Website $website, Page $page): JsonResponse
+    public function destroy(Page $page): JsonResponse
     {
         $page->delete();
 

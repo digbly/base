@@ -18,19 +18,18 @@ interface PostFormPageProps {
 
 export default function PostFormPage({ title, post, categories }: PostFormPageProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const backUrl = route('admin.blog.posts.index', { websiteId });
+    const backUrl = route('admin.blog.posts.index');
 
     const submit = (payload: PostPayload) => {
         setError(null);
 
         const url = post
-            ? route('admin.blog.posts.update', { websiteId, post: post.id })
-            : route('admin.blog.posts.store', { websiteId });
+            ? route('admin.blog.posts.update', { post: post.id })
+            : route('admin.blog.posts.store');
 
         const options = {
             preserveScroll: true,

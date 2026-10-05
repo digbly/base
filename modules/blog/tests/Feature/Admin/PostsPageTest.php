@@ -9,14 +9,10 @@ use Modules\Blog\Enums\PostStatus;
 use Modules\Blog\Models\Category;
 use Modules\Blog\Models\Post;
 use Modules\Blog\Tests\TestCase;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class PostsPageTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -24,15 +20,6 @@ class PostsPageTest extends TestCase
 
         $this->withoutVite();
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function admin(): User
@@ -42,7 +29,7 @@ class PostsPageTest extends TestCase
 
     protected function base(): string
     {
-        return '/admin/'.$this->website->id.'/blog/posts';
+        return '/admin/blog/posts';
     }
 
     protected function makePost(): Post
@@ -107,7 +94,7 @@ class PostsPageTest extends TestCase
                     ['locale' => 'en', 'title' => 'Hello world', 'slug' => 'hello-world'],
                 ],
             ])
-            ->assertRedirect(route('admin.blog.posts.index', ['websiteId' => $this->website->id]));
+            ->assertRedirect(route('admin.blog.posts.index'));
 
         $this->assertDatabaseHas('post_translations', ['slug' => 'hello-world', 'title' => 'Hello world']);
     }
@@ -161,26 +148,9 @@ class PostsPageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $this->website->users()->attach($user);
 
         $this->actingAs($user, 'web')
             ->get($this->base())
             ->assertForbidden();
-    }
-
-    public function test_edit_is_scoped_to_the_route_website(): void
-    {
-        $post = $this->makePost();
-
-        $other = Website::create([
-            'title' => 'Other Site',
-            'subdomain' => 'other-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        $this->actingAs($this->admin(), 'web')
-            ->get('/admin/'.$other->id.'/blog/posts/'.$post->id.'/edit')
-            ->assertNotFound();
     }
 }

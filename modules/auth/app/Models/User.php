@@ -6,7 +6,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,7 +13,6 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\Contracts\OAuthenticatable;
 use Laravel\Passport\HasApiTokens;
 use Modules\Auth\Database\Factories\UserFactory;
-use Modules\Network\Models\Website;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
@@ -80,11 +78,6 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail, OAuthen
     public function socialConnections(): HasMany
     {
         return $this->hasMany(UserSocialConnection::class);
-    }
-
-    public function websites(): BelongsToMany
-    {
-        return $this->belongsToMany(Website::class, 'website_user', 'user_id', 'website_id');
     }
 
     public function isSuperAdmin(): bool

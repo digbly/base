@@ -17,7 +17,6 @@ return new class extends Migration
             $table->id();
             $table->string('group')->index();
             $table->string('key');
-            $table->string('website_id')->nullable()->index();
             $table->json('text');
             $table->timestamps();
         });

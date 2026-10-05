@@ -8,7 +8,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Admin\Http\Requests\Admin\SettingRequest;
 use Modules\Admin\Http\Resources\SettingResource;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class SettingController extends Controller
@@ -20,13 +19,12 @@ class SettingController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/settings',
+        path: '/api/v1/admin/settings',
         summary: 'Show Settings',
         operationId: 'admin.settings.index',
         tags: ['Admin Settings'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
             new OA\Response(
@@ -41,19 +39,18 @@ class SettingController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website): SettingResource
+    public function index(): SettingResource
     {
         return SettingResource::make($this->payload());
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/settings',
+        path: '/api/v1/admin/settings',
         summary: 'Update Settings',
         operationId: 'admin.settings.update',
         tags: ['Admin Settings'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -78,7 +75,7 @@ class SettingController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, SettingRequest $request): SettingResource
+    public function update(SettingRequest $request): SettingResource
     {
         $this->apply($request->validated());
 

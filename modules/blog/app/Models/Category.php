@@ -11,11 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Blog\Database\Factories\CategoryFactory;
-use Modules\Network\Traits\Networkable;
 
 class Category extends Model implements TranslatableContract
 {
-    use HasFactory, HasUuids, Networkable, Translatable;
+    use HasFactory, HasUuids, Translatable;
 
     protected $table = 'post_categories';
 

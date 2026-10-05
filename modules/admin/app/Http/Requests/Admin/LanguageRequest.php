@@ -37,9 +37,7 @@ class LanguageRequest extends FormRequest
                 'string',
                 'max:10',
                 Rule::in(array_keys(config('locales'))),
-                Rule::unique('languages', 'code')
-                    ->where(fn ($query) => $query->where('website_id', website_id()))
-                    ->ignore($ignoreId),
+                Rule::unique('languages', 'code')->ignore($ignoreId),
             ],
             'name' => ['required', 'string', 'max:100'],
             'is_default' => ['sometimes', 'boolean'],

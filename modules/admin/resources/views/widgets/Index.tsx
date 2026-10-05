@@ -25,7 +25,6 @@ export default function Widgets({
     abilities,
 }: WidgetsProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     return (
         <AdminLayout title={title}>
@@ -43,8 +42,7 @@ export default function Widgets({
                 sidebarWidgets={sidebar_widgets}
                 theme={theme}
                 locale={locale}
-                websiteId={websiteId}
-                canUpdate={abilities.update}
+                                canUpdate={abilities.update}
             />
         </AdminLayout>
     );

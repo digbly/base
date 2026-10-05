@@ -14,16 +14,14 @@ use Modules\Admin\Http\Controllers\Web\Concerns\AuthorizesAdmin;
 use Modules\Admin\Http\Requests\Admin\Customize\SettingRequest;
 use Modules\Admin\Support\CustomizeCatalog;
 use Modules\Admin\Support\MediaPreviewResolver;
-use Modules\Network\Models\Website;
 
 class CustomizeController extends Controller
 {
     use AuthorizesAdmin;
 
-    public function index(string $websiteId, Request $request, CustomizeCatalog $catalog): Response
+    public function index(Request $request, CustomizeCatalog $catalog): Response
     {
-        $website = Website::query()->findOrFail($websiteId);
-        $customize = $catalog->index($website);
+        $customize = $catalog->index();
         $settings = $customize['settings']['setting'] ?? [];
 
         $previews = app(MediaPreviewResolver::class)->byId([
@@ -44,7 +42,7 @@ class CustomizeController extends Controller
         ]);
     }
 
-    public function update(string $websiteId, SettingRequest $request): RedirectResponse
+    public function update(SettingRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
@@ -62,7 +60,7 @@ class CustomizeController extends Controller
     /**
      * JSON feed of a page's blocks, fetched when the homepage picker changes.
      */
-    public function pageBlocks(string $websiteId, string $page): JsonResponse
+    public function pageBlocks(string $page): JsonResponse
     {
         return response()->json(app(CustomizeCatalog::class)->pageBlocks($page));
     }

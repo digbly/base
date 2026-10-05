@@ -10,19 +10,17 @@ use Modules\Blog\Http\Requests\Admin\IndexCommentRequest;
 use Modules\Blog\Http\Requests\Admin\UpdateCommentRequest;
 use Modules\Blog\Http\Resources\CommentResource;
 use Modules\Blog\Models\Comment;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class CommentController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/blog/comments',
+        path: '/api/v1/admin/blog/comments',
         summary: 'List Blog Comments',
         operationId: 'admin.blog.comments.index',
         tags: ['Admin Blog Comments'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['pending', 'approved', 'spam', 'rejected'])),
             new OA\Parameter(name: 'post_id', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'uuid')),
@@ -44,7 +42,7 @@ class CommentController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website, IndexCommentRequest $request): AnonymousResourceCollection
+    public function index(IndexCommentRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
 
@@ -72,13 +70,12 @@ class CommentController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/blog/comments/{id}',
+        path: '/api/v1/admin/blog/comments/{id}',
         summary: 'Show Blog Comment',
         operationId: 'admin.blog.comments.show',
         tags: ['Admin Blog Comments'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -90,19 +87,18 @@ class CommentController extends Controller
             new OA\Response(response: 404, description: 'Comment not found'),
         ]
     )]
-    public function show(Website $website, Comment $comment): CommentResource
+    public function show(Comment $comment): CommentResource
     {
         return CommentResource::make($comment->load('author'));
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/blog/comments/{id}',
+        path: '/api/v1/admin/blog/comments/{id}',
         summary: 'Update Blog Comment Status',
         operationId: 'admin.blog.comments.update',
         tags: ['Admin Blog Comments'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
@@ -124,7 +120,7 @@ class CommentController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, UpdateCommentRequest $request, Comment $comment): CommentResource
+    public function update(UpdateCommentRequest $request, Comment $comment): CommentResource
     {
         $comment->update(['status' => $request->validated('status')]);
 
@@ -132,13 +128,12 @@ class CommentController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/blog/comments/{id}',
+        path: '/api/v1/admin/blog/comments/{id}',
         summary: 'Delete Blog Comment',
         operationId: 'admin.blog.comments.destroy',
         tags: ['Admin Blog Comments'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -146,7 +141,7 @@ class CommentController extends Controller
             new OA\Response(response: 404, description: 'Comment not found'),
         ]
     )]
-    public function destroy(Website $website, Comment $comment): JsonResponse
+    public function destroy(Comment $comment): JsonResponse
     {
         $comment->delete();
 

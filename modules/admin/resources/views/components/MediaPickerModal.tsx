@@ -28,7 +28,6 @@ interface MediaListResponse {
 }
 
 export default function MediaPickerModal({ open, onClose, onSelect }: MediaPickerModalProps) {
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const [items, setItems] = useState<MediaItemSummary[]>([]);
     const [meta, setMeta] = useState<MediaListResponse['meta'] | null>(null);
@@ -45,7 +44,7 @@ export default function MediaPickerModal({ open, onClose, onSelect }: MediaPicke
         setLoading(true);
 
         axios
-            .get<MediaListResponse>(route('admin.media.list', { websiteId }), {
+            .get<MediaListResponse>(route('admin.media.list'), {
                 params: { search: search || undefined, type: 'image', page, per_page: 24 },
             })
             .then((response) => {
@@ -61,7 +60,7 @@ export default function MediaPickerModal({ open, onClose, onSelect }: MediaPicke
         return () => {
             active = false;
         };
-    }, [open, search, page, websiteId]);
+    }, [open, search, page]);
 
     return (
         <Modal open={open} title="Insert media" onClose={onClose}>

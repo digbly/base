@@ -7,32 +7,21 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\Passport;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class RoleControllerTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
     }
 
     protected function base(): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}";
+        return '/api/v1/admin';
     }
 
     protected function admin(): User
@@ -45,7 +34,6 @@ class RoleControllerTest extends TestCase
         $role = Role::query()->create([
             'name' => $name,
             'guard_name' => 'api',
-            'website_id' => $this->website->id,
         ]);
 
         $role->syncPermissions($permissions);
@@ -91,11 +79,10 @@ class RoleControllerTest extends TestCase
 
         $this->assertDatabaseHas('roles', [
             'name' => 'manager',
-            'website_id' => $this->website->id,
         ]);
     }
 
-    public function test_store_validates_unique_name_per_website(): void
+    public function test_store_validates_unique_name(): void
     {
         Passport::actingAs($this->admin());
         $this->makeRole('manager');
@@ -171,30 +158,6 @@ class RoleControllerTest extends TestCase
             ->assertJsonValidationErrors('role');
 
         $this->assertDatabaseHas('roles', ['id' => $role->id]);
-    }
-
-    public function test_roles_are_scoped_to_website(): void
-    {
-        Passport::actingAs($this->admin());
-
-        $other = Website::create([
-            'title' => 'Other Site',
-            'subdomain' => 'other-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        $foreign = Role::query()->create([
-            'name' => 'foreign',
-            'guard_name' => 'api',
-            'website_id' => $other->id,
-        ]);
-
-        $this->getJson($this->base().'/roles')
-            ->assertOk()
-            ->assertJsonMissing(['name' => 'foreign']);
-
-        $this->getJson($this->base()."/roles/{$foreign->id}")->assertNotFound();
     }
 
     public function test_permissions_endpoint_lists_permissions(): void

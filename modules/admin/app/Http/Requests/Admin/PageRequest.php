@@ -43,7 +43,6 @@ class PageRequest extends FormRequest
                 'string',
                 'max:190',
                 Rule::unique('page_translations', 'slug')
-                    ->where('website_id', website_id())
                     ->when($page !== null, fn ($rule) => $rule->whereNot('page_id', $page->id)),
             ],
             'content' => ['nullable', 'string'],

@@ -12,7 +12,6 @@ use App\Support\Customizes\Customize;
 use App\Support\Customizes\CustomizeControl;
 use App\Support\Customizes\CustomizeRegistry;
 use Illuminate\Support\Collection;
-use Modules\Network\Models\Website;
 
 /**
  * Read model for the customizer: the registered panels/sections/controls, the
@@ -23,7 +22,7 @@ class CustomizeCatalog
     /**
      * @return array<string, mixed>
      */
-    public function index(Website $website): array
+    public function index(): array
     {
         $customize = new Customize;
 
@@ -50,8 +49,6 @@ class CustomizeCatalog
                 'setting' => app(SettingContract::class)->all()->toArray(),
                 'theme_setting' => app(ThemeSettingContract::class)->all()->toArray(),
             ],
-            'websiteId' => $website->id,
-            'previewUrl' => $website->url,
             'pages' => $this->pagesPayload(),
             'pageTemplates' => $this->pageTemplatesPayload(),
             'availableBlocks' => $this->availableBlocksPayload(),

@@ -38,10 +38,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        config([
-            'permission.cache.key' => config('permission.cache.key').'.'.(website_id() ?? 'global'),
-        ]);
-
         $this->app->singleton(SettingContract::class, SettingRepository::class);
         $this->app->singleton(ThemeSettingContract::class, ThemeSettingRepository::class);
         $this->app->singleton(MenuContract::class, MenuRepository::class);

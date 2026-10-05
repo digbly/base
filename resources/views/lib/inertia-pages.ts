@@ -11,7 +11,6 @@ const modulePattern = /^\.\.\/\.\.\/\.\.\/modules\/([^/]+)\/resources\/views\/(.
  *
  * Supported names:
  * - "Admin::dashboard/Index" -> modules/admin/resources/views/dashboard/Index.tsx
- * - "NoWebsite"              -> resources/views/pages/NoWebsite.tsx
  */
 export function resolvePage(name: string): Promise<any> {
     if (name.includes('::')) {

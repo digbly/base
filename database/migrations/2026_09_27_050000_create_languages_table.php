@@ -16,35 +16,28 @@ return new class extends Migration
             $table->id();
             $table->string('code', 10)->index();
             $table->string('name', 100);
-            $table->uuid('website_id')->nullable()->index();
             $table->boolean('is_default')->default(false);
             $table->timestamps();
 
-            $table->unique(['website_id', 'code']);
+            $table->unique(['code']);
         });
 
-        $websiteId = config('network.main_website_id');
-
-        if ($websiteId !== null) {
-            DB::table('languages')->insert([
-                [
-                    'code' => 'en',
-                    'name' => 'English',
-                    'website_id' => $websiteId,
-                    'is_default' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                [
-                    'code' => 'vi',
-                    'name' => 'Vietnamese',
-                    'website_id' => $websiteId,
-                    'is_default' => false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-            ]);
-        }
+        DB::table('languages')->insert([
+            [
+                'code' => 'en',
+                'name' => 'English',
+                'is_default' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'code' => 'vi',
+                'name' => 'Vietnamese',
+                'is_default' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 
     /**

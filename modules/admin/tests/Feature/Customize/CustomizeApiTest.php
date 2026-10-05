@@ -12,15 +12,11 @@ use Modules\Admin\Enums\PagePermission;
 use Modules\Admin\Enums\ThemePermission;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 use Themes\Default\Providers\ThemeServiceProvider;
 
 class CustomizeApiTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -33,19 +29,12 @@ class CustomizeApiTest extends TestCase
             $this->app->make(FileRepository::class)->findOrFail('Default')
         );
 
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
         Passport::actingAs($this->adminUser());
     }
 
     protected function customizeUrl(string $suffix = ''): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/customize{$suffix}";
+        return "/api/v1/admin/customize{$suffix}";
     }
 
     protected function adminUser(): User
@@ -67,7 +56,6 @@ class CustomizeApiTest extends TestCase
         $page = Page::create([
             'status' => 'published',
             'template' => $template,
-            'website_id' => $this->website->id,
         ]);
 
         $page->translateOrNew('en')->title = $title;
@@ -127,7 +115,6 @@ class CustomizeApiTest extends TestCase
 
         $this->assertDatabaseHas('theme_settings', [
             'code' => 'home_page',
-            'website_id' => $this->website->id,
         ]);
 
         $this->assertDatabaseHas('page_blocks', [
@@ -143,7 +130,6 @@ class CustomizeApiTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('theme_sidebars', [
-            'website_id' => $this->website->id,
             'sidebar' => 'sidebar',
             'widget' => 'recent-posts',
         ]);

@@ -8,8 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class SettingsPageTest extends TestCase
 {
@@ -23,27 +21,12 @@ class SettingsPageTest extends TestCase
         $this->artisan('permission:generate');
     }
 
-    protected function makeWebsite(): Website
-    {
-        $website = Website::create([
-            'title' => 'Site '.uniqid(),
-            'subdomain' => 'site-'.uniqid(),
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $website->id]);
-
-        return $website;
-    }
-
     public function test_super_admin_can_view_settings_page(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
 
         $this->actingAs($admin, 'web')
-            ->get('/admin/'.$website->id.'/settings')
+            ->get('/admin/settings')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Admin::settings/Index', false)
@@ -55,10 +38,9 @@ class SettingsPageTest extends TestCase
     public function test_super_admin_can_update_settings(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
 
         $this->actingAs($admin, 'web')
-            ->put('/admin/'.$website->id.'/settings', [
+            ->put('/admin/settings', [
                 'sitename' => 'My Site',
                 'user_registration' => true,
             ])
@@ -72,24 +54,21 @@ class SettingsPageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $website = $this->makeWebsite();
-        $website->users()->attach($user);
 
         $this->actingAs($user, 'web')
-            ->get('/admin/'.$website->id.'/settings')
+            ->get('/admin/settings')
             ->assertForbidden();
     }
 
     public function test_settings_page_resolves_branding_media(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
 
         $media = MediaItem::factory()->create();
         app(SettingContract::class)->set('logo', $media->id);
 
         $this->actingAs($admin, 'web')
-            ->get('/admin/'.$website->id.'/settings')
+            ->get('/admin/settings')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Admin::settings/Index', false)
@@ -100,11 +79,10 @@ class SettingsPageTest extends TestCase
     public function test_super_admin_can_update_branding(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
         $media = MediaItem::factory()->create();
 
         $this->actingAs($admin, 'web')
-            ->put('/admin/'.$website->id.'/settings', ['logo' => $media->id])
+            ->put('/admin/settings', ['logo' => $media->id])
             ->assertRedirect();
 
         $this->assertSame($media->id, app(SettingContract::class)->get('logo'));

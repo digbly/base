@@ -9,45 +9,22 @@ use Modules\Auth\Models\User;
 use Modules\Blog\Enums\PostStatus;
 use Modules\Blog\Models\Category;
 use Modules\Blog\Models\Post;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 use Tests\TestCase;
 
 class AdminPostControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected Website $website;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function base(): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/blog";
-    }
-
-    protected function otherWebsite(): Website
-    {
-        return Website::create([
-            'title' => 'Other Site',
-            'subdomain' => 'other-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
+        return '/api/v1/admin/blog';
     }
 
     protected function admin(): User
@@ -144,38 +121,6 @@ class AdminPostControllerTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.title', 'Laravel tips');
-    }
-
-    public function test_index_only_returns_posts_of_current_website(): void
-    {
-        Passport::actingAs($this->admin());
-
-        $this->makePost(['title' => 'Mine', 'slug' => 'mine']);
-
-        config(['app.website_id' => $this->otherWebsite()->id]);
-        $this->makePost(['title' => 'Theirs', 'slug' => 'theirs']);
-
-        // The website context must be resolved from the route, not from config.
-        config(['app.website_id' => null]);
-
-        $this->getJson($this->base().'/posts')
-            ->assertOk()
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.title', 'Mine');
-    }
-
-    public function test_show_returns_not_found_for_post_of_another_website(): void
-    {
-        Passport::actingAs($this->admin());
-
-        config(['app.website_id' => $this->otherWebsite()->id]);
-        $post = $this->makePost(['title' => 'Theirs', 'slug' => 'theirs']);
-
-        // The website context must be resolved from the route, not from config.
-        config(['app.website_id' => null]);
-
-        $this->getJson($this->base()."/posts/{$post->getKey()}")
-            ->assertNotFound();
     }
 
     public function test_store_creates_post_with_translations_and_categories(): void

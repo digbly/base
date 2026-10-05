@@ -16,7 +16,6 @@ class MenuFactory extends Factory
     {
         return [
             'name' => $this->faker->words(3, true),
-            'website_id' => config('app.website_id'),
         ];
     }
 }

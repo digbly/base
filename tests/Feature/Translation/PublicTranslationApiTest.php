@@ -20,8 +20,7 @@ class PublicTranslationApiTest extends TestCase
             ->assertJsonPath('admin.media.title', 'Media Library')
             ->assertJsonPath('auth.login.title', 'Welcome back')
             ->assertJsonPath('blog.posts.title', 'Blog Posts')
-            ->assertJsonPath('blog.nav.blogPosts', 'Blog Posts')
-            ->assertJsonPath('network.networkAdmin.dashboard.title', 'Network dashboard');
+            ->assertJsonPath('blog.nav.blogPosts', 'Blog Posts');
     }
 
     public function test_it_returns_vietnamese_translations(): void

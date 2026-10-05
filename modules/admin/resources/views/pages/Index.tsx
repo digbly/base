@@ -63,7 +63,7 @@ const pageLabel = (label: string): string => label.replace(/&laquo;/g, '«').rep
 
 export default function Pages({ title, pages, filters, abilities }: PagesProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId, locale } = usePage<SharedProps>().props;
+    const { locale } = usePage<SharedProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [formOpen, setFormOpen] = useState(false);
@@ -72,7 +72,7 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
     const [mediaOpen, setMediaOpen] = useState(false);
     const insertImageRef = useRef<((url: string, alt?: string) => void) | null>(null);
 
-    const indexUrl = route('admin.pages.index', { websiteId });
+    const indexUrl = route('admin.pages.index');
 
     const form = useForm<PageForm>({ defaultValues: emptyForm });
 
@@ -121,8 +121,8 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
         };
 
         const url = editing
-            ? route('admin.pages.update', { websiteId, page: editing.id })
-            : route('admin.pages.store', { websiteId });
+            ? route('admin.pages.update', { page: editing.id })
+            : route('admin.pages.store');
 
         return submitForm(url, payload, {
             method: editing ? 'put' : 'post',
@@ -137,7 +137,7 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
             return;
         }
 
-        router.delete(route('admin.pages.destroy', { websiteId, page: deleteTarget.id }), {
+        router.delete(route('admin.pages.destroy', { page: deleteTarget.id }), {
             preserveScroll: true,
             onFinish: () => setDeleteTarget(null),
         });

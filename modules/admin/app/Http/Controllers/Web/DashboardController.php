@@ -7,11 +7,12 @@ use App\Models\MediaItem;
 use App\Models\Pages\Page;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Auth\Models\User;
 
 class DashboardController extends Controller
 {
     /**
-     * Display the admin dashboard for the current website.
+     * Display the admin dashboard.
      */
     public function index(): Response
     {
@@ -26,10 +27,10 @@ class DashboardController extends Controller
     }
 
     /**
-     * Number of users attached to the current website.
+     * Number of registered users.
      */
     protected function userCount(): int
     {
-        return website()?->users()->count() ?? 0;
+        return User::query()->count();
     }
 }

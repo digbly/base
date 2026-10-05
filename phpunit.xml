@@ -18,9 +18,6 @@
         <testsuite name="BlogModule">
             <directory>modules/blog/tests/Feature</directory>
         </testsuite>
-        <testsuite name="NetworkModule">
-            <directory>modules/network/tests/Feature</directory>
-        </testsuite>
     </testsuites>
     <source>
         <include>

@@ -60,7 +60,6 @@ const pageLabel = (label: string): string => label.replace(/&laquo;/g, '«').rep
 
 export default function Media({ title, items, filters, abilities }: MediaProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [uploading, setUploading] = useState(false);
@@ -69,7 +68,7 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
     const [deleteTarget, setDeleteTarget] = useState<MediaRow | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const indexUrl = route('admin.media.index', { websiteId });
+    const indexUrl = route('admin.media.index');
 
     const applyFilters = (overrides: Record<string, string | null> = {}) => {
         const merged = { search, type: filters.type, month: filters.month, ...overrides };
@@ -98,7 +97,7 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
         Array.from(fileList).forEach((file) => data.append('files[]', file));
 
         setUploading(true);
-        router.post(route('admin.media.store', { websiteId }), data, {
+        router.post(route('admin.media.store'), data, {
             preserveScroll: true,
             onFinish: () => setUploading(false),
         });
@@ -132,7 +131,7 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
             return;
         }
 
-        return submitForm(route('admin.media.update', { websiteId, media: detail.id }), data, {
+        return submitForm(route('admin.media.update', { media: detail.id }), data, {
             method: 'put',
             setError: detailsForm.setError,
             preserveScroll: true,
@@ -145,7 +144,7 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
             return;
         }
 
-        router.delete(route('admin.media.destroy', { websiteId, media: deleteTarget.id }), {
+        router.delete(route('admin.media.destroy', { media: deleteTarget.id }), {
             preserveScroll: true,
             onFinish: () => {
                 setDeleteTarget(null);

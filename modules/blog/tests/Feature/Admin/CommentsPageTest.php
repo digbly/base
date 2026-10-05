@@ -8,14 +8,10 @@ use Modules\Auth\Models\User;
 use Modules\Blog\Enums\CommentStatus;
 use Modules\Blog\Models\Comment;
 use Modules\Blog\Tests\TestCase;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class CommentsPageTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -23,15 +19,6 @@ class CommentsPageTest extends TestCase
 
         $this->withoutVite();
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function admin(): User
@@ -41,7 +28,7 @@ class CommentsPageTest extends TestCase
 
     protected function base(): string
     {
-        return '/admin/'.$this->website->id.'/blog/comments';
+        return '/admin/blog/comments';
     }
 
     public function test_super_admin_can_view_comments(): void
@@ -92,7 +79,6 @@ class CommentsPageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $this->website->users()->attach($user);
 
         $this->actingAs($user, 'web')
             ->get($this->base())

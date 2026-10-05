@@ -9,8 +9,7 @@ use Spatie\Permission\PermissionRegistrar;
 
 class PermissionGenerateCommand extends Command
 {
-    protected $signature = 'permission:generate
-        {--website= : Website id to scope the permissions to}';
+    protected $signature = 'permission:generate';
 
     protected $description = 'Generate application permissions from the registry';
 
@@ -19,13 +18,11 @@ class PermissionGenerateCommand extends Command
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $guard = config('auth.defaults.guard', 'api');
-        $websiteId = $this->option('website') ?? website_id();
 
         foreach ($registry->all() as $permission) {
             Permission::query()->firstOrCreate([
                 'name' => $permission,
                 'guard_name' => $guard,
-                'website_id' => $websiteId,
             ]);
         }
 

@@ -23,7 +23,6 @@ return [
         'admin' => ['group' => 'admin', 'module' => 'Admin'],
         'auth' => ['group' => 'admin_auth', 'module' => 'Auth'],
         'blog' => ['group' => 'blog', 'module' => 'Blog'],
-        'network' => ['group' => 'network', 'module' => 'Network'],
     ],
 
 ];

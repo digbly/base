@@ -22,7 +22,7 @@ interface PostsProps {
 
 export default function Posts({ title, posts, filters, abilities }: PostsProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId, locale } = usePage<SharedProps>().props;
+    const { locale } = usePage<SharedProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
@@ -30,7 +30,7 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const indexUrl = route('admin.blog.posts.index', { websiteId });
+    const indexUrl = route('admin.blog.posts.index');
 
     const applyFilters = (overrides: Record<string, string | null> = {}) => {
         const params: Record<string, string> = {};
@@ -67,7 +67,7 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
         setError(null);
         setDeleting(true);
 
-        router.delete(route('admin.blog.posts.destroy', { websiteId, post: deleteTarget.id }), {
+        router.delete(route('admin.blog.posts.destroy', { post: deleteTarget.id }), {
             preserveScroll: true,
             onError: () => setError(t('blog.posts.errors.deleteFailed', 'Failed to delete the post.')),
             onFinish: () => {
@@ -88,7 +88,7 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
                 </div>
 
                 {abilities.create && (
-                    <Link href={route('admin.blog.posts.create', { websiteId })}>
+                    <Link href={route('admin.blog.posts.create')}>
                         <Button leftIcon={<Plus className="h-4 w-4" />}>
                             {t('blog.posts.add', 'Add post')}
                         </Button>
@@ -197,7 +197,7 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
                                         <div className="flex items-center justify-end gap-1">
                                             {abilities.update && (
                                                 <Link
-                                                    href={route('admin.blog.posts.edit', { websiteId, post: post.id })}
+                                                    href={route('admin.blog.posts.edit', { post: post.id })}
                                                     title={t('blog.posts.actions.edit', 'Edit post')}
                                                     className="rounded-lg p-2 text-indigo-500 transition-colors hover:bg-indigo-500/10 hover:text-indigo-600 dark:text-indigo-400"
                                                 >

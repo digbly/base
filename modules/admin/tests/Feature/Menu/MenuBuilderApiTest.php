@@ -10,14 +10,10 @@ use Laravel\Passport\Passport;
 use Modules\Admin\Enums\MenuPermission;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class MenuBuilderApiTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -25,19 +21,12 @@ class MenuBuilderApiTest extends TestCase
 
         $this->artisan('permission:generate');
 
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
         Passport::actingAs($this->adminUser());
     }
 
     protected function menuUrl(string $suffix = ''): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/menus{$suffix}";
+        return "/api/v1/admin/menus{$suffix}";
     }
 
     protected function adminUser(): User
@@ -72,7 +61,7 @@ class MenuBuilderApiTest extends TestCase
         $response->assertCreated()
             ->assertJsonPath('data.name', 'Main Menu');
 
-        $this->assertDatabaseHas('menus', ['name' => 'Main Menu', 'website_id' => $this->website->id]);
+        $this->assertDatabaseHas('menus', ['name' => 'Main Menu']);
     }
 
     public function test_store_validates_name(): void
@@ -83,7 +72,7 @@ class MenuBuilderApiTest extends TestCase
 
     public function test_update_syncs_items_tree_with_translations(): void
     {
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
+        $menu = Menu::create(['name' => 'Main']);
         $menu->items()->create(['box_key' => 'custom', 'link' => '/stale', 'display_order' => 0]);
 
         $content = json_encode([
@@ -124,7 +113,7 @@ class MenuBuilderApiTest extends TestCase
 
     public function test_show_returns_items_tree(): void
     {
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
+        $menu = Menu::create(['name' => 'Main']);
         $root = $menu->items()->create(['box_key' => 'custom', 'link' => '/', 'display_order' => 1]);
         $root->translateOrNew('en')->label = 'Home';
         $root->save();
@@ -137,28 +126,11 @@ class MenuBuilderApiTest extends TestCase
 
     public function test_destroy_deletes_menu(): void
     {
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
+        $menu = Menu::create(['name' => 'Main']);
 
         $this->deleteJson($this->menuUrl("/{$menu->id}"))->assertOk();
 
         $this->assertDatabaseMissing('menus', ['id' => $menu->id]);
         $this->assertSame(0, MenuItem::query()->count());
-    }
-
-    public function test_menu_is_scoped_to_route_website(): void
-    {
-        $other = Website::create([
-            'title' => 'Other Site',
-            'subdomain' => 'other-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
-
-        $this->deleteJson("/api/v1/admin/websites/{$other->id}/menus/{$menu->id}")
-            ->assertNotFound();
-
-        $this->assertDatabaseHas('menus', ['id' => $menu->id]);
     }
 }

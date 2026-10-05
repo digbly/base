@@ -9,9 +9,8 @@ use Nwidart\Modules\LaravelModulesServiceProvider;
 class ModulesServiceProvider extends LaravelModulesServiceProvider
 {
     /**
-     * Modules are registered from boot(), once the network has resolved the
-     * current website, so a database-backed activator can read that website's
-     * activation settings.
+     * Modules are registered from boot() so a database-backed activator can
+     * read the stored activation settings.
      */
     protected bool $deferModuleRegistration = true;
 

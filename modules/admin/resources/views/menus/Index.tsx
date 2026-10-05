@@ -53,7 +53,7 @@ const resolveSelectedLocations = (menuId: string, locations: MenuLocations): str
 
 export default function Menus({ title, menus, boxes, locations, abilities, selectedMenuId }: MenusProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId, locale, errors } = usePage<SharedProps>().props;
+    const { locale, errors } = usePage<SharedProps>().props;
 
     const [selectedId, setSelectedId] = useState<string | null>(
         selectedMenuId ?? menus[0]?.id ?? null
@@ -100,7 +100,7 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
         }
 
         router.post(
-            route('admin.menus.store', { websiteId }),
+            route('admin.menus.store'),
             { name: newName.trim() },
             {
                 preserveScroll: true,
@@ -119,7 +119,7 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
 
         setIsSaving(true);
         router.put(
-            route('admin.menus.update', { websiteId, menu: activeMenu.id }),
+            route('admin.menus.update', { menu: activeMenu.id }),
             {
                 name,
                 content: JSON.stringify(serializeItems(items)),
@@ -138,7 +138,7 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
             return;
         }
 
-        router.delete(route('admin.menus.destroy', { websiteId, menu: activeMenu.id }), {
+        router.delete(route('admin.menus.destroy', { menu: activeMenu.id }), {
             preserveScroll: true,
             onFinish: () => setConfirmDelete(false),
         });

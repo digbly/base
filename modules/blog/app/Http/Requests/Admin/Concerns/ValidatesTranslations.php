@@ -9,25 +9,16 @@ use Illuminate\Validation\Rule;
 trait ValidatesTranslations
 {
     /**
-     * Skip the website constraint when no website is resolved (console/tests),
-     * otherwise scope uniqueness and existence checks to the current website.
-     *
      * @return array<int, mixed>
      */
     protected function existsInWebsite(string $table): array
     {
-        $rule = Rule::exists($table, 'id');
-
-        if (($websiteId = website_id()) !== null) {
-            $rule->where('website_id', $websiteId);
-        }
-
-        return [$rule];
+        return [Rule::exists($table, 'id')];
     }
 
     /**
-     * Reject duplicate translation slugs inside the same website, ignoring the
-     * translations of the record being updated.
+     * Reject duplicate translation slugs, ignoring the translations of the
+     * record being updated.
      *
      * @param  class-string<Model>  $translationModel
      */
@@ -42,10 +33,6 @@ trait ValidatesTranslations
             $ignoreId
         ): void {
             $query = $translationModel::query()->where('slug', $value);
-
-            if (($websiteId = website_id()) !== null) {
-                $query->where('website_id', $websiteId);
-            }
 
             if ($ignoreId !== null) {
                 $query->where($foreignKey, '!=', $ignoreId);

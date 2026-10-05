@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('media_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('website_id')->nullable()->index();
             $table->uuid('uploaded_by')->nullable();
             $table->string('title')->nullable();
             $table->string('alt')->nullable();

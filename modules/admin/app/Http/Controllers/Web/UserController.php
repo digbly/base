@@ -24,10 +24,6 @@ use Modules\Auth\Models\User;
  * The mutation logic mirrors {@see \Modules\Admin\Http\Controllers\Admin\UserController}
  * (the JSON API). Extracting it into a shared action is planned; keeping it
  * here avoids coupling the web layer to the API resource responses.
- *
- * Methods with a `{user}` route parameter accept the unused `$websiteId`
- * argument first so Laravel's controller dispatcher maps the route parameters
- * positionally (otherwise `$user` receives the raw website id string).
  */
 class UserController extends Controller
 {
@@ -106,11 +102,11 @@ class UserController extends Controller
         });
 
         return redirect()
-            ->route('admin.users.index', ['websiteId' => request()->route('websiteId')])
+            ->route('admin.users.index')
             ->with('success', __('admin.users.notices.created'));
     }
 
-    public function edit(string $websiteId, Request $request, User $user): Response
+    public function edit(Request $request, User $user): Response
     {
         return Inertia::render('Admin::users/Form', [
             'title' => __('admin.users.form.editTitle'),
@@ -120,7 +116,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(string $websiteId, UpdateUserRequest $request, User $user): RedirectResponse
+    public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $this->ensureCanManage($request, $user);
 
@@ -164,7 +160,7 @@ class UserController extends Controller
         return back()->with('success', __('admin.users.notices.updated'));
     }
 
-    public function destroy(string $websiteId, Request $request, User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
         $this->ensureCanManage($request, $user);
 
@@ -179,7 +175,7 @@ class UserController extends Controller
         return back()->with('success', __('admin.users.notices.deleted'));
     }
 
-    public function restore(string $websiteId, Request $request, User $user): RedirectResponse
+    public function restore(Request $request, User $user): RedirectResponse
     {
         $this->ensureCanManage($request, $user);
 
@@ -190,7 +186,7 @@ class UserController extends Controller
         return back()->with('success', __('admin.users.notices.restored'));
     }
 
-    public function resetPassword(string $websiteId, ResetUserPasswordRequest $request, User $user): RedirectResponse
+    public function resetPassword(ResetUserPasswordRequest $request, User $user): RedirectResponse
     {
         $this->ensureCanManage($request, $user);
 
@@ -199,7 +195,7 @@ class UserController extends Controller
         return back()->with('success', __('admin.users.notices.passwordReset'));
     }
 
-    public function resendVerification(string $websiteId, Request $request, User $user): RedirectResponse
+    public function resendVerification(Request $request, User $user): RedirectResponse
     {
         $this->ensureCanManage($request, $user);
 

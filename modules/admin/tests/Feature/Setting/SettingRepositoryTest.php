@@ -16,8 +16,6 @@ class SettingRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        config(['app.website_id' => null]);
-
         SettingsRegistry::flush();
     }
 
@@ -124,7 +122,7 @@ class SettingRepositoryTest extends TestCase
         $this->assertSame('Hello', $repository->locale('en')->get('title'));
         $this->assertSame('Bonjour', $repository->locale('fr')->get('title'));
 
-        $setting = SettingModel::withoutGlobalScope('website_id')
+        $setting = SettingModel::query()
             ->where('code', 'title')
             ->firstOrFail();
 
@@ -139,24 +137,6 @@ class SettingRepositoryTest extends TestCase
             'locale' => 'fr',
             'lang_value' => 'Bonjour',
         ]);
-    }
-
-    public function test_values_are_isolated_per_website(): void
-    {
-        $repository = $this->repository();
-
-        config(['app.website_id' => 1]);
-        $repository->set('site_name', 'site-one');
-
-        config(['app.website_id' => 2]);
-        $this->assertNull($repository->get('site_name'));
-        $repository->set('site_name', 'site-two');
-
-        config(['app.website_id' => 1]);
-        $this->assertSame('site-one', $repository->get('site_name'));
-
-        config(['app.website_id' => 2]);
-        $this->assertSame('site-two', $repository->get('site_name'));
     }
 
     public function test_is_json_helper(): void

@@ -18,7 +18,7 @@ class WidgetController extends Controller
 {
     use AuthorizesAdmin;
 
-    public function index(string $websiteId, Request $request, WidgetCatalog $catalog): Response
+    public function index(Request $request, WidgetCatalog $catalog): Response
     {
         return Inertia::render('Admin::widgets/Index', [
             'title' => __('admin.widgets.title'),
@@ -29,7 +29,7 @@ class WidgetController extends Controller
         ]);
     }
 
-    public function update(string $websiteId, WidgetUpdateRequest $request, string $sidebar): RedirectResponse
+    public function update(WidgetUpdateRequest $request, string $sidebar): RedirectResponse
     {
         abort_if(Sidebar::get($sidebar) === null, 404);
 

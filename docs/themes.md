@@ -1,9 +1,9 @@
 # Themes
 
-Multiple themes per network site, built on the same architecture as
+Multiple themes, built on the same architecture as
 `nwidart/laravel-modules`. A theme is a full package: it has a manifest
 (`theme.json`), a service provider, views, assets, translations, config and
-routes. Themes live in `themes/` and are selected per website.
+routes. Themes live in `themes/`.
 
 The registry is deliberately a structural mirror of modules so the mental model
 is identical: *discover → activate → register → boot*.
@@ -93,7 +93,7 @@ Stubs live in `resources/stubs/themes`.
 {
     "name": "Default",
     "alias": "default",
-    "description": "Default network theme",
+    "description": "Default theme",
     "version": "1.0.0",
     "priority": 0,
     "providers": [
@@ -131,17 +131,14 @@ Code-level registration (`register()` / `boot()`) runs for **every enabled
 theme**; render-level registration (views, config, translations, routes) runs
 for the **active theme only**, so themes cannot bleed into each other's output.
 
-Because `AppServiceProvider::boot()` runs first and initializes the network
-(`NetworkRepository::init()`), the active theme is resolved against the correct
-website.
+The active theme is resolved once during boot by `ThemeManager::activate()`.
 
 ## Theme selection
 
 `ThemeManager::resolve()` picks the first enabled candidate:
 
 1. an explicit theme passed to `resolve()` / `activate()`,
-2. `website()->theme` (the `websites.theme` column),
-3. `config('themes.default')` (`THEME_DEFAULT`, default `default`),
+2. `config('themes.default')` (`THEME_DEFAULT`, default `default`),
 
 then falls back to the first enabled theme, or `null` when no theme is enabled.
 
@@ -263,7 +260,7 @@ Blade templates under `resources/views` (`pages/**/*.tsx`). Blade only compiles
   `THEMES_ACTIVATOR`).
 - `activators.<name>.class` — activator definitions. `activators.file.statuses-file`
   points to `themes/statuses.json`; `activators.database.key` (default `theme`)
-  is the settings key that holds the active theme name per website.
+  is the settings key that holds the active theme name.
 
 ## Create a theme
 
@@ -280,10 +277,9 @@ Or manually:
 3. Put Blade templates in `resources/views`, assets in `resources/assets`,
    translations in `resources/lang`, config in `config`, routes in `routes`.
 4. Enable it: run `theme:enable <Name>` (the default database activator stores
-   it as the website's active theme; with the file activator, add
+   it as the active theme; with the file activator, add
    `"<Name>": true` to `themes/statuses.json`).
-5. Run `composer dump-autoload` and select it per website via
-   `websites.theme`, or set `THEME_DEFAULT`.
+5. Run `composer dump-autoload` and select it via `THEME_DEFAULT`.
 
 `theme_path('default', 'resources/views/welcome.blade.php')` is handy while
 scaffolding, and `theme:publish <Name>` copies assets into

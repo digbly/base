@@ -12,19 +12,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Collection;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class MediaController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/media',
+        path: '/api/v1/admin/media',
         summary: 'List Media',
         operationId: 'admin.media.index',
         tags: ['Admin Media'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'type', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['image', 'document'])),
             new OA\Parameter(name: 'month', in: 'query', required: false, schema: new OA\Schema(type: 'string', example: '2026-09')),
@@ -46,7 +44,7 @@ class MediaController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website, IndexMediaRequest $request): AnonymousResourceCollection
+    public function index(IndexMediaRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
 
@@ -88,13 +86,12 @@ class MediaController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/media/{id}',
+        path: '/api/v1/admin/media/{id}',
         summary: 'Show Media',
         operationId: 'admin.media.show',
         tags: ['Admin Media'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -106,19 +103,18 @@ class MediaController extends Controller
             new OA\Response(response: 404, description: 'Media not found'),
         ]
     )]
-    public function show(Website $website, MediaItem $media): MediaResource
+    public function show(MediaItem $media): MediaResource
     {
         return MediaResource::make($media->load('media'));
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/media',
+        path: '/api/v1/admin/media',
         summary: 'Upload Media',
         operationId: 'admin.media.store',
         tags: ['Admin Media'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -142,7 +138,7 @@ class MediaController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Website $website, StoreMediaRequest $request): JsonResponse
+    public function store(StoreMediaRequest $request): JsonResponse
     {
         $data = $request->validated();
         $files = $request->file('files') ?? array_filter([$request->file('file')]);
@@ -171,13 +167,12 @@ class MediaController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/media/{id}',
+        path: '/api/v1/admin/media/{id}',
         summary: 'Update Media',
         operationId: 'admin.media.update',
         tags: ['Admin Media'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
@@ -199,7 +194,7 @@ class MediaController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, UpdateMediaRequest $request, MediaItem $media): MediaResource
+    public function update(UpdateMediaRequest $request, MediaItem $media): MediaResource
     {
         $media->update($request->validated());
 
@@ -207,13 +202,12 @@ class MediaController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/media/{id}',
+        path: '/api/v1/admin/media/{id}',
         summary: 'Delete Media',
         operationId: 'admin.media.destroy',
         tags: ['Admin Media'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -221,7 +215,7 @@ class MediaController extends Controller
             new OA\Response(response: 404, description: 'Media not found'),
         ]
     )]
-    public function destroy(Website $website, MediaItem $media): JsonResponse
+    public function destroy(MediaItem $media): JsonResponse
     {
         $media->delete();
 

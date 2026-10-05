@@ -45,7 +45,6 @@ interface SettingsForm {
 
 export default function Settings({ title, settings, media, locales }: SettingsProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
     const [activeLocale, setActiveLocale] = useState(locales[0] ?? 'en');
 
     const {
@@ -73,7 +72,7 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
         path.split('.').reduce<any>((acc, key) => acc?.[key], errors)?.message;
 
     const onSubmit = handleSubmit((data) =>
-        submitForm(route('admin.settings.update', { websiteId }), data, { method: 'put', setError })
+        submitForm(route('admin.settings.update'), data, { method: 'put', setError })
     );
 
     const branding: { key: 'logo' | 'favicon' | 'banner'; label: string }[] = [

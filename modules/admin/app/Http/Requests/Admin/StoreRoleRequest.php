@@ -38,19 +38,14 @@ class StoreRoleRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('roles', 'name')
-                    ->where(fn ($query) => $query
-                        ->where('guard_name', config('auth.defaults.guard'))
-                        ->where('website_id', website_id())),
+                    ->where('guard_name', config('auth.defaults.guard')),
             ],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => [
                 'string',
                 Rule::exists('permissions', 'name')
                     ->where(fn ($query) => $query
-                        ->where('guard_name', config('auth.defaults.guard'))
-                        ->where(fn ($query) => $query
-                            ->where('website_id', website_id())
-                            ->orWhereNull('website_id'))),
+                        ->where('guard_name', config('auth.defaults.guard'))),
             ],
         ];
     }

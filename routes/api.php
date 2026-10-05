@@ -6,7 +6,6 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TranslationController;
 use Illuminate\Support\Facades\Route;
 use Modules\Admin\Enums\MediaPermission;
-use Modules\Network\Http\Middleware\InitWebsite;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,8 +26,8 @@ Route::get('languages', LanguageController::class)->name('languages.index');
 
 Route::get('translations/{locale}', TranslationController::class)->name('translations.show');
 
-Route::middleware(['auth:api', InitWebsite::class])
-    ->prefix('admin/websites/{website}/media')
+Route::middleware(['auth:api'])
+    ->prefix('admin/media')
     ->group(function () {
         Route::get('/', [MediaController::class, 'index'])
             ->middleware('permission:'.MediaPermission::MediaView->value);

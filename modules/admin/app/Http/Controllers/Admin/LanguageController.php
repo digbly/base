@@ -11,19 +11,17 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Modules\Admin\Http\Requests\Admin\LanguageRequest;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class LanguageController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/languages',
-        summary: 'List Website Languages',
+        path: '/api/v1/admin/languages',
+        summary: 'List Languages',
         operationId: 'admin.languages.index',
         tags: ['Admin Languages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'q', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
         ],
         responses: [
@@ -39,7 +37,7 @@ class LanguageController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website, Request $request): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         $languages = Language::query()
             ->when($request->filled('q'), function (Builder $query) use ($request) {
@@ -58,13 +56,12 @@ class LanguageController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/languages/{id}',
-        summary: 'Show Website Language',
+        path: '/api/v1/admin/languages/{id}',
+        summary: 'Show Language',
         operationId: 'admin.languages.show',
         tags: ['Admin Languages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -76,19 +73,18 @@ class LanguageController extends Controller
             new OA\Response(response: 404, description: 'Language not found'),
         ]
     )]
-    public function show(Website $website, Language $language): LanguageResource
+    public function show(Language $language): LanguageResource
     {
         return LanguageResource::make($language);
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/languages',
-        summary: 'Create Website Language',
+        path: '/api/v1/admin/languages',
+        summary: 'Create Language',
         operationId: 'admin.languages.store',
         tags: ['Admin Languages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -108,7 +104,7 @@ class LanguageController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Website $website, LanguageRequest $request): LanguageResource
+    public function store(LanguageRequest $request): LanguageResource
     {
         $data = $request->validated();
 
@@ -124,13 +120,12 @@ class LanguageController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/languages/{id}',
-        summary: 'Update Website Language',
+        path: '/api/v1/admin/languages/{id}',
+        summary: 'Update Language',
         operationId: 'admin.languages.update',
         tags: ['Admin Languages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         requestBody: new OA\RequestBody(
@@ -152,7 +147,7 @@ class LanguageController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, LanguageRequest $request, Language $language): LanguageResource
+    public function update(LanguageRequest $request, Language $language): LanguageResource
     {
         $data = $request->validated();
 
@@ -170,13 +165,12 @@ class LanguageController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/languages/{id}',
-        summary: 'Delete Website Language',
+        path: '/api/v1/admin/languages/{id}',
+        summary: 'Delete Language',
         operationId: 'admin.languages.destroy',
         tags: ['Admin Languages'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
@@ -185,7 +179,7 @@ class LanguageController extends Controller
             new OA\Response(response: 422, description: 'Language cannot be deleted'),
         ]
     )]
-    public function destroy(Website $website, Language $language): JsonResponse
+    public function destroy(Language $language): JsonResponse
     {
         if ($language->is_default) {
             return response()->json(['message' => 'The default language cannot be deleted.'], 422);

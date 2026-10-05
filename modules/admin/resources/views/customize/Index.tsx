@@ -41,7 +41,6 @@ interface CustomizeProps {
         setting: Record<string, unknown>;
         theme_setting: Record<string, unknown>;
     };
-    websiteId: string;
     previewUrl: string | null;
     pages: PageSummary[];
     pageTemplates: PageTemplateDefinition[];
@@ -90,7 +89,6 @@ export default function Customize({
     title: documentTitle,
     panels: panelsProp,
     settings,
-    websiteId,
     previewUrl,
     pages,
     pageTemplates,
@@ -177,7 +175,7 @@ export default function Customize({
 
         setIsSaving(true);
 
-        router.post(route('admin.customize.update', { websiteId }), payload as unknown as Parameters<typeof router.post>[1], {
+        router.post(route('admin.customize.update'), payload as unknown as Parameters<typeof router.post>[1], {
             preserveScroll: true,
             onSuccess: () => {
                 setNotice({ type: 'success', message: t('admin.customize.notices.saved', 'Changes published.') });
@@ -232,7 +230,7 @@ export default function Customize({
                 <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/[0.08]">
                     <div className="flex min-w-0 items-center gap-2">
                         <a
-                            href={route('admin.dashboard', { websiteId })}
+                            href={route('admin.dashboard')}
                             title={t('admin.customize.exit', 'Exit customizer')}
                             className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/[0.06] dark:hover:text-slate-200"
                         >

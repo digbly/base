@@ -67,9 +67,14 @@ class DefaultThemeTest extends TestCase
 
     public function test_home_lists_published_posts_with_pagination(): void
     {
+        $base = now();
+
         foreach (range(1, 10) as $index) {
             $number = str_pad((string) $index, 2, '0', STR_PAD_LEFT);
-            $this->makePost(['title' => "Article {$number}", 'slug' => "article-{$number}"]);
+            $this->makePost(
+                ['title' => "Article {$number}", 'slug' => "article-{$number}"],
+                ['created_at' => $base->copy()->subSeconds($index), 'updated_at' => $base->copy()->subSeconds($index)],
+            );
         }
 
         $this->makePost(

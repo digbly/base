@@ -13,7 +13,6 @@ use Modules\Blog\Http\Requests\Admin\StoreCategoryRequest;
 use Modules\Blog\Http\Requests\Admin\UpdateCategoryRequest;
 use Modules\Blog\Http\Resources\CategoryResource;
 use Modules\Blog\Models\Category;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class CategoryController extends Controller
@@ -21,13 +20,12 @@ class CategoryController extends Controller
     use SyncsTranslations;
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/blog/categories',
+        path: '/api/v1/admin/blog/categories',
         summary: 'List Blog Categories',
         operationId: 'admin.blog.categories.index',
         tags: ['Admin Blog Categories'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'sort', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['created_at', 'updated_at'])),
             new OA\Parameter(name: 'direction', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['asc', 'desc'])),
@@ -47,7 +45,7 @@ class CategoryController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website, IndexCategoryRequest $request): AnonymousResourceCollection
+    public function index(IndexCategoryRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
 
@@ -68,13 +66,12 @@ class CategoryController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/blog/categories/{id}',
+        path: '/api/v1/admin/blog/categories/{id}',
         summary: 'Show Blog Category',
         operationId: 'admin.blog.categories.show',
         tags: ['Admin Blog Categories'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -86,19 +83,18 @@ class CategoryController extends Controller
             new OA\Response(response: 404, description: 'Category not found'),
         ]
     )]
-    public function show(Website $website, Category $category): CategoryResource
+    public function show(Category $category): CategoryResource
     {
         return CategoryResource::make($category->load('translations')->loadCount('posts'));
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/blog/categories',
+        path: '/api/v1/admin/blog/categories',
         summary: 'Create Blog Category',
         operationId: 'admin.blog.categories.store',
         tags: ['Admin Blog Categories'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -118,7 +114,7 @@ class CategoryController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Website $website, StoreCategoryRequest $request): CategoryResource
+    public function store(StoreCategoryRequest $request): CategoryResource
     {
         $data = $request->validated();
 
@@ -137,13 +133,12 @@ class CategoryController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/blog/categories/{id}',
+        path: '/api/v1/admin/blog/categories/{id}',
         summary: 'Update Blog Category',
         operationId: 'admin.blog.categories.update',
         tags: ['Admin Blog Categories'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
@@ -165,7 +160,7 @@ class CategoryController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, UpdateCategoryRequest $request, Category $category): CategoryResource
+    public function update(UpdateCategoryRequest $request, Category $category): CategoryResource
     {
         $data = $request->validated();
 
@@ -188,13 +183,12 @@ class CategoryController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/blog/categories/{id}',
+        path: '/api/v1/admin/blog/categories/{id}',
         summary: 'Delete Blog Category',
         operationId: 'admin.blog.categories.destroy',
         tags: ['Admin Blog Categories'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -202,7 +196,7 @@ class CategoryController extends Controller
             new OA\Response(response: 404, description: 'Category not found'),
         ]
     )]
-    public function destroy(Website $website, Category $category): JsonResponse
+    public function destroy(Category $category): JsonResponse
     {
         $category->delete();
 

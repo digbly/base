@@ -9,14 +9,10 @@ use Laravel\Passport\Passport;
 use Modules\Admin\Enums\PagePermission;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class PageApiTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -24,19 +20,12 @@ class PageApiTest extends TestCase
 
         $this->artisan('permission:generate');
 
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
         Passport::actingAs($this->adminUser());
     }
 
     protected function pagesUrl(string $suffix = ''): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/pages{$suffix}";
+        return "/api/v1/admin/pages{$suffix}";
     }
 
     protected function adminUser(): User
@@ -81,7 +70,6 @@ class PageApiTest extends TestCase
 
         $this->assertDatabaseHas('pages', [
             'template' => 'landing',
-            'website_id' => $this->website->id,
         ]);
 
         $page = Page::query()->firstOrFail();
@@ -113,7 +101,7 @@ class PageApiTest extends TestCase
 
     public function test_update_updates_page_and_translation(): void
     {
-        $page = Page::create(['status' => 'published', 'website_id' => $this->website->id]);
+        $page = Page::create(['status' => 'published']);
         $page->translateOrNew('en')->title = 'Old title';
         $page->translateOrNew('en')->slug = 'old-title';
         $page->save();
@@ -135,7 +123,7 @@ class PageApiTest extends TestCase
 
     public function test_update_without_template_preserves_existing_template(): void
     {
-        $page = Page::create(['status' => 'published', 'template' => 'landing', 'website_id' => $this->website->id]);
+        $page = Page::create(['status' => 'published', 'template' => 'landing']);
         $page->translateOrNew('en')->title = 'Landing';
         $page->translateOrNew('en')->slug = 'landing';
         $page->save();
@@ -151,7 +139,7 @@ class PageApiTest extends TestCase
 
     public function test_destroy_deletes_page(): void
     {
-        $page = Page::create(['status' => 'published', 'website_id' => $this->website->id]);
+        $page = Page::create(['status' => 'published']);
         $page->translateOrNew('en')->title = 'Delete me';
         $page->translateOrNew('en')->slug = 'delete-me';
         $page->save();

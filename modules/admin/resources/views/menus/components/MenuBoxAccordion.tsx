@@ -20,7 +20,6 @@ const makeTempId = (): string => `new-${Date.now()}-${(tempCounter += 1)}`;
 
 export default function MenuBoxAccordion({ box, onAddItems }: MenuBoxAccordionProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'latest' | 'search'>('latest');
@@ -47,7 +46,6 @@ export default function MenuBoxAccordion({ box, onAddItems }: MenuBoxAccordionPr
         axios
             .get(
                 route('admin.menus.box-items', {
-                    websiteId,
                     box: box.key,
                     q: activeTab === 'search' ? search || undefined : undefined,
                 })
@@ -71,7 +69,7 @@ export default function MenuBoxAccordion({ box, onAddItems }: MenuBoxAccordionPr
         return () => {
             cancelled = true;
         };
-    }, [isOpen, activeTab, search, box.key, websiteId]);
+    }, [isOpen, activeTab, search, box.key]);
 
     const switchTab = (tab: 'latest' | 'search') => {
         setActiveTab(tab);

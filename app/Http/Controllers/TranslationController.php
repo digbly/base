@@ -27,7 +27,6 @@ class TranslationController extends Controller
                         new OA\Property(property: 'admin', type: 'object'),
                         new OA\Property(property: 'auth', type: 'object'),
                         new OA\Property(property: 'blog', type: 'object'),
-                        new OA\Property(property: 'network', type: 'object'),
                     ]
                 )
             ),

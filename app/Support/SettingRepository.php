@@ -73,10 +73,9 @@ class SettingRepository implements SettingContract
         $definition = $this->settings()->get($key);
         $translatable = (bool) ($definition['translatable'] ?? false);
 
-        $model = SettingModel::withoutGlobalScope('website_id')->updateOrCreate(
+        $model = SettingModel::updateOrCreate(
             [
                 'code' => $key,
-                'website_id' => website_id(),
             ],
             [
                 'value' => $value,
@@ -171,7 +170,7 @@ class SettingRepository implements SettingContract
 
     protected function cacheKey(): string
     {
-        return sprintf('settings.configs.%s', website_id() ?? 'global');
+        return 'settings.configs';
     }
 
     protected function flushCache(): void

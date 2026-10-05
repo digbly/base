@@ -9,14 +9,10 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class MediaPageTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -25,15 +21,6 @@ class MediaPageTest extends TestCase
         $this->withoutVite();
         Storage::fake('public');
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function admin(): User
@@ -43,7 +30,7 @@ class MediaPageTest extends TestCase
 
     protected function base(): string
     {
-        return '/admin/'.$this->website->id.'/media';
+        return '/admin/media';
     }
 
     public function test_super_admin_can_view_media_library(): void
@@ -97,7 +84,6 @@ class MediaPageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $this->website->users()->attach($user);
 
         $this->actingAs($user, 'web')
             ->get($this->base())

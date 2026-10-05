@@ -22,14 +22,13 @@ interface CategoriesProps {
 
 export default function Categories({ title, categories, filters, abilities }: CategoriesProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [deleteTarget, setDeleteTarget] = useState<AdminCategory | null>(null);
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const indexUrl = route('admin.blog.categories.index', { websiteId });
+    const indexUrl = route('admin.blog.categories.index');
 
     const applyFilters = (overrides: Record<string, string | null> = {}) => {
         const params: Record<string, string> = {};
@@ -57,7 +56,7 @@ export default function Categories({ title, categories, filters, abilities }: Ca
         setError(null);
         setDeleting(true);
 
-        router.delete(route('admin.blog.categories.destroy', { websiteId, category: deleteTarget.id }), {
+        router.delete(route('admin.blog.categories.destroy', { category: deleteTarget.id }), {
             preserveScroll: true,
             onError: () => setError(t('blog.categories.errors.deleteFailed', 'Failed to delete the category.')),
             onFinish: () => {
@@ -78,7 +77,7 @@ export default function Categories({ title, categories, filters, abilities }: Ca
                 </div>
 
                 {abilities.create && (
-                    <Link href={route('admin.blog.categories.create', { websiteId })}>
+                    <Link href={route('admin.blog.categories.create')}>
                         <Button leftIcon={<Plus className="h-4 w-4" />}>
                             {t('blog.categories.add', 'Add category')}
                         </Button>
@@ -156,7 +155,6 @@ export default function Categories({ title, categories, filters, abilities }: Ca
                                             {abilities.update && (
                                                 <Link
                                                     href={route('admin.blog.categories.edit', {
-                                                        websiteId,
                                                         category: category.id,
                                                     })}
                                                     title={t('blog.categories.actions.edit', 'Edit category')}

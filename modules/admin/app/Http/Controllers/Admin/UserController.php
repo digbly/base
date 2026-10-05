@@ -16,19 +16,17 @@ use Modules\Admin\Http\Resources\MessageResource;
 use Modules\Admin\Http\Resources\UserResource;
 use Modules\Auth\Enums\Permission;
 use Modules\Auth\Models\User;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class UserController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/users',
+        path: '/api/v1/admin/users',
         summary: 'List Users',
         operationId: 'admin.users.index',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'role', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'trashed', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['only', 'with'])),
@@ -54,7 +52,7 @@ class UserController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website, IndexUserRequest $request): AnonymousResourceCollection
+    public function index(IndexUserRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
         $trashed = $filters['trashed'] ?? null;
@@ -86,13 +84,12 @@ class UserController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/users/{id}',
+        path: '/api/v1/admin/users/{id}',
         summary: 'Show User',
         operationId: 'admin.users.show',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -108,19 +105,18 @@ class UserController extends Controller
             new OA\Response(response: 404, description: 'User not found'),
         ]
     )]
-    public function show(Website $website, User $user): UserResource
+    public function show(User $user): UserResource
     {
         return UserResource::make($user->load($this->resourceRelations()));
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/users',
+        path: '/api/v1/admin/users',
         summary: 'Create User',
         operationId: 'admin.users.store',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -144,7 +140,7 @@ class UserController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Website $website, StoreUserRequest $request): UserResource
+    public function store(StoreUserRequest $request): UserResource
     {
         $data = $request->validated();
 
@@ -171,13 +167,12 @@ class UserController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/users/{id}',
+        path: '/api/v1/admin/users/{id}',
         summary: 'Update User',
         operationId: 'admin.users.update',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
@@ -203,7 +198,7 @@ class UserController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, UpdateUserRequest $request, User $user): UserResource
+    public function update(UpdateUserRequest $request, User $user): UserResource
     {
         $this->ensureCanManage($request, $user);
 
@@ -252,13 +247,12 @@ class UserController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/users/{id}',
+        path: '/api/v1/admin/users/{id}',
         summary: 'Delete User',
         operationId: 'admin.users.destroy',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -267,7 +261,7 @@ class UserController extends Controller
             new OA\Response(response: 422, description: 'Cannot delete yourself'),
         ]
     )]
-    public function destroy(Website $website, Request $request, User $user): JsonResponse
+    public function destroy(Request $request, User $user): JsonResponse
     {
         $this->ensureCanManage($request, $user);
 
@@ -283,13 +277,12 @@ class UserController extends Controller
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/users/{id}/restore',
+        path: '/api/v1/admin/users/{id}/restore',
         summary: 'Restore User',
         operationId: 'admin.users.restore',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -305,7 +298,7 @@ class UserController extends Controller
             new OA\Response(response: 404, description: 'User not found'),
         ]
     )]
-    public function restore(Website $website, User $user): UserResource
+    public function restore(User $user): UserResource
     {
         if ($user->trashed()) {
             $user->restore();
@@ -315,13 +308,12 @@ class UserController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/users/{id}/password',
+        path: '/api/v1/admin/users/{id}/password',
         summary: 'Reset User Password',
         operationId: 'admin.users.reset-password',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
@@ -347,7 +339,7 @@ class UserController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function resetPassword(Website $website, ResetUserPasswordRequest $request, User $user): MessageResource
+    public function resetPassword(ResetUserPasswordRequest $request, User $user): MessageResource
     {
         $this->ensureCanManage($request, $user);
 
@@ -357,13 +349,12 @@ class UserController extends Controller
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/users/{id}/resend-verification',
+        path: '/api/v1/admin/users/{id}/resend-verification',
         summary: 'Resend Verification Email',
         operationId: 'admin.users.resend-verification',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -380,7 +371,7 @@ class UserController extends Controller
             new OA\Response(response: 422, description: 'Email already verified'),
         ]
     )]
-    public function resendVerification(Website $website, User $user): MessageResource
+    public function resendVerification(User $user): MessageResource
     {
         if ($user->hasVerifiedEmail()) {
             throw ValidationException::withMessages([

@@ -9,15 +9,11 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 use Themes\Default\Providers\ThemeServiceProvider;
 
 class CustomizePageTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -30,15 +26,6 @@ class CustomizePageTest extends TestCase
         $this->app->make(ThemeManager::class)->activate(
             $this->app->make(FileRepository::class)->findOrFail('Default')
         );
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function admin(): User
@@ -48,7 +35,7 @@ class CustomizePageTest extends TestCase
 
     protected function base(): string
     {
-        return '/admin/'.$this->website->id.'/customize';
+        return '/admin/customize';
     }
 
     protected function makePage(string $title = 'Home', string $template = 'landing'): Page
@@ -56,7 +43,6 @@ class CustomizePageTest extends TestCase
         $page = Page::create([
             'status' => 'published',
             'template' => $template,
-            'website_id' => $this->website->id,
         ]);
 
         $page->translateOrNew('en')->title = $title;
@@ -109,7 +95,6 @@ class CustomizePageTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('theme_sidebars', [
-            'website_id' => $this->website->id,
             'sidebar' => 'sidebar',
             'widget' => 'recent-posts',
         ]);
@@ -136,7 +121,6 @@ class CustomizePageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $this->website->users()->attach($user);
 
         $this->actingAs($user, 'web')
             ->get($this->base())

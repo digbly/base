@@ -13,7 +13,6 @@ use Modules\Blog\Http\Requests\Admin\StorePostRequest;
 use Modules\Blog\Http\Requests\Admin\UpdatePostRequest;
 use Modules\Blog\Http\Resources\PostResource;
 use Modules\Blog\Models\Post;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class PostController extends Controller
@@ -21,13 +20,12 @@ class PostController extends Controller
     use SyncsTranslations;
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/blog/posts',
+        path: '/api/v1/admin/blog/posts',
         summary: 'List Blog Posts',
         operationId: 'admin.blog.posts.index',
         tags: ['Admin Blog Posts'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'search', in: 'query', required: false, schema: new OA\Schema(type: 'string')),
             new OA\Parameter(name: 'status', in: 'query', required: false, schema: new OA\Schema(type: 'string', enum: ['draft', 'published'])),
             new OA\Parameter(name: 'category', in: 'query', required: false, schema: new OA\Schema(type: 'string', format: 'uuid')),
@@ -49,7 +47,7 @@ class PostController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website, IndexPostRequest $request): AnonymousResourceCollection
+    public function index(IndexPostRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
 
@@ -80,13 +78,12 @@ class PostController extends Controller
     }
 
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/blog/posts/{id}',
+        path: '/api/v1/admin/blog/posts/{id}',
         summary: 'Show Blog Post',
         operationId: 'admin.blog.posts.show',
         tags: ['Admin Blog Posts'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -98,19 +95,18 @@ class PostController extends Controller
             new OA\Response(response: 404, description: 'Post not found'),
         ]
     )]
-    public function show(Website $website, Post $post): PostResource
+    public function show(Post $post): PostResource
     {
         return PostResource::make($post->load($this->resourceRelations()));
     }
 
     #[OA\Post(
-        path: '/api/v1/admin/websites/{website}/blog/posts',
+        path: '/api/v1/admin/blog/posts',
         summary: 'Create Blog Post',
         operationId: 'admin.blog.posts.store',
         tags: ['Admin Blog Posts'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
             required: true,
@@ -130,7 +126,7 @@ class PostController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(Website $website, StorePostRequest $request): PostResource
+    public function store(StorePostRequest $request): PostResource
     {
         $data = $request->validated();
 
@@ -150,13 +146,12 @@ class PostController extends Controller
     }
 
     #[OA\Put(
-        path: '/api/v1/admin/websites/{website}/blog/posts/{id}',
+        path: '/api/v1/admin/blog/posts/{id}',
         summary: 'Update Blog Post',
         operationId: 'admin.blog.posts.update',
         tags: ['Admin Blog Posts'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         requestBody: new OA\RequestBody(
@@ -178,7 +173,7 @@ class PostController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function update(Website $website, UpdatePostRequest $request, Post $post): PostResource
+    public function update(UpdatePostRequest $request, Post $post): PostResource
     {
         $data = $request->validated();
 
@@ -203,13 +198,12 @@ class PostController extends Controller
     }
 
     #[OA\Delete(
-        path: '/api/v1/admin/websites/{website}/blog/posts/{id}',
+        path: '/api/v1/admin/blog/posts/{id}',
         summary: 'Delete Blog Post',
         operationId: 'admin.blog.posts.destroy',
         tags: ['Admin Blog Posts'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
@@ -217,7 +211,7 @@ class PostController extends Controller
             new OA\Response(response: 404, description: 'Post not found'),
         ]
     )]
-    public function destroy(Website $website, Post $post): JsonResponse
+    public function destroy(Post $post): JsonResponse
     {
         $post->delete();
 

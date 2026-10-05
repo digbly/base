@@ -4,11 +4,10 @@ namespace App\Models;
 
 use App\Traits\HasThemeField;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Network\Traits\Networkable;
 
 class ThemeSetting extends Model
 {
-    use HasThemeField, Networkable;
+    use HasThemeField;
 
     public $timestamps = false;
 
@@ -18,7 +17,6 @@ class ThemeSetting extends Model
         'code',
         'theme',
         'value',
-        'website_id',
     ];
 
     public function getValueAttribute(): null|string|array

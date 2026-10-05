@@ -19,7 +19,7 @@ class PageController extends Controller
 {
     use AuthorizesAdmin;
 
-    public function index(string $websiteId, IndexPageRequest $request): Response
+    public function index(IndexPageRequest $request): Response
     {
         $filters = $request->validated();
 
@@ -53,7 +53,7 @@ class PageController extends Controller
         ]);
     }
 
-    public function store(string $websiteId, PageRequest $request): RedirectResponse
+    public function store(PageRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
@@ -67,7 +67,7 @@ class PageController extends Controller
         return back()->with('success', __('admin.pages.notices.created'));
     }
 
-    public function update(string $websiteId, PageRequest $request, Page $page): RedirectResponse
+    public function update(PageRequest $request, Page $page): RedirectResponse
     {
         $data = $request->validated();
 
@@ -84,7 +84,7 @@ class PageController extends Controller
         return back()->with('success', __('admin.pages.notices.updated'));
     }
 
-    public function destroy(string $websiteId, Page $page): RedirectResponse
+    public function destroy(Page $page): RedirectResponse
     {
         $page->delete();
 

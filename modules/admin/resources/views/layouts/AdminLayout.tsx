@@ -25,9 +25,9 @@ function normalizePath(url: string): string {
 export default function AdminLayout({ title, children }: AdminLayoutProps) {
     const page = usePage<SharedProps>();
     const { url, props } = page;
-    const { auth, admin_menu: menu, admin_prefix: prefix, website_id: websiteId, flash } = props;
+    const { auth, admin_menu: menu, admin_prefix: prefix, flash } = props;
 
-    const base = websiteId ? `/${prefix}/${websiteId}` : `/${prefix}`;
+    const base = `/${prefix}`;
     const currentPath = normalizePath(url);
     const isActive = (to?: string | null) => {
         if (!to) {
@@ -134,7 +134,7 @@ export default function AdminLayout({ title, children }: AdminLayoutProps) {
                     >
                         <MenuIcon className="h-5 w-5" />
                     </button>
-                    <Link href={route('admin.websites.index')} className="flex items-center gap-3">
+                    <Link href={route('admin.dashboard')} className="flex items-center gap-3">
                         <Globe className="h-5 w-5 text-indigo-600" />
                         <span className="text-sm font-semibold">Admin</span>
                     </Link>

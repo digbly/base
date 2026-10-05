@@ -13,8 +13,7 @@ return new class extends Migration
             $table->string('code', 100)->index();
             $table->boolean('translatable')->default(false);
             $table->text('value')->nullable();
-            $table->string('website_id')->nullable()->index();
-            $table->unique(['code', 'website_id']);
+            $table->unique(['code']);
         });
     }
 

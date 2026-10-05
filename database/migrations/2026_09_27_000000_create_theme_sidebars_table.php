@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('theme', 100)->nullable()->index();
             $table->json('data')->nullable();
             $table->integer('display_order')->default(1)->index();
-            $table->string('website_id')->nullable()->index();
             $table->timestamps();
         });
 

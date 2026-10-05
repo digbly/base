@@ -14,11 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Auth\Models\User;
 use Modules\Blog\Database\Factories\PostFactory;
 use Modules\Blog\Enums\PostStatus;
-use Modules\Network\Traits\Networkable;
 
 class Post extends Model implements TranslatableContract
 {
-    use HasFactory, HasUuids, Networkable, Translatable;
+    use HasFactory, HasUuids, Translatable;
 
     protected $table = 'posts';
 

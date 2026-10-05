@@ -26,16 +26,13 @@ use Modules\Blog\Models\Post;
  *
  * The mutation logic mirrors {@see \Modules\Blog\Http\Controllers\Admin\PostController}
  * (the JSON API) but returns Inertia pages and redirects instead of resources.
- * Methods with a `{post}` route parameter accept the unused `$websiteId`
- * argument first so Laravel's controller dispatcher maps the route parameters
- * positionally.
  */
 class PostController extends Controller
 {
     use AuthorizesAdmin;
     use SyncsTranslations;
 
-    public function index(string $websiteId, IndexPostRequest $request): Response
+    public function index(IndexPostRequest $request): Response
     {
         $filters = $request->validated();
 
@@ -74,7 +71,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function create(string $websiteId): Response
+    public function create(): Response
     {
         return Inertia::render('Blog::posts/Form', [
             'title' => __('blog.posts.form.createTitle'),
@@ -83,7 +80,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function edit(string $websiteId, Post $post): Response
+    public function edit(Post $post): Response
     {
         return Inertia::render('Blog::posts/Form', [
             'title' => __('blog.posts.form.editTitle'),
@@ -92,7 +89,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function store(string $websiteId, StorePostRequest $request): RedirectResponse
+    public function store(StorePostRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
@@ -107,11 +104,11 @@ class PostController extends Controller
         });
 
         return redirect()
-            ->route('admin.blog.posts.index', ['websiteId' => $websiteId])
+            ->route('admin.blog.posts.index')
             ->with('success', __('blog.posts.notices.created'));
     }
 
-    public function update(string $websiteId, UpdatePostRequest $request, Post $post): RedirectResponse
+    public function update(UpdatePostRequest $request, Post $post): RedirectResponse
     {
         $data = $request->validated();
 
@@ -131,11 +128,11 @@ class PostController extends Controller
         });
 
         return redirect()
-            ->route('admin.blog.posts.index', ['websiteId' => $websiteId])
+            ->route('admin.blog.posts.index')
             ->with('success', __('blog.posts.notices.updated'));
     }
 
-    public function destroy(string $websiteId, Post $post): RedirectResponse
+    public function destroy(Post $post): RedirectResponse
     {
         $post->delete();
 

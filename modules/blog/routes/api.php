@@ -8,7 +8,6 @@ use Modules\Blog\Http\Controllers\Admin\PostController;
 use Modules\Blog\Http\Controllers\Api\CategoryController as ApiCategoryController;
 use Modules\Blog\Http\Controllers\Api\CommentController as ApiCommentController;
 use Modules\Blog\Http\Controllers\Api\PostController as ApiPostController;
-use Modules\Network\Http\Middleware\InitWebsite;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,7 +15,7 @@ use Modules\Network\Http\Middleware\InitWebsite;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth:api', InitWebsite::class])->prefix('admin/websites/{website}/blog')->group(function () {
+Route::middleware(['auth:api'])->prefix('admin/blog')->group(function () {
     Route::prefix('posts')->group(function () {
         Route::get('/', [PostController::class, 'index'])->middleware('permission:'.Permission::PostsView->value);
         Route::post('/', [PostController::class, 'store'])->middleware('permission:'.Permission::PostsCreate->value);

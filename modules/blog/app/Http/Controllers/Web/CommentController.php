@@ -25,7 +25,7 @@ class CommentController extends Controller
 {
     use AuthorizesAdmin;
 
-    public function index(string $websiteId, IndexCommentRequest $request): Response
+    public function index(IndexCommentRequest $request): Response
     {
         $filters = $request->validated();
 
@@ -61,14 +61,14 @@ class CommentController extends Controller
         ]);
     }
 
-    public function update(string $websiteId, UpdateCommentRequest $request, Comment $comment): RedirectResponse
+    public function update(UpdateCommentRequest $request, Comment $comment): RedirectResponse
     {
         $comment->update(['status' => $request->validated('status')]);
 
         return back()->with('success', __('blog.comments.notices.updated'));
     }
 
-    public function destroy(string $websiteId, Comment $comment): RedirectResponse
+    public function destroy(Comment $comment): RedirectResponse
     {
         $comment->delete();
 

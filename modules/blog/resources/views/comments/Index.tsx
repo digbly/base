@@ -35,7 +35,7 @@ const statusVariant = (status: CommentStatus) => {
 
 export default function Comments({ title, comments, filters, abilities }: CommentsProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId, locale } = usePage<SharedProps>().props;
+    const { locale } = usePage<SharedProps>().props;
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
@@ -43,7 +43,7 @@ export default function Comments({ title, comments, filters, abilities }: Commen
     const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const indexUrl = route('admin.blog.comments.index', { websiteId });
+    const indexUrl = route('admin.blog.comments.index');
 
     const applyFilters = (overrides: Record<string, string | null> = {}) => {
         const params: Record<string, string> = {};
@@ -76,7 +76,7 @@ export default function Comments({ title, comments, filters, abilities }: Commen
         setError(null);
 
         router.put(
-            route('admin.blog.comments.update', { websiteId, comment: comment.id }),
+            route('admin.blog.comments.update', { comment: comment.id }),
             { status: nextStatus },
             { preserveScroll: true, onError: () => setError(t('blog.comments.errors.updateFailed', 'Failed to update the comment.')) }
         );
@@ -90,7 +90,7 @@ export default function Comments({ title, comments, filters, abilities }: Commen
         setError(null);
         setDeleting(true);
 
-        router.delete(route('admin.blog.comments.destroy', { websiteId, comment: deleteTarget.id }), {
+        router.delete(route('admin.blog.comments.destroy', { comment: deleteTarget.id }), {
             preserveScroll: true,
             onError: () => setError(t('blog.comments.errors.deleteFailed', 'Failed to delete the comment.')),
             onFinish: () => {

@@ -8,14 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class PagePageTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -23,15 +19,6 @@ class PagePageTest extends TestCase
 
         $this->withoutVite();
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function admin(): User
@@ -41,7 +28,7 @@ class PagePageTest extends TestCase
 
     protected function base(): string
     {
-        return '/admin/'.$this->website->id.'/pages';
+        return '/admin/pages';
     }
 
     public function test_super_admin_can_view_pages(): void
@@ -112,7 +99,6 @@ class PagePageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $this->website->users()->attach($user);
 
         $this->actingAs($user, 'web')
             ->get($this->base())

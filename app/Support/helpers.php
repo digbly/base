@@ -74,6 +74,18 @@ if (! function_exists('theme_path')) {
     }
 }
 
+if (! function_exists('admin_url')) {
+    function admin_url(?string $uri = null): string
+    {
+        $segments = array_filter(
+            [config('app.admin_prefix', 'admin'), ltrim((string) $uri, '/')],
+            fn ($segment) => $segment !== null && $segment !== ''
+        );
+
+        return url(implode('/', $segments));
+    }
+}
+
 if (! function_exists('theme_asset')) {
     function theme_asset(string $asset, ?string $theme = null): string
     {

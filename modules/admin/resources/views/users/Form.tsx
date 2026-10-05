@@ -34,7 +34,6 @@ interface FormValues {
 
 export default function UserForm({ title, user, roles, canManageSuperAdmin }: UserFormProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
     const isEdit = user !== null;
 
     const {
@@ -64,8 +63,8 @@ export default function UserForm({ title, user, roles, canManageSuperAdmin }: Us
         };
 
         const url = isEdit
-            ? route('admin.users.update', { websiteId, user: user.id })
-            : route('admin.users.store', { websiteId });
+            ? route('admin.users.update', { user: user.id })
+            : route('admin.users.store');
 
         return submitForm(url, payload, { method: isEdit ? 'put' : 'post', setError });
     });
@@ -74,7 +73,7 @@ export default function UserForm({ title, user, roles, canManageSuperAdmin }: Us
         <AdminLayout title={title}>
             <div className="mb-6 flex items-center gap-3">
                 <Link
-                    href={route('admin.users.index', { websiteId })}
+                    href={route('admin.users.index')}
                     className="rounded p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                     <ArrowLeft className="h-5 w-5" />
@@ -168,7 +167,7 @@ export default function UserForm({ title, user, roles, canManageSuperAdmin }: Us
                     </Button>
                     <Button
                         variant="secondary"
-                        onClick={() => router.visit(route('admin.users.index', { websiteId }))}
+                        onClick={() => router.visit(route('admin.users.index'))}
                     >
                         {t('admin.users.form.cancel', 'Cancel')}
                     </Button>

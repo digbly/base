@@ -12,7 +12,6 @@ use Modules\Admin\Enums\ThemePermission;
 use Modules\Admin\Enums\WidgetPermission;
 use Modules\Auth\Enums\Permission as AuthPermission;
 use Modules\Blog\Enums\Permission as BlogPermission;
-use Modules\Network\Enums\WebsitePermission;
 
 class PermissionServiceProvider extends ServiceProvider
 {
@@ -28,7 +27,6 @@ class PermissionServiceProvider extends ServiceProvider
             ...AuthPermission::values(),
             ...BlogPermission::values(),
             ...MediaPermission::values(),
-            ...WebsitePermission::values(),
             ...LanguagePermission::values(),
             ...WidgetPermission::values(),
             ...PagePermission::values(),

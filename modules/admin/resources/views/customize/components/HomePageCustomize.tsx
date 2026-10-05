@@ -38,7 +38,6 @@ export default function HomePageCustomize({
     onBlocksChange,
 }: HomePageCustomizeProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const selectedPage = pages.find((page) => page.id === value);
     const template = pageTemplates.find((item) => item.key === selectedPage?.template);
@@ -54,7 +53,7 @@ export default function HomePageCustomize({
 
         try {
             const response = await axios.get(
-                route('admin.customize.page-blocks', { websiteId, page: pageId })
+                route('admin.customize.page-blocks', { page: pageId })
             );
             onBlocksChange(response.data?.blocks ?? {});
         } catch {

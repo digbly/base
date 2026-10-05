@@ -11,15 +11,10 @@ use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
 use Modules\Blog\Models\Category;
 use Modules\Blog\Models\Post;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Facades\Network;
-use Modules\Network\Models\Website;
 
 class MenuBoxesApiTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -27,21 +22,12 @@ class MenuBoxesApiTest extends TestCase
 
         $this->artisan('permission:generate');
 
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        Network::init($this->website);
-
         Passport::actingAs($this->adminUser());
     }
 
     protected function menuUrl(string $suffix = ''): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/menus{$suffix}";
+        return "/api/v1/admin/menus{$suffix}";
     }
 
     protected function adminUser(): User
@@ -128,7 +114,7 @@ class MenuBoxesApiTest extends TestCase
 
     public function test_update_persists_location_assignments(): void
     {
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
+        $menu = Menu::create(['name' => 'Main']);
 
         $this->putJson($this->menuUrl("/{$menu->id}"), [
             'name' => 'Main',

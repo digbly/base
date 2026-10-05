@@ -6,19 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Modules\Admin\Http\Resources\PermissionResource;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class PermissionController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/permissions',
+        path: '/api/v1/admin/permissions',
         summary: 'List Permissions',
         operationId: 'admin.permissions.index',
         tags: ['Admin Users'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
             new OA\Response(
@@ -37,7 +35,7 @@ class PermissionController extends Controller
             new OA\Response(response: 403, description: 'Forbidden'),
         ]
     )]
-    public function index(Website $website): AnonymousResourceCollection
+    public function index(): AnonymousResourceCollection
     {
         $permissions = Permission::query()
             ->orderBy('name')

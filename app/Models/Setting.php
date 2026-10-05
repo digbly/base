@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Astrotomic\Translatable\Translatable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model implements TranslatableContract
@@ -19,7 +18,6 @@ class Setting extends Model implements TranslatableContract
         'code',
         'value',
         'translatable',
-        'website_id',
     ];
 
     public array $translatedAttributes = [
@@ -29,20 +27,6 @@ class Setting extends Model implements TranslatableContract
     protected $casts = [
         'translatable' => 'boolean',
     ];
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope('website_id', function (Builder $builder) {
-            $websiteId = website_id();
-
-            if ($websiteId !== null) {
-                $builder->where(
-                    $builder->getModel()->getTable().'.website_id',
-                    $websiteId
-                );
-            }
-        });
-    }
 
     public function getValueAttribute(): null|string|array
     {

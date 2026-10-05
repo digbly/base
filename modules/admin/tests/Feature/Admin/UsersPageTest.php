@@ -9,8 +9,6 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Enums\Permission;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class UsersPageTest extends TestCase
 {
@@ -24,23 +22,12 @@ class UsersPageTest extends TestCase
         $this->artisan('permission:generate');
     }
 
-    protected function makeWebsite(): Website
-    {
-        return Website::create([
-            'title' => 'Site '.uniqid(),
-            'subdomain' => 'site-'.uniqid(),
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-    }
-
     public function test_super_admin_can_list_users(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
 
         $this->actingAs($admin, 'web')
-            ->get('/admin/'.$website->id.'/users')
+            ->get('/admin/users')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Admin::users/Index', false)
@@ -52,10 +39,9 @@ class UsersPageTest extends TestCase
     public function test_super_admin_can_create_user(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
 
         $this->actingAs($admin, 'web')
-            ->post('/admin/'.$website->id.'/users', [
+            ->post('/admin/users', [
                 'name' => 'Created User',
                 'email' => 'created@example.com',
                 'password' => 'Password123!',
@@ -71,10 +57,9 @@ class UsersPageTest extends TestCase
     public function test_store_validates_unique_email(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
 
         $this->actingAs($admin, 'web')
-            ->post('/admin/'.$website->id.'/users', [
+            ->post('/admin/users', [
                 'name' => 'Dup',
                 'email' => $admin->email,
                 'password' => 'Password123!',
@@ -86,11 +71,10 @@ class UsersPageTest extends TestCase
     public function test_super_admin_can_update_user(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
         $target = User::factory()->create(['name' => 'Old Name']);
 
         $this->actingAs($admin, 'web')
-            ->put('/admin/'.$website->id.'/users/'.$target->id, [
+            ->put('/admin/users/'.$target->id, [
                 'name' => 'New Name',
                 'email' => $target->email,
             ])
@@ -102,11 +86,10 @@ class UsersPageTest extends TestCase
     public function test_super_admin_can_reset_user_password(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
         $target = User::factory()->create();
 
         $this->actingAs($admin, 'web')
-            ->put('/admin/'.$website->id.'/users/'.$target->id.'/password', [
+            ->put('/admin/users/'.$target->id.'/password', [
                 'password' => 'NewPassword123!',
                 'password_confirmation' => 'NewPassword123!',
             ])
@@ -118,17 +101,16 @@ class UsersPageTest extends TestCase
     public function test_super_admin_can_delete_and_restore_user(): void
     {
         $admin = User::factory()->create(['is_super_admin' => true]);
-        $website = $this->makeWebsite();
         $target = User::factory()->create();
 
         $this->actingAs($admin, 'web')
-            ->delete('/admin/'.$website->id.'/users/'.$target->id)
+            ->delete('/admin/users/'.$target->id)
             ->assertRedirect();
 
         $this->assertSoftDeleted('users', ['id' => $target->id]);
 
         $this->actingAs($admin, 'web')
-            ->post('/admin/'.$website->id.'/users/'.$target->id.'/restore')
+            ->post('/admin/users/'.$target->id.'/restore')
             ->assertRedirect();
 
         $this->assertDatabaseHas('users', ['id' => $target->id, 'deleted_at' => null]);
@@ -137,35 +119,29 @@ class UsersPageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $website = $this->makeWebsite();
-        $website->users()->attach($user);
 
         $this->actingAs($user, 'web')
-            ->get('/admin/'.$website->id.'/users')
+            ->get('/admin/users')
             ->assertForbidden();
     }
 
     public function test_admin_with_permission_can_list_users(): void
     {
         $actor = $this->userWithPermission();
-        $website = $this->makeWebsite();
-        $website->users()->attach($actor);
 
         $this->actingAs($actor, 'web')
-            ->get('/admin/'.$website->id.'/users')
+            ->get('/admin/users')
             ->assertOk();
     }
 
     public function test_non_super_admin_cannot_update_a_super_admin(): void
     {
         $actor = $this->userWithPermission();
-        $website = $this->makeWebsite();
-        $website->users()->attach($actor);
 
         $target = User::factory()->create(['is_super_admin' => true]);
 
         $this->actingAs($actor, 'web')
-            ->put('/admin/'.$website->id.'/users/'.$target->id, [
+            ->put('/admin/users/'.$target->id, [
                 'name' => 'Hacked',
                 'email' => $target->email,
             ])
@@ -175,14 +151,12 @@ class UsersPageTest extends TestCase
     public function test_non_super_admin_cannot_restore_a_super_admin(): void
     {
         $actor = $this->userWithPermission();
-        $website = $this->makeWebsite();
-        $website->users()->attach($actor);
 
         $target = User::factory()->create(['is_super_admin' => true]);
         $target->delete();
 
         $this->actingAs($actor, 'web')
-            ->post('/admin/'.$website->id.'/users/'.$target->id.'/restore')
+            ->post('/admin/users/'.$target->id.'/restore')
             ->assertSessionHasErrors('user');
     }
 

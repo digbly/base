@@ -20,7 +20,7 @@ class MenuController extends Controller
 {
     use AuthorizesAdmin;
 
-    public function index(string $websiteId, Request $request, MenuCatalog $catalog): Response
+    public function index(Request $request, MenuCatalog $catalog): Response
     {
         $menus = Menu::withDataItems()->orderBy('name')->get();
 
@@ -41,26 +41,25 @@ class MenuController extends Controller
     /**
      * JSON feed of the items available inside a builder box (session-authenticated).
      */
-    public function boxItems(string $websiteId, string $box, Request $request): JsonResponse
+    public function boxItems(string $box, Request $request): JsonResponse
     {
         return response()->json([
             'results' => app(MenuCatalog::class)->boxItems($box, $request->string('q')->toString()),
         ]);
     }
 
-    public function store(string $websiteId, MenuRequest $request): RedirectResponse
+    public function store(MenuRequest $request): RedirectResponse
     {
         $menu = Menu::create([
             'name' => $request->validated('name'),
-            'website_id' => website_id(),
         ]);
 
         return redirect()
-            ->route('admin.menus.index', ['websiteId' => $websiteId, 'menu' => $menu->getKey()])
+            ->route('admin.menus.index', ['menu' => $menu->getKey()])
             ->with('success', __('admin.menus.notices.created'));
     }
 
-    public function update(string $websiteId, MenuRequest $request, Menu $menu): RedirectResponse
+    public function update(MenuRequest $request, Menu $menu): RedirectResponse
     {
         app(UpdateMenu::class)->handle(
             $menu,
@@ -73,7 +72,7 @@ class MenuController extends Controller
         return back()->with('success', __('admin.menus.notices.updated'));
     }
 
-    public function destroy(string $websiteId, Menu $menu): RedirectResponse
+    public function destroy(Menu $menu): RedirectResponse
     {
         $menu->delete();
 

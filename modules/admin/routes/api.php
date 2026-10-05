@@ -18,14 +18,13 @@ use Modules\Admin\Http\Controllers\Admin\UserController;
 use Modules\Admin\Http\Controllers\Admin\WidgetController;
 use Modules\Admin\Http\Controllers\AdminController;
 use Modules\Auth\Enums\Permission;
-use Modules\Network\Http\Middleware\InitWebsite;
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('admins', AdminController::class)->names('admin');
 });
 
-Route::middleware(['auth:api', InitWebsite::class])
-    ->prefix('v1/admin/websites/{website}/menus')
+Route::middleware(['auth:api'])
+    ->prefix('v1/admin/menus')
     ->group(function () {
         Route::get('/', [MenuController::class, 'index'])
             ->middleware('permission:'.MenuPermission::View->value);
@@ -45,8 +44,8 @@ Route::middleware(['auth:api', InitWebsite::class])
             ->middleware('permission:'.MenuPermission::Delete->value);
     });
 
-Route::middleware(['auth:api', InitWebsite::class])
-    ->prefix('v1/admin/websites/{website}/widgets')
+Route::middleware(['auth:api'])
+    ->prefix('v1/admin/widgets')
     ->group(function () {
         Route::get('/', [WidgetController::class, 'index'])
             ->middleware('permission:'.WidgetPermission::View->value);
@@ -54,14 +53,14 @@ Route::middleware(['auth:api', InitWebsite::class])
             ->middleware('permission:'.WidgetPermission::Update->value);
     });
 
-Route::middleware(['auth:api', InitWebsite::class])
-    ->prefix('v1/admin/websites/{website}/navigation')
+Route::middleware(['auth:api'])
+    ->prefix('v1/admin/navigation')
     ->group(function () {
         Route::get('/', [NavigationController::class, 'index']);
     });
 
-Route::middleware(['auth:api', InitWebsite::class])
-    ->prefix('v1/admin/websites/{website}/languages')
+Route::middleware(['auth:api'])
+    ->prefix('v1/admin/languages')
     ->group(function () {
         Route::get('/', [LanguageController::class, 'index'])
             ->middleware('permission:'.LanguagePermission::View->value);
@@ -75,15 +74,15 @@ Route::middleware(['auth:api', InitWebsite::class])
             ->middleware('permission:'.LanguagePermission::Delete->value);
     });
 
-Route::middleware(['auth:api', InitWebsite::class, 'permission:'.Permission::SettingsManage->value])
-    ->prefix('v1/admin/websites/{website}/settings')
+Route::middleware(['auth:api', 'permission:'.Permission::SettingsManage->value])
+    ->prefix('v1/admin/settings')
     ->group(function () {
         Route::get('/', [SettingController::class, 'index']);
         Route::match(['put', 'patch'], '/', [SettingController::class, 'update']);
     });
 
-Route::middleware(['auth:api', InitWebsite::class, 'permission:'.Permission::UsersManage->value])
-    ->prefix('v1/admin/websites/{website}/users')
+Route::middleware(['auth:api', 'permission:'.Permission::UsersManage->value])
+    ->prefix('v1/admin/users')
     ->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'store']);
@@ -95,8 +94,8 @@ Route::middleware(['auth:api', InitWebsite::class, 'permission:'.Permission::Use
         Route::delete('{user}', [UserController::class, 'destroy']);
     });
 
-Route::middleware(['auth:api', InitWebsite::class, 'permission:'.Permission::RolesManage->value])
-    ->prefix('v1/admin/websites/{website}/roles')
+Route::middleware(['auth:api', 'permission:'.Permission::RolesManage->value])
+    ->prefix('v1/admin/roles')
     ->group(function () {
         Route::get('/', [RoleController::class, 'index']);
         Route::post('/', [RoleController::class, 'store']);
@@ -105,14 +104,14 @@ Route::middleware(['auth:api', InitWebsite::class, 'permission:'.Permission::Rol
         Route::delete('{role}', [RoleController::class, 'destroy']);
     });
 
-Route::middleware(['auth:api', InitWebsite::class, 'permission:'.Permission::RolesManage->value])
-    ->prefix('v1/admin/websites/{website}/permissions')
+Route::middleware(['auth:api', 'permission:'.Permission::RolesManage->value])
+    ->prefix('v1/admin/permissions')
     ->group(function () {
         Route::get('/', [PermissionController::class, 'index']);
     });
 
-Route::middleware(['auth:api', InitWebsite::class])
-    ->prefix('v1/admin/websites/{website}/customize')
+Route::middleware(['auth:api'])
+    ->prefix('v1/admin/customize')
     ->group(function () {
         Route::get('/', [CustomizeController::class, 'index'])
             ->middleware('permission:'.ThemePermission::View->value);
@@ -124,8 +123,8 @@ Route::middleware(['auth:api', InitWebsite::class])
             ->middleware('permission:'.ThemePermission::View->value);
     });
 
-Route::middleware(['auth:api', InitWebsite::class])
-    ->prefix('v1/admin/websites/{website}/pages')
+Route::middleware(['auth:api'])
+    ->prefix('v1/admin/pages')
     ->group(function () {
         Route::get('/', [PageController::class, 'index'])
             ->middleware('permission:'.PagePermission::View->value);

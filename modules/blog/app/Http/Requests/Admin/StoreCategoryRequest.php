@@ -44,9 +44,6 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         $parent = Rule::exists('post_categories', 'id');
-        if (($websiteId = website_id()) !== null) {
-            $parent->where('website_id', $websiteId);
-        }
 
         return [
             'parent_id' => ['nullable', 'uuid', $parent],

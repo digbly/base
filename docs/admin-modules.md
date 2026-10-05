@@ -276,16 +276,14 @@ builds the response from the language files described in
 
 | i18next namespace | Backend group | Stored in |
 | ----------------- | ------------- | --------- |
-| `common`          | `common`      | `resources/lang/{en,vi}/common.php` (shell + auth/network layout) |
+| `common`          | `common`      | `resources/lang/{en,vi}/common.php` (shell + auth layout) |
 | `admin`           | `admin`       | `modules/admin/lang/{en,vi}/admin.php` (also holds the backend navigation labels) |
 | `auth`            | `admin_auth`  | `modules/auth/lang/{en,vi}/admin_auth.php` |
 | `blog`            | `blog`        | `modules/blog/lang/{en,vi}/blog.php` |
-| `network`         | `network`     | `modules/network/lang/{en,vi}/network.php` |
 
 `App\Support\AdminTranslations` resolves each namespace to its backend group
 and owning module. `registerNamespaces()` registers module directories as
-translation namespaces independently of module activation (the Network module
-is not always enabled). Add a namespace to `config/admin-translations.php` with
+translation namespaces independently of module activation. Add a namespace to `config/admin-translations.php` with
 its `group` and optional `module` to make it available.
 
 Components call `useTranslation()` and reference the namespace inline with
@@ -301,7 +299,6 @@ admin:   nav.* (also read by the backend menu), dashboard.*, users.*,
 auth:    login.*, register.*, forgotPassword.*, resetPassword.*, verifyEmail.*, oauth.*
 blog:    nav.* (also read by the backend menu), posts.*, categories.*,
          comments.*, pagination.*
-network: network.*, networkAdmin.*
 ```
 
 Cross-namespace references are explicit: the blog post form uses

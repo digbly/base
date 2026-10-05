@@ -19,7 +19,6 @@ class ThemeManager
 
         $candidates = array_filter([
             $theme,
-            website()?->theme,
             $this->app['config']->get('themes.default'),
         ]);
 

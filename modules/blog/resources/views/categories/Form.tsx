@@ -18,19 +18,18 @@ interface CategoryFormPageProps {
 
 export default function CategoryFormPage({ title, category, categories }: CategoryFormPageProps) {
     const { t } = useTranslation();
-    const { website_id: websiteId } = usePage<SharedProps>().props;
 
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const backUrl = route('admin.blog.categories.index', { websiteId });
+    const backUrl = route('admin.blog.categories.index');
 
     const submit = (payload: CategoryPayload) => {
         setError(null);
 
         const url = category
-            ? route('admin.blog.categories.update', { websiteId, category: category.id })
-            : route('admin.blog.categories.store', { websiteId });
+            ? route('admin.blog.categories.update', { category: category.id })
+            : route('admin.blog.categories.store');
 
         const options = {
             preserveScroll: true,

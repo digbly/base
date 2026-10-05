@@ -9,14 +9,10 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\Passport;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class AdminMediaControllerTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -25,20 +21,11 @@ class AdminMediaControllerTest extends TestCase
         Storage::fake('public');
 
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function base(): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/media";
+        return '/api/v1/admin/media';
     }
 
     protected function admin(): User

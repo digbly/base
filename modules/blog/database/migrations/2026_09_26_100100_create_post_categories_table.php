@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('post_categories', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('website_id')->nullable()->index();
             $table->uuid('parent_id')->nullable();
             $table->boolean('is_home')->default(false);
             $table->timestamps();
@@ -26,7 +25,6 @@ return new class extends Migration
 
         Schema::create('post_category_translations', function (Blueprint $table) {
             $table->id();
-            $table->uuid('website_id')->nullable()->index();
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('slug', 190)->index();
@@ -34,7 +32,7 @@ return new class extends Migration
             $table->uuid('post_category_id');
             $table->timestamps();
 
-            $table->unique(['website_id', 'slug']);
+            $table->unique(['slug']);
             $table->unique(['post_category_id', 'locale']);
 
             $table->foreign('post_category_id')

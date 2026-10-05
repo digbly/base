@@ -17,22 +17,7 @@ class Menu extends Model
 
     protected $fillable = [
         'name',
-        'website_id',
     ];
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope('website_id', function (Builder $builder) {
-            $websiteId = website_id();
-
-            if ($websiteId !== null) {
-                $builder->where(
-                    $builder->getModel()->getTable().'.website_id',
-                    $websiteId
-                );
-            }
-        });
-    }
 
     public function items(): HasMany
     {

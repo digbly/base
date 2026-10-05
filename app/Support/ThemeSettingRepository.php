@@ -61,11 +61,10 @@ class ThemeSettingRepository implements ThemeSettingContract
 
     public function set(string $key, mixed $value = null): ThemeSettingModel
     {
-        $model = ThemeSettingModel::withoutGlobalScope('website_id')->updateOrCreate(
+        $model = ThemeSettingModel::updateOrCreate(
             [
                 'code' => $key,
                 'theme' => theme_name(),
-                'website_id' => website_id(),
             ],
             [
                 'value' => $value,
@@ -124,8 +123,6 @@ class ThemeSettingRepository implements ThemeSettingContract
     {
         $settings = $this->cache->remember($this->cacheKey(), 3600, function () {
             return ThemeSettingModel::query()
-                ->withoutGlobalScope('website_id')
-                ->where('website_id', website_id())
                 ->get()
                 ->all();
         });
@@ -137,7 +134,7 @@ class ThemeSettingRepository implements ThemeSettingContract
 
     protected function cacheKey(): string
     {
-        return sprintf('theme_settings.configs.%s.%s', theme_name() ?? 'default', website_id() ?? 'global');
+        return sprintf('theme_settings.configs.%s', theme_name() ?? 'default');
     }
 
     protected function flushCache(): void

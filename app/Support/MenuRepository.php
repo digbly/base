@@ -41,10 +41,6 @@ class MenuRepository implements MenuContract
                 $data['key'] = $key;
                 $prefix = $data['prefix'] ?? 'admin';
 
-                if ($websiteId = request()->route('websiteId')) {
-                    $prefix .= "/{$websiteId}";
-                }
-
                 if (! isset($data['url'])) {
                     $data['url'] = $key === 'dashboard'
                         ? url($prefix ?: '')
@@ -52,7 +48,7 @@ class MenuRepository implements MenuContract
                 } else {
                     $data['url'] = isset($data['prefix'])
                         ? url($data['prefix'].'/'.ltrim($data['url'], '/'))
-                        : admin_url($data['url']);
+                        : url(config('app.admin_prefix', 'admin').'/'.ltrim($data['url'], '/'));
                 }
 
                 $data['target'] ??= '_self';

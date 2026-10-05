@@ -4,18 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Network\Traits\Networkable;
 
 class Language extends Model
 {
-    use Networkable;
-
     protected $table = 'languages';
 
     protected $fillable = [
         'code',
         'name',
-        'website_id',
         'is_default',
     ];
 

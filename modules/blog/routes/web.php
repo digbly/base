@@ -6,8 +6,6 @@ use Modules\Blog\Enums\Permission;
 use Modules\Blog\Http\Controllers\Web\CategoryController;
 use Modules\Blog\Http\Controllers\Web\CommentController;
 use Modules\Blog\Http\Controllers\Web\PostController;
-use Modules\Network\Http\Middleware\EnsureWebsiteAccess;
-use Modules\Network\Http\Middleware\InitWebsite;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,8 +16,7 @@ use Modules\Network\Http\Middleware\InitWebsite;
 Route::middleware(['auth:web'])
     ->prefix(config('app.admin_prefix', 'admin'))
     ->group(function () {
-        Route::middleware([InitWebsite::class, EnsureWebsiteAccess::class])
-            ->prefix('{websiteId}/blog')
+        Route::prefix('blog')
             ->name('admin.blog.')
             ->group(function () {
                 Route::prefix('posts')->name('posts.')->group(function () {

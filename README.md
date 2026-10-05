@@ -1,22 +1,14 @@
-# Laravel Network
+# Laravel CMS
 
-A multi-site CMS / "network" platform built on Laravel 12. Each website in the
-network runs on its own theme and content, while a super-admin layer manages the
-websites, users and permissions across the whole network.
-
-The project is intentionally modular: features live in `modules/`, presentation
-lives in `themes/`, and both are discovered, activated and booted through their
-own registries.
+A CMS platform built on Laravel 12. It ships with a modular architecture: features
+live in `modules/`, presentation lives in `themes/`, and both are discovered,
+activated and booted through their own registries.
 
 ## Features
 
-- **Multi-site network** — one installation serves many websites; a website
-  picker and per-website scoping (`InitWebsite`, `EnsureWebsiteAccess`) resolve
-  the active site on every request.
-- **Super-admin network management** — dashboard, websites, users, roles and
-  permissions across the network.
+- **Admin dashboard** — users, roles and permissions managed from a single admin.
 - **Themes** — full theme packages (`theme.json`, views, assets, translations,
-  config, routes) selected per website, modelled after `nwidart/laravel-modules`.
+  config, routes), modelled after `nwidart/laravel-modules`.
   The bundled `default` theme renders the public site with its own self-contained
   Inertia (React) front end, built via `php artisan theme:build`.
 - **Blog module** — posts, categories and comments with translatable content.
@@ -25,10 +17,9 @@ own registries.
   Socialite, and an OAuth2 server via Passport.
 - **Appearance tools** — pages + page blocks, navigation menus, widgets,
   sidebars and a live customizer.
-- **Settings & localization** — per-website settings, languages and editable
-  translations.
+- **Settings & localization** — settings, languages and editable translations.
 - **Media library** — powered by `spatie/laravel-medialibrary`.
-- **Permissions** — `spatie/laravel-permission`, scoped per website.
+- **Permissions** — `spatie/laravel-permission`.
 - **Audit log** — `spatie/laravel-activitylog`.
 - **API docs** — OpenAPI/Swagger generated with `darkaonline/l5-swagger`.
 - **Two React front ends** — an Inertia SSR-style admin rendered from Blade
@@ -106,10 +97,8 @@ Key `.env` values:
 | `APP_URL` | Base URL of the installation |
 | `DB_CONNECTION` | `sqlite` (default), `mysql`, `pgsql`, ... |
 | `ADMIN_PREFIX` | URL prefix for the web admin (default `admin`) |
-| `NETWORK_MAIN_WEBSITE_ID` | Website resolved when none is selected |
-| `NETWORK_DOMAIN` / `NETWORK_SUBSITE_DOMAIN` | Network domain settings |
 | `THEME_DEFAULT` | Fallback theme alias (default `default`) |
-| `THEMES_ACTIVATOR` | `database` (per website) or `file` |
+| `THEMES_ACTIVATOR` | `database` or `file` |
 | `GOOGLE_*`, `FACEBOOK_*`, `GITHUB_*` | Social login credentials |
 | `FRONTEND_URL` | Base URL of the standalone admin SPA |
 
@@ -137,9 +126,8 @@ php artisan test
 composer test
 ```
 
-The test suites are split by module (`AdminModule`, `BlogModule`,
-`NetworkModule`) plus the application `Unit` and `Feature` suites in
-`phpunit.xml`.
+The test suites are split by module (`AdminModule`, `BlogModule`) plus the
+application `Unit` and `Feature` suites in `phpunit.xml`.
 
 ## Useful commands
 
@@ -173,7 +161,7 @@ app/
   Modules/                                 # Module registry (repository + activators)
   Http/ Models/ Providers/ ...
 modules/
-  admin/   auth/   blog/   network/        # Feature modules (own routes, migrations, lang, tests)
+  admin/   auth/   blog/                   # Feature modules (own routes, migrations, lang, tests)
 themes/
   default/                                 # Theme packages + statuses.json
 resources/
@@ -200,7 +188,8 @@ files and tests. Modules are registered through their `module.json` manifest.
 A theme is a complete package (`theme.json`, service provider, Blade views,
 assets, translations, config and routes) living in `themes/`. The registry
 mirrors modules so the model is identical: *discover → activate → register →
-boot*. The active theme is stored per website and applied by the `ThemeManager`.
+boot*. The active theme is stored in the settings and applied by the
+`ThemeManager`.
 
 ### Admin front ends
 

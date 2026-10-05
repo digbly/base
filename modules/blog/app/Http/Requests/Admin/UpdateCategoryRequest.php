@@ -48,9 +48,6 @@ class UpdateCategoryRequest extends FormRequest
         $ignoreId = $category instanceof Category ? $category->getKey() : null;
 
         $parent = Rule::exists('post_categories', 'id');
-        if (($websiteId = website_id()) !== null) {
-            $parent->where('website_id', $websiteId);
-        }
         if ($ignoreId !== null) {
             $parent->where('id', '!=', $ignoreId);
         }

@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
  * Authorise an admin web request against a single permission.
  *
  * Super admins bypass the check; everyone else must hold the permission.
- * Runs after {@see EnsureWebsiteAccess} so the website context is resolved.
  */
 class RequireAdminPermission
 {

@@ -9,33 +9,22 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Passport\Passport;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 use Tests\TestCase;
 
 class AdminUserControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected Website $website;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
     }
 
     protected function base(): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}";
+        return '/api/v1/admin';
     }
 
     protected function admin(): User

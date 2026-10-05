@@ -11,11 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Auth\Models\User;
 use Modules\Blog\Database\Factories\CommentFactory;
 use Modules\Blog\Enums\CommentStatus;
-use Modules\Network\Traits\Networkable;
 
 class Comment extends Model
 {
-    use HasFactory, HasUuids, Networkable;
+    use HasFactory, HasUuids;
 
     protected $table = 'comments';
 

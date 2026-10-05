@@ -42,7 +42,6 @@ class HandleInertiaRequests extends Middleware
                 'warning' => fn () => $request->session()->get('warning'),
             ],
             'admin_menu' => fn () => $this->adminMenu($request),
-            'website_id' => website_id(),
             'admin_prefix' => config('app.admin_prefix', 'admin'),
             'locale' => app()->getLocale(),
             'translations' => fn () => $this->translations(),

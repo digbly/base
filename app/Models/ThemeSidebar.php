@@ -7,11 +7,10 @@ use Astrotomic\Translatable\Translatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Network\Traits\Networkable;
 
 class ThemeSidebar extends Model implements TranslatableContract
 {
-    use HasUuids, Networkable, Translatable;
+    use HasUuids, Translatable;
 
     protected $table = 'theme_sidebars';
 
@@ -21,7 +20,6 @@ class ThemeSidebar extends Model implements TranslatableContract
         'data',
         'theme',
         'display_order',
-        'website_id',
     ];
 
     protected $casts = [

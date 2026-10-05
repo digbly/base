@@ -8,34 +8,21 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Passport\Passport;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class AdminSettingControllerTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function base(): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/settings";
+        return '/api/v1/admin/settings';
     }
 
     protected function admin(): User
@@ -100,7 +87,7 @@ class AdminSettingControllerTest extends TestCase
             'value' => 'Network',
         ]);
 
-        $title = SettingModel::withoutGlobalScope('website_id')
+        $title = SettingModel::query()
             ->where('code', 'title')
             ->firstOrFail();
 

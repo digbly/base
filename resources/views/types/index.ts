@@ -29,7 +29,6 @@ export interface SharedProps {
     };
     flash: FlashMessages;
     admin_menu: NavItem[];
-    website_id: string | number | null;
     admin_prefix: string;
     locale: string;
     translations: Record<string, Record<string, unknown>>;

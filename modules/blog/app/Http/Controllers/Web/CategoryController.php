@@ -30,7 +30,7 @@ class CategoryController extends Controller
     use AuthorizesAdmin;
     use SyncsTranslations;
 
-    public function index(string $websiteId, IndexCategoryRequest $request): Response
+    public function index(IndexCategoryRequest $request): Response
     {
         $filters = $request->validated();
 
@@ -58,7 +58,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function create(string $websiteId): Response
+    public function create(): Response
     {
         return Inertia::render('Blog::categories/Form', [
             'title' => __('blog.categories.form.createTitle'),
@@ -67,7 +67,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function edit(string $websiteId, Category $category): Response
+    public function edit(Category $category): Response
     {
         return Inertia::render('Blog::categories/Form', [
             'title' => __('blog.categories.form.editTitle'),
@@ -76,7 +76,7 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function store(string $websiteId, StoreCategoryRequest $request): RedirectResponse
+    public function store(StoreCategoryRequest $request): RedirectResponse
     {
         $data = $request->validated();
 
@@ -90,11 +90,11 @@ class CategoryController extends Controller
         });
 
         return redirect()
-            ->route('admin.blog.categories.index', ['websiteId' => $websiteId])
+            ->route('admin.blog.categories.index')
             ->with('success', __('blog.categories.notices.created'));
     }
 
-    public function update(string $websiteId, UpdateCategoryRequest $request, Category $category): RedirectResponse
+    public function update(UpdateCategoryRequest $request, Category $category): RedirectResponse
     {
         $data = $request->validated();
 
@@ -110,11 +110,11 @@ class CategoryController extends Controller
         });
 
         return redirect()
-            ->route('admin.blog.categories.index', ['websiteId' => $websiteId])
+            ->route('admin.blog.categories.index')
             ->with('success', __('blog.categories.notices.updated'));
     }
 
-    public function destroy(string $websiteId, Category $category): RedirectResponse
+    public function destroy(Category $category): RedirectResponse
     {
         $category->delete();
 

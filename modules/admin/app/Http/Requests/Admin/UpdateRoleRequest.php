@@ -42,9 +42,7 @@ class UpdateRoleRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('roles', 'name')
-                    ->where(fn ($query) => $query
-                        ->where('guard_name', config('auth.defaults.guard'))
-                        ->where('website_id', website_id()))
+                    ->where('guard_name', config('auth.defaults.guard'))
                     ->ignore($roleId),
             ],
             'permissions' => ['nullable', 'array'],
@@ -52,10 +50,7 @@ class UpdateRoleRequest extends FormRequest
                 'string',
                 Rule::exists('permissions', 'name')
                     ->where(fn ($query) => $query
-                        ->where('guard_name', config('auth.defaults.guard'))
-                        ->where(fn ($query) => $query
-                            ->where('website_id', website_id())
-                            ->orWhereNull('website_id'))),
+                        ->where('guard_name', config('auth.defaults.guard'))),
             ],
         ];
     }

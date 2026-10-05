@@ -142,7 +142,6 @@ interface WidgetsEditorProps {
     sidebarWidgets: Record<string, SidebarWidgetItem[]>;
     theme: string | null;
     locale: string;
-    websiteId: string | number | null;
     canUpdate: boolean;
 }
 
@@ -152,7 +151,6 @@ export default function WidgetsEditor({
     sidebarWidgets,
     theme,
     locale,
-    websiteId,
     canUpdate,
 }: WidgetsEditorProps) {
     const { t } = useTranslation();
@@ -254,7 +252,7 @@ export default function WidgetsEditor({
         };
 
         router.put(
-            route('admin.widgets.update', { websiteId, sidebar: sidebar.key }),
+            route('admin.widgets.update', { sidebar: sidebar.key }),
             // Widget settings are plain JSON; the server validates the shape.
             payload as unknown as Parameters<typeof router.put>[1],
             {

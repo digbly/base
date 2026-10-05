@@ -8,19 +8,17 @@ use App\Support\MenuRepository;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Modules\Admin\Http\Resources\NavigationItemResource;
-use Modules\Network\Models\Website;
 use OpenApi\Attributes as OA;
 
 class NavigationController extends Controller
 {
     #[OA\Get(
-        path: '/api/v1/admin/websites/{website}/navigation',
+        path: '/api/v1/admin/navigation',
         summary: 'Admin sidebar navigation',
         operationId: 'navigation.index',
         tags: ['Navigation'],
         security: [['bearerAuth' => []]],
         parameters: [
-            new OA\Parameter(name: 'website', in: 'path', required: true, schema: new OA\Schema(type: 'string', format: 'uuid')),
         ],
         responses: [
             new OA\Response(
@@ -38,7 +36,7 @@ class NavigationController extends Controller
             ),
         ]
     )]
-    public function index(Website $website, Request $request): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         app()->setLocale($request->getPreferredLanguage(['en', 'vi']));
 

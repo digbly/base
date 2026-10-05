@@ -7,14 +7,10 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Auth\Models\User;
 use Modules\Blog\Models\Category;
 use Modules\Blog\Tests\TestCase;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class CategoriesPageTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -22,15 +18,6 @@ class CategoriesPageTest extends TestCase
 
         $this->withoutVite();
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function admin(): User
@@ -40,7 +27,7 @@ class CategoriesPageTest extends TestCase
 
     protected function base(): string
     {
-        return '/admin/'.$this->website->id.'/blog/categories';
+        return '/admin/blog/categories';
     }
 
     public function test_super_admin_can_view_categories(): void
@@ -66,7 +53,7 @@ class CategoriesPageTest extends TestCase
                     ['locale' => 'en', 'name' => 'News', 'slug' => 'news'],
                 ],
             ])
-            ->assertRedirect(route('admin.blog.categories.index', ['websiteId' => $this->website->id]));
+            ->assertRedirect(route('admin.blog.categories.index'));
 
         $this->assertDatabaseHas('post_category_translations', ['slug' => 'news', 'name' => 'News']);
         $this->assertDatabaseHas('post_categories', ['is_home' => true]);
@@ -108,7 +95,6 @@ class CategoriesPageTest extends TestCase
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $this->website->users()->attach($user);
 
         $this->actingAs($user, 'web')
             ->get($this->base())

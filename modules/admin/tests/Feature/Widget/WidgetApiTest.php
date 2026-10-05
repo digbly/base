@@ -11,15 +11,11 @@ use Laravel\Passport\Passport;
 use Modules\Admin\Enums\WidgetPermission;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 use Themes\Default\Providers\ThemeServiceProvider;
 
 class WidgetApiTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -32,19 +28,12 @@ class WidgetApiTest extends TestCase
             $this->app->make(FileRepository::class)->findOrFail('Default')
         );
 
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
         Passport::actingAs($this->adminUser());
     }
 
     protected function widgetUrl(string $suffix = ''): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/widgets{$suffix}";
+        return "/api/v1/admin/widgets{$suffix}";
     }
 
     protected function adminUser(): User
@@ -101,7 +90,6 @@ class WidgetApiTest extends TestCase
         $response->assertJsonPath('message', 'Sidebar saved successfully.');
 
         $this->assertDatabaseHas('theme_sidebars', [
-            'website_id' => $this->website->id,
             'sidebar' => 'sidebar',
             'widget' => 'recent-posts',
             'display_order' => 1,
@@ -133,24 +121,5 @@ class WidgetApiTest extends TestCase
         $this->putJson($this->widgetUrl('/unknown'), [
             'content' => [],
         ])->assertNotFound();
-    }
-
-    public function test_assignments_are_scoped_to_the_route_website(): void
-    {
-        $other = Website::create([
-            'title' => 'Other Site',
-            'subdomain' => 'other-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        ThemeSidebar::create([
-            'sidebar' => 'sidebar',
-            'widget' => 'categories',
-            'display_order' => 1,
-            'website_id' => $other->id,
-        ]);
-
-        $this->assertSame([], $this->getJson($this->widgetUrl())->json('data.sidebar_widgets.sidebar'));
     }
 }

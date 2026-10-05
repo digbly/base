@@ -8,35 +8,22 @@ use Modules\Auth\Models\User;
 use Modules\Blog\Enums\CommentStatus;
 use Modules\Blog\Models\Comment;
 use Modules\Blog\Models\Post;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 use Tests\TestCase;
 
 class AdminCommentControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected Website $website;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function base(): string
     {
-        return "/api/v1/admin/websites/{$this->website->id}/blog";
+        return '/api/v1/admin/blog';
     }
 
     protected function admin(): User

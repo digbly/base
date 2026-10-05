@@ -4,12 +4,9 @@ namespace Modules\Blog\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Modules\Network\Traits\HasNetworkWebsite;
 
 class PostTranslation extends Model
 {
-    use HasNetworkWebsite;
-
     protected $table = 'post_translations';
 
     protected $fillable = [

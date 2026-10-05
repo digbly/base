@@ -8,14 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
 use Modules\Auth\Models\User;
-use Modules\Network\Enums\WebsiteStatus;
-use Modules\Network\Models\Website;
 
 class MenuPageTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected Website $website;
 
     protected function setUp(): void
     {
@@ -23,15 +19,6 @@ class MenuPageTest extends TestCase
 
         $this->withoutVite();
         $this->artisan('permission:generate');
-
-        $this->website = Website::create([
-            'title' => 'Test Site',
-            'subdomain' => 'test-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        config(['app.website_id' => $this->website->id]);
     }
 
     protected function admin(): User
@@ -41,12 +28,12 @@ class MenuPageTest extends TestCase
 
     protected function base(): string
     {
-        return '/admin/'.$this->website->id.'/menus';
+        return '/admin/menus';
     }
 
     public function test_super_admin_can_view_menus(): void
     {
-        Menu::create(['name' => 'Main Menu', 'website_id' => $this->website->id]);
+        Menu::create(['name' => 'Main Menu']);
 
         $this->actingAs($this->admin(), 'web')
             ->get($this->base())
@@ -66,7 +53,7 @@ class MenuPageTest extends TestCase
             ->post($this->base(), ['name' => 'Main Menu'])
             ->assertRedirect();
 
-        $this->assertDatabaseHas('menus', ['name' => 'Main Menu', 'website_id' => $this->website->id]);
+        $this->assertDatabaseHas('menus', ['name' => 'Main Menu']);
     }
 
     public function test_store_validates_required_name(): void
@@ -78,7 +65,7 @@ class MenuPageTest extends TestCase
 
     public function test_super_admin_can_update_menu_tree(): void
     {
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
+        $menu = Menu::create(['name' => 'Main']);
         $menu->items()->create(['box_key' => 'custom', 'link' => '/stale', 'display_order' => 0]);
 
         $content = json_encode([
@@ -119,7 +106,7 @@ class MenuPageTest extends TestCase
 
     public function test_update_assigns_menu_to_locations(): void
     {
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
+        $menu = Menu::create(['name' => 'Main']);
 
         $this->actingAs($this->admin(), 'web')
             ->put($this->base().'/'.$menu->id, [
@@ -135,7 +122,7 @@ class MenuPageTest extends TestCase
 
     public function test_super_admin_can_delete_menu(): void
     {
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
+        $menu = Menu::create(['name' => 'Main']);
 
         $this->actingAs($this->admin(), 'web')
             ->delete($this->base().'/'.$menu->id)
@@ -152,28 +139,9 @@ class MenuPageTest extends TestCase
             ->assertJsonStructure(['results']);
     }
 
-    public function test_menu_is_scoped_to_route_website(): void
-    {
-        $other = Website::create([
-            'title' => 'Other Site',
-            'subdomain' => 'other-site',
-            'status' => WebsiteStatus::ACTIVE,
-            'user_id' => User::factory()->create()->id,
-        ]);
-
-        $menu = Menu::create(['name' => 'Main', 'website_id' => $this->website->id]);
-
-        $this->actingAs($this->admin(), 'web')
-            ->delete("/admin/{$other->id}/menus/{$menu->id}")
-            ->assertNotFound();
-
-        $this->assertDatabaseHas('menus', ['id' => $menu->id]);
-    }
-
     public function test_user_without_permission_is_forbidden(): void
     {
         $user = User::factory()->create();
-        $this->website->users()->attach($user);
 
         $this->actingAs($user, 'web')
             ->get($this->base())
