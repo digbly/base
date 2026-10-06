@@ -6,8 +6,8 @@ use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
+use Modules\Admin\Enums\UserPermission;
 use Modules\Admin\Tests\TestCase;
-use Modules\Auth\Enums\Permission;
 use Modules\Auth\Models\User;
 
 class UsersPageTest extends TestCase
@@ -189,7 +189,7 @@ class UsersPageTest extends TestCase
     protected function userWithPermission(): User
     {
         $role = Role::findOrCreate('user-manager', 'api');
-        $role->syncPermissions([Permission::UsersManage->value]);
+        $role->syncPermissions([UserPermission::Manage->value]);
 
         $user = User::factory()->create();
         $user->assignRole($role);

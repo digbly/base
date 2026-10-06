@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Modules\Admin\Enums\UserPermission;
 use Modules\Admin\Http\Requests\Admin\IndexUserRequest;
 use Modules\Admin\Http\Requests\Admin\ResetUserPasswordRequest;
 use Modules\Admin\Http\Requests\Admin\StoreUserRequest;
 use Modules\Admin\Http\Requests\Admin\UpdateUserRequest;
 use Modules\Admin\Http\Resources\UserResource;
-use Modules\Auth\Enums\Permission;
 use Modules\Auth\Models\User;
 
 /**
@@ -147,7 +147,7 @@ class UserController extends Controller
             if ($actor->is($user)) {
                 $fresh = $user->fresh();
                 $canManage = $fresh->isSuperAdmin()
-                    || in_array(Permission::UsersManage->value, $fresh->permissionNames(), true);
+                    || in_array(UserPermission::Manage->value, $fresh->permissionNames(), true);
 
                 if (! $canManage) {
                     throw ValidationException::withMessages([

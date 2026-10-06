@@ -8,12 +8,14 @@ use App\Facades\NavMenu;
 use App\Facades\Setting;
 use App\Support\MenuRepository;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Admin\Enums\DashboardPermission;
 use Modules\Admin\Enums\MediaPermission;
 use Modules\Admin\Enums\MenuPermission;
 use Modules\Admin\Enums\PagePermission;
+use Modules\Admin\Enums\SettingPermission;
 use Modules\Admin\Enums\ThemePermission;
+use Modules\Admin\Enums\UserPermission;
 use Modules\Admin\Enums\WidgetPermission;
-use Modules\Auth\Enums\Permission as AuthPermission;
 use Modules\Auth\Enums\SocialProvider;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
@@ -102,7 +104,7 @@ class AdminServiceProvider extends ModuleServiceProvider
             'label' => __('admin.nav.dashboard'),
             'to' => '/',
             'icon' => 'layout-dashboard',
-            'permission' => AuthPermission::DashboardView->value,
+            'permission' => DashboardPermission::View->value,
             'position' => $position,
             'priority' => 10,
         ]);
@@ -120,7 +122,7 @@ class AdminServiceProvider extends ModuleServiceProvider
             'label' => __('admin.nav.users'),
             'to' => '/users',
             'icon' => 'users',
-            'permission' => AuthPermission::UsersManage->value,
+            'permission' => UserPermission::Manage->value,
             'position' => $position,
             'priority' => 50,
         ]);
@@ -129,7 +131,7 @@ class AdminServiceProvider extends ModuleServiceProvider
             'label' => __('admin.nav.settings'),
             'to' => '/settings',
             'icon' => 'settings',
-            'permission' => AuthPermission::SettingsManage->value,
+            'permission' => SettingPermission::Manage->value,
             'position' => $position,
             'priority' => 60,
         ]);

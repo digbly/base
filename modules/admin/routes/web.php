@@ -1,10 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Admin\Enums\DashboardPermission;
 use Modules\Admin\Enums\MediaPermission;
 use Modules\Admin\Enums\MenuPermission;
 use Modules\Admin\Enums\PagePermission;
+use Modules\Admin\Enums\SettingPermission;
 use Modules\Admin\Enums\ThemePermission;
+use Modules\Admin\Enums\UserPermission;
 use Modules\Admin\Enums\WidgetPermission;
 use Modules\Admin\Http\Controllers\Web\CustomizeController;
 use Modules\Admin\Http\Controllers\Web\DashboardController;
@@ -15,22 +18,21 @@ use Modules\Admin\Http\Controllers\Web\SettingController;
 use Modules\Admin\Http\Controllers\Web\UserController;
 use Modules\Admin\Http\Controllers\Web\WidgetController;
 use Modules\Admin\Http\Middleware\RequireAdminPermission;
-use Modules\Auth\Enums\Permission;
 
 Route::middleware(['auth:web'])
     ->prefix(config('app.admin_prefix', 'admin'))
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])
-            ->middleware(RequireAdminPermission::class.':'.Permission::DashboardView->value)
+            ->middleware(RequireAdminPermission::class.':'.DashboardPermission::View->value)
             ->name('admin.dashboard');
 
-        Route::middleware(RequireAdminPermission::class.':'.Permission::SettingsManage->value)
+        Route::middleware(RequireAdminPermission::class.':'.SettingPermission::Manage->value)
             ->group(function () {
                 Route::get('settings', [SettingController::class, 'edit'])->name('admin.settings.edit');
                 Route::put('settings', [SettingController::class, 'store'])->name('admin.settings.update');
             });
 
-        Route::middleware(RequireAdminPermission::class.':'.Permission::UsersManage->value)
+        Route::middleware(RequireAdminPermission::class.':'.UserPermission::Manage->value)
             ->prefix('users')
             ->name('admin.users.')
             ->group(function () {

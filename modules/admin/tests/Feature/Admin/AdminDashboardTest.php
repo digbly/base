@@ -5,8 +5,8 @@ namespace Modules\Admin\Tests\Feature\Admin;
 use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Modules\Admin\Enums\DashboardPermission;
 use Modules\Admin\Tests\TestCase;
-use Modules\Auth\Enums\Permission;
 use Modules\Auth\Models\User;
 
 class AdminDashboardTest extends TestCase
@@ -43,7 +43,7 @@ class AdminDashboardTest extends TestCase
     public function test_user_with_dashboard_permission_can_view_dashboard(): void
     {
         $role = Role::findOrCreate('dashboard-viewer', 'api');
-        $role->syncPermissions([Permission::DashboardView->value]);
+        $role->syncPermissions([DashboardPermission::View->value]);
 
         $user = User::factory()->create();
         $user->assignRole($role);
