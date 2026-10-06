@@ -161,7 +161,7 @@ const SortableMenuItem = ({
         <div
             ref={setNodeRef}
             style={style}
-            className={`mb-2 rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 dark:border-white/[0.07] dark:bg-[#0F1626] ${
+            className={`mb-2 rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 dark:border-white/[0.07] dark:bg-slate-900 ${
                 levelBorder[currentDepth] ?? 'border-l-4 border-l-slate-200'
             }`}
         >
@@ -277,7 +277,7 @@ const SortableMenuItem = ({
 const MenuItemPreview = ({ item }: { item: FlatMenuItem }) => (
     <div
         style={{ marginLeft: `${item.depth * INDENT_STEP}px` }}
-        className={`mb-2 cursor-grabbing rounded-xl border border-slate-200 bg-white opacity-90 shadow-lg dark:border-white/[0.07] dark:bg-[#0F1626] ${
+        className={`mb-2 cursor-grabbing rounded-xl border border-slate-200 bg-white opacity-90 shadow-lg dark:border-white/[0.07] dark:bg-slate-900 ${
             levelBorder[item.depth] ?? 'border-l-4 border-l-slate-200'
         }`}
     >

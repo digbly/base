@@ -1,4 +1,5 @@
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import PageHeader from '@/components/ui/PageHeader';
 import { useTranslation } from '@/hooks/useTranslation';
 import WidgetsEditor from './components/WidgetsEditor';
 import type { SidebarDefinition, SidebarWidgetItem, WidgetDefinition } from './types';
@@ -26,12 +27,10 @@ export default function Widgets({
 
     return (
         <AdminLayout title={title}>
-            <div className="mb-6">
-                <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{title}</h1>
-                <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                    {t('admin.widgets.subtitle', 'Manage the widgets displayed in your theme sidebars.')}
-                </p>
-            </div>
+            <PageHeader
+                title={title}
+                description={t('admin.widgets.subtitle', 'Manage the widgets displayed in your theme sidebars.')}
+            />
 
             <WidgetsEditor
                 key={JSON.stringify(sidebar_widgets)}
@@ -40,7 +39,7 @@ export default function Widgets({
                 sidebarWidgets={sidebar_widgets}
                 theme={theme}
                 locale={locale}
-                                canUpdate={abilities.update}
+                canUpdate={abilities.update}
             />
         </AdminLayout>
     );

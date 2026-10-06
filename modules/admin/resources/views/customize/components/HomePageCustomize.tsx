@@ -212,7 +212,7 @@ function BlockRow({
     const { t } = useTranslation();
 
     return (
-        <details className="group rounded-lg border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-[#0F1626]">
+        <details className="group rounded-lg border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-slate-900">
             <summary className="flex cursor-pointer items-center justify-between gap-2 p-2.5 text-xs">
                 <span className="flex items-center gap-1.5 truncate">
                     <ChevronDown className="h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />

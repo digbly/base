@@ -7,6 +7,19 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
+        <script>
+            (function () {
+                try {
+                    var stored = localStorage.getItem('admin-theme') || 'system';
+                    var dark = stored === 'dark' ||
+                        (stored === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                    var root = document.documentElement;
+                    root.classList.toggle('dark', dark);
+                    root.style.colorScheme = dark ? 'dark' : 'light';
+                } catch (e) {}
+            })();
+        </script>
+
         @viteReactRefresh
         @vite('resources/views/app.tsx')
         @inertiaHead

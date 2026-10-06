@@ -3,6 +3,7 @@ import { Link, router } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 import CategoryForm from '../components/CategoryForm';
@@ -61,7 +62,7 @@ export default function CategoryFormPage({ title, category, categories }: Catego
                 </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <Card className="p-5">
                 <CategoryForm
                     category={category}
                     categories={categories}
@@ -70,7 +71,7 @@ export default function CategoryFormPage({ title, category, categories }: Catego
                     onSubmit={submit}
                     onCancel={() => router.visit(backUrl)}
                 />
-            </div>
+            </Card>
         </AdminLayout>
     );
 }

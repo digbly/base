@@ -1,219 +1,188 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ChevronDown, Globe, LogOut, Menu as MenuIcon, X } from 'lucide-react';
-import NavIcon from '@/components/NavIcon';
+import { ChevronsRight, ExternalLink, Menu as MenuIcon, PanelLeft, Sparkles, X } from 'lucide-react';
+import AdminSidebar from '@modules/admin/resources/views/components/AdminSidebar';
+import UserMenu from '@modules/admin/resources/views/components/UserMenu';
+import Alert from '@/components/ui/Alert';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { route } from '@/lib/route';
-import type { NavItem, SharedProps } from '@/types';
+import { normalizePath } from '@/lib/url';
+import { useTranslation } from '@/hooks/useTranslation';
+import type { SharedProps } from '@/types';
 
 interface AdminLayoutProps {
     title?: string;
     children: ReactNode;
 }
 
-function joinUrl(base: string, to?: string | null): string {
-    if (!to) {
-        return base;
-    }
-
-    const path = to.replace(/^\//, '');
-
-    if (path === '') {
-        return base;
-    }
-
-    return `${base.replace(/\/$/, '')}/${path}`;
-}
-
-function normalizePath(url: string): string {
-    return (url.split('?')[0] || '/').replace(/\/$/, '') || '/';
-}
+const SIDEBAR_STORAGE_KEY = 'admin-sidebar-collapsed';
 
 export default function AdminLayout({ title, children }: AdminLayoutProps) {
     const page = usePage<SharedProps>();
     const { url, props } = page;
     const { auth, admin_menu: menu, admin_prefix: prefix, flash } = props;
+    const { t } = useTranslation();
 
     const base = `/${prefix}`;
     const currentPath = normalizePath(url);
-    const isActive = (to?: string | null) => {
-        if (!to) {
+
+    const [mobileOpen, setMobileOpen] = useState(false);
+    const [collapsed, setCollapsed] = useState(() => {
+        if (typeof window === 'undefined') {
             return false;
         }
 
-        const target = normalizePath(joinUrl(base, to));
+        return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1';
+    });
+    const [dismissedFlash, setDismissedFlash] = useState(false);
 
-        return currentPath === target || currentPath.startsWith(`${target}/`);
-    };
+    useEffect(() => {
+        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, collapsed ? '1' : '0');
+    }, [collapsed]);
 
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    useEffect(() => {
+        setDismissedFlash(false);
+    }, [flash?.success, flash?.error, flash?.warning]);
 
-    const toggle = (key: string) => {
-        setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
-    };
+    const closeMobile = () => setMobileOpen(false);
 
     const logout = () => {
         router.post('/logout');
     };
 
-    const renderItem = (item: NavItem) => {
-        const active = isActive(item.to) || item.children.some((child) => isActive(child.to));
-        const hasChildren = item.children.length > 0;
-        const isOpen = expanded[item.key] ?? active;
-
-        return (
-            <li key={item.key}>
-                <div
-                    className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
-                        active
-                            ? 'bg-indigo-600 text-white'
-                            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-                    }`}
-                >
-                    {item.to ? (
-                        <Link href={joinUrl(base, item.to)} className="flex flex-1 items-center gap-3">
-                            <NavIcon name={item.icon} className="h-4 w-4 shrink-0" />
-                            <span>{item.label}</span>
-                        </Link>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={() => toggle(item.key)}
-                            className="flex flex-1 items-center gap-3 text-left"
-                        >
-                            <NavIcon name={item.icon} className="h-4 w-4 shrink-0" />
-                            <span>{item.label}</span>
-                        </button>
-                    )}
-
-                    {hasChildren && (
-                        <button type="button" onClick={() => toggle(item.key)} aria-label="Toggle group">
-                            <ChevronDown className={`h-4 w-4 transition ${isOpen ? 'rotate-180' : ''}`} />
-                        </button>
-                    )}
-                </div>
-
-                {hasChildren && isOpen && (
-                    <ul className="mt-1 space-y-1 border-l border-slate-200 pl-4 dark:border-slate-800">
-                        {item.children.map((child) => {
-                            const childActive = isActive(child.to);
-
-                            return (
-                                <li key={child.key}>
-                                    <Link
-                                        href={joinUrl(base, child.to)}
-                                        className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition ${
-                                            childActive
-                                                ? 'text-indigo-600 dark:text-indigo-400'
-                                                : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100'
-                                        }`}
-                                    >
-                                        <NavIcon name={child.icon} className="h-4 w-4 shrink-0" />
-                                        <span>{child.label}</span>
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                )}
-            </li>
-        );
-    };
-
-    const sidebar = (
-        <nav className="flex-1 space-y-1 overflow-y-auto p-4">
-            <ul className="space-y-1">{menu.map(renderItem)}</ul>
-        </nav>
+    const brand = (
+        <Link
+            href={route('admin.dashboard')}
+            className={`flex h-16 items-center gap-3 px-4 ${collapsed ? 'justify-center px-0' : ''}`}
+        >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-lg shadow-indigo-500/30">
+                <Sparkles className="h-5 w-5" />
+            </span>
+            {!collapsed && (
+                <span className="min-w-0">
+                    <span className="block truncate text-sm font-bold tracking-tight text-slate-900 dark:text-white">
+                        {t('common.layout.brand', 'SiteStore')}
+                    </span>
+                    <span className="block truncate text-[11px] font-medium text-slate-400">
+                        {t('common.brandDesc', 'Admin Console')}
+                    </span>
+                </span>
+            )}
+        </Link>
     );
+
+    const flashMessages = [
+        flash?.success && (
+            <Alert key="success" variant="success" onClose={() => setDismissedFlash(true)}>
+                {flash.success}
+            </Alert>
+        ),
+        flash?.error && (
+            <Alert key="error" variant="error" onClose={() => setDismissedFlash(true)}>
+                {flash.error}
+            </Alert>
+        ),
+        flash?.warning && (
+            <Alert key="warning" variant="warning" onClose={() => setDismissedFlash(true)}>
+                {flash.warning}
+            </Alert>
+        ),
+    ].filter(Boolean);
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
             <Head title={title} />
 
-            <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-900">
-                <div className="flex items-center gap-3">
-                    <button
-                        type="button"
-                        className="rounded-md p-2 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden"
-                        onClick={() => setMobileOpen(true)}
-                        aria-label="Open menu"
-                    >
-                        <MenuIcon className="h-5 w-5" />
-                    </button>
-                    <Link href={route('admin.dashboard')} className="flex items-center gap-3">
-                        <Globe className="h-5 w-5 text-indigo-600" />
-                        <span className="text-sm font-semibold">Admin</span>
-                    </Link>
-                </div>
+            <aside
+                className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-slate-200/70 bg-white/80 backdrop-blur-xl transition-[width] duration-200 dark:border-white/10 dark:bg-slate-950/80 lg:flex ${
+                    collapsed ? 'w-20' : 'w-64'
+                }`}
+            >
+                {brand}
+                <AdminSidebar
+                    menu={menu}
+                    base={base}
+                    currentPath={currentPath}
+                    collapsed={collapsed}
+                    onExpandRequest={() => setCollapsed(false)}
+                />
+            </aside>
 
-                <div className="flex items-center gap-4">
-                    <Link
-                        href="/profile"
-                        className="hidden text-sm text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 sm:inline"
-                    >
-                        {auth.user?.name}
-                    </Link>
-                    <button
-                        type="button"
-                        onClick={logout}
-                        className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-                    >
-                        <LogOut className="h-4 w-4" />
-                        <span className="hidden sm:inline">Logout</span>
-                    </button>
-                </div>
-            </header>
+            <div className={`transition-[padding] duration-200 ${collapsed ? 'lg:pl-20' : 'lg:pl-64'}`}>
+                <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-slate-200/70 bg-white/80 px-4 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/70 sm:px-6">
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
+                            onClick={() => setMobileOpen(true)}
+                            aria-label={t('common.topbar.openMenu', 'Open navigation menu')}
+                        >
+                            <MenuIcon className="h-5 w-5" />
+                        </button>
 
-            <div className="flex">
-                <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 lg:flex lg:flex-col">
-                    {sidebar}
-                </aside>
-
-                {mobileOpen && (
-                    <div className="fixed inset-0 z-50 flex lg:hidden">
-                        <div
-                            className="absolute inset-0 bg-slate-900/50"
-                            onClick={() => setMobileOpen(false)}
-                        />
-                        <aside className="relative flex w-64 flex-col bg-white dark:bg-slate-900">
-                            <div className="flex h-16 items-center justify-end px-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setMobileOpen(false)}
-                                    aria-label="Close menu"
-                                >
-                                    <X className="h-5 w-5" />
-                                </button>
-                            </div>
-                            {sidebar}
-                        </aside>
+                        <button
+                            type="button"
+                            className="hidden rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 lg:inline-flex"
+                            onClick={() => setCollapsed((previous) => !previous)}
+                            aria-label={t('common.shell.toggleSidebar', 'Toggle sidebar')}
+                        >
+                            {collapsed ? <ChevronsRight className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
+                        </button>
                     </div>
-                )}
 
-                <main className="min-h-[calc(100vh-4rem)] flex-1 p-4 sm:p-6 lg:p-8">
-                    {(flash?.success || flash?.error || flash?.warning) && (
-                        <div className="mb-6 space-y-2">
-                            {flash.success && (
-                                <div className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
-                                    {flash.success}
-                                </div>
-                            )}
-                            {flash.error && (
-                                <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-400">
-                                    {flash.error}
-                                </div>
-                            )}
-                            {flash.warning && (
-                                <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
-                                    {flash.warning}
-                                </div>
-                            )}
-                        </div>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <Link
+                            href="/"
+                            target="_blank"
+                            className="hidden items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 sm:inline-flex"
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                            {t('common.shell.viewSite', 'View site')}
+                        </Link>
+
+                        <ThemeToggle />
+
+                        <UserMenu user={auth.user} onLogout={logout} />
+                    </div>
+                </header>
+
+                <main className="mx-auto min-h-[calc(100vh-4rem)] w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+                    {!dismissedFlash && flashMessages.length > 0 && (
+                        <div className="mb-6 space-y-2">{flashMessages}</div>
                     )}
 
                     {children}
                 </main>
             </div>
+
+            {mobileOpen && (
+                <div className="fixed inset-0 z-50 flex lg:hidden">
+                    <div
+                        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                        onClick={closeMobile}
+                    />
+
+                    <aside className="relative flex w-72 flex-col bg-white dark:bg-slate-950">
+                        <div className="flex h-16 items-center justify-between px-4">
+                            <span className="flex items-center gap-2 text-sm font-bold tracking-tight">
+                                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 text-white">
+                                    <Sparkles className="h-4 w-4" />
+                                </span>
+                                {t('common.layout.brand', 'SiteStore')}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={closeMobile}
+                                aria-label={t('common.topbar.closeMenu', 'Close navigation menu')}
+                                className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <AdminSidebar menu={menu} base={base} currentPath={currentPath} onNavigate={closeMobile} />
+                    </aside>
+                </div>
+            )}
         </div>
     );
 }

@@ -1,9 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { router, usePage } from '@inertiajs/react';
-import { Menu as MenuIcon, Plus, Save, Trash2 } from 'lucide-react';import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import { Menu as MenuIcon, Plus, Save, Trash2 } from 'lucide-react';
+import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Checkbox from '@/components/ui/Checkbox';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import PageHeader from '@/components/ui/PageHeader';
+import Select from '@/components/ui/Select';
 import { useTranslation } from '@/hooks/useTranslation';
 import { route } from '@/lib/route';
 import type { SharedProps } from '@/types';
@@ -150,47 +155,43 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
         );
     };
 
-    const card = 'rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900';
-
     return (
         <AdminLayout title={title}>
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{title}</h1>
-                    <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                        {t('admin.menus.subtitle', 'Build the navigation menus used across your website.')}
-                    </p>
-                </div>
+            <PageHeader
+                title={title}
+                description={t('admin.menus.subtitle', 'Build the navigation menus used across your website.')}
+                actions={
+                    abilities.create && (
+                        <Button
+                            onClick={() => setIsCreating((value) => !value)}
+                            leftIcon={<Plus className="h-4 w-4" />}
+                        >
+                            {t('admin.menus.createNew', 'Create new menu')}
+                        </Button>
+                    )
+                }
+            />
 
-                {abilities.create && (
-                    <Button
-                        onClick={() => setIsCreating((value) => !value)}
-                        leftIcon={<Plus className="h-4 w-4" />}
-                    >
-                        {t('admin.menus.createNew', 'Create new menu')}
-                    </Button>
-                )}
-            </div>
-
-            <div className={`${card} mb-6`}>
+            <Card className="mb-6">
                 <div className="flex flex-wrap items-center gap-4 p-4">
                     {menus.length > 0 ? (
                         <>
                             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                 {t('admin.menus.selectMenu', 'Select a menu to edit:')}
                             </span>
-                            <select
-                                value={selectedId ?? ''}
-                                onChange={(event) => setSelectedId(event.target.value)}
-                                aria-label={t('admin.menus.selectMenu', 'Select a menu to edit:')}
-                                className="max-w-sm flex-1 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/[0.08] dark:bg-slate-900/60 dark:text-white"
-                            >
-                                {menus.map((menu) => (
-                                    <option key={menu.id} value={menu.id}>
-                                        {menu.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="min-w-[200px] max-w-sm flex-1">
+                                <Select
+                                    value={selectedId ?? ''}
+                                    onChange={(event) => setSelectedId(event.target.value)}
+                                    aria-label={t('admin.menus.selectMenu', 'Select a menu to edit:')}
+                                >
+                                    {menus.map((menu) => (
+                                        <option key={menu.id} value={menu.id}>
+                                            {menu.name}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </div>
                             <span className="text-sm text-slate-500">{t('admin.menus.or', 'or')}</span>
                             {abilities.create && (
                                 <button
@@ -209,10 +210,10 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
                         </div>
                     )}
                 </div>
-            </div>
+            </Card>
 
             {isCreating && (
-                <div className={`${card} mb-6`}>
+                <Card className="mb-6">
                     <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-4 p-4">
                         <div className="min-w-[220px] flex-1">
                             <Input
@@ -228,7 +229,7 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
                             {t('admin.menus.addMenu', 'Add menu')}
                         </Button>
                     </form>
-                </div>
+                </Card>
             )}
 
             {activeMenu && (
@@ -252,7 +253,7 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
                     </div>
 
                     <div className="lg:col-span-2">
-                        <div className={card}>
+                        <Card>
                             <div className="flex flex-wrap items-end gap-4 p-4">
                                 <div className="min-w-[220px] flex-1">
                                     <Input
@@ -274,41 +275,33 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
                                 )}
                             </div>
 
-                            <div className="border-t border-slate-200 px-4 py-3 text-sm font-semibold dark:border-slate-800">
+                            <div className="border-t border-slate-200 px-4 py-3 text-sm font-semibold dark:border-white/10">
                                 {t('admin.menus.structure', 'Menu structure')}
                             </div>
 
-                            <div className="border-t border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-white/[0.01]">
+                            <div className="border-t border-slate-100 bg-slate-50/50 p-4 dark:border-white/10 dark:bg-white/[0.01]">
                                 <MenuBuilder items={items} onChange={setItems} />
                             </div>
 
                             {locations.data.length > 0 && (
                                 <>
-                                    <div className="border-t border-slate-200 px-4 py-3 text-sm font-semibold dark:border-slate-800">
+                                    <div className="border-t border-slate-200 px-4 py-3 text-sm font-semibold dark:border-white/10">
                                         {t('admin.menus.settings', 'Menu settings')}
                                     </div>
-                                    <div className="space-y-2 border-t border-slate-100 p-4 dark:border-slate-800">
+                                    <div className="space-y-2 border-t border-slate-100 p-4 dark:border-white/10">
                                         {locations.data.map((location) => (
-                                            <label
+                                            <Checkbox
                                                 key={location.key}
-                                                className="flex cursor-pointer items-center gap-3"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedLocations.includes(location.key)}
-                                                    onChange={() => toggleLocation(location.key)}
-                                                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                                />
-                                                <span className="text-sm text-slate-700 dark:text-slate-200">
-                                                    {location.label}
-                                                </span>
-                                            </label>
+                                                checked={selectedLocations.includes(location.key)}
+                                                onChange={() => toggleLocation(location.key)}
+                                                label={location.label}
+                                            />
                                         ))}
                                     </div>
                                 </>
                             )}
 
-                            <div className="flex items-center justify-between border-t border-slate-200 p-4 dark:border-slate-800">
+                            <div className="flex items-center justify-between border-t border-slate-200 p-4 dark:border-white/10">
                                 {abilities.delete ? (
                                     <Button
                                         variant="ghost"
@@ -332,7 +325,7 @@ export default function Menus({ title, menus, boxes, locations, abilities, selec
                                     </Button>
                                 )}
                             </div>
-                        </div>
+                        </Card>
                     </div>
                 </div>
             )}

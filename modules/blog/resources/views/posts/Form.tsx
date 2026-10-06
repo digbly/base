@@ -3,6 +3,7 @@ import { Link, router } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 import PostForm from '../components/PostForm';
@@ -61,7 +62,7 @@ export default function PostFormPage({ title, post, categories }: PostFormPagePr
                 </div>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <Card className="p-5">
                 <PostForm
                     post={post}
                     categories={categories}
@@ -70,7 +71,7 @@ export default function PostFormPage({ title, post, categories }: PostFormPagePr
                     onSubmit={submit}
                     onCancel={() => router.visit(backUrl)}
                 />
-            </div>
+            </Card>
         </AdminLayout>
     );
 }

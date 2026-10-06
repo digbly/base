@@ -4,8 +4,12 @@ import { useForm } from 'react-hook-form';
 import { Copy, ExternalLink, FileText, FolderOpen, Image as ImageIcon, Search, Trash2, UploadCloud } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import EmptyState from '@/components/ui/EmptyState';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
 import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -54,8 +58,6 @@ interface DetailsForm {
 }
 
 type TypeFilter = 'all' | 'image' | 'document';
-
-const pageLabel = (label: string): string => label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
 
 export default function Media({ title, items, filters, abilities }: MediaProps) {
     const { t } = useTranslation();
@@ -160,12 +162,10 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
 
     return (
         <AdminLayout title={title}>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold">{title}</h1>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {t('admin.media.subtitle', 'Upload, organise and reuse images and documents.')}
-                </p>
-            </div>
+            <PageHeader
+                title={title}
+                description={t('admin.media.subtitle', 'Upload, organise and reuse images and documents.')}
+            />
 
             {abilities.create && (
                 <div
@@ -207,16 +207,16 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
             )}
 
             <div className="mb-4 flex flex-wrap items-center gap-3">
-                <div className="flex gap-1 rounded-lg border border-slate-200 p-1 dark:border-slate-700">
+                <div className="flex gap-1 rounded-xl border border-slate-200 p-1 dark:border-white/10">
                     {tabs.map(({ key, label, Icon }) => (
                         <button
                             key={key}
                             type="button"
                             onClick={() => applyFilters({ type: key })}
-                            className={`inline-flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium ${
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                                 (filters.type ?? 'all') === key
-                                    ? 'bg-indigo-600 text-white'
-                                    : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                    ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                                    : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
                             }`}
                         >
                             <Icon className="h-3.5 w-3.5" />
@@ -238,21 +238,25 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
                         type="month"
                         value={filters.month ?? ''}
                         onChange={(event) => applyFilters({ month: event.target.value })}
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                        className="rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/[0.08] dark:bg-slate-900/60 dark:text-white"
                     />
                 </form>
             </div>
 
             {items.data.length === 0 ? (
-                <p className="py-16 text-center text-sm text-slate-500">
-                    {t('admin.media.empty', 'No media found.')}
-                </p>
+                <Card>
+                    <EmptyState
+                        icon={FolderOpen}
+                        title={t('admin.media.empty', 'No media found.')}
+                        description={t('admin.media.emptyHint', 'Upload files or adjust your filters.')}
+                    />
+                </Card>
             ) : (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                     {items.data.map((item) => (
                         <div
                             key={item.id}
-                            className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                            className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 transition hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-slate-900/60 dark:shadow-black/20"
                         >
                             <button
                                 type="button"
@@ -263,24 +267,26 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
                                     <img
                                         src={item.thumb_url ?? item.url}
                                         alt={item.alt ?? item.title ?? ''}
-                                        className="h-full w-full object-cover"
+                                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                     />
                                 ) : (
                                     <FileText className="h-8 w-8 text-slate-400" />
                                 )}
                             </button>
 
-                            <div className="flex items-center justify-between gap-2 p-2">
+                            <div className="flex items-center justify-between gap-2 p-2.5">
                                 <div className="min-w-0">
-                                    <p className="truncate text-xs font-medium">{item.title ?? item.file_name}</p>
+                                    <p className="truncate text-xs font-medium text-slate-700 dark:text-slate-200">
+                                        {item.title ?? item.file_name}
+                                    </p>
                                     <p className="text-[10px] text-slate-400">{item.size_formatted}</p>
                                 </div>
-                                <div className="flex shrink-0 gap-1">
+                                <div className="flex shrink-0 gap-0.5">
                                     <button
                                         type="button"
                                         title={t('admin.media.details.copyUrl', 'Copy URL')}
                                         onClick={() => copyUrl(item)}
-                                        className="rounded p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                        className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800"
                                     >
                                         <Copy className="h-3.5 w-3.5" />
                                     </button>
@@ -289,7 +295,7 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
                                             type="button"
                                             title={t('admin.media.details.delete', 'Delete')}
                                             onClick={() => setDeleteTarget(item)}
-                                            className="rounded p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                                            className="rounded-lg p-1.5 text-rose-500 transition hover:bg-rose-50 dark:hover:bg-rose-500/10"
                                         >
                                             <Trash2 className="h-3.5 w-3.5" />
                                         </button>
@@ -301,30 +307,7 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
                 </div>
             )}
 
-            {items.meta.last_page > 1 && (
-                <div className="mt-6 flex justify-center gap-1">
-                    {items.links.map((link, index) =>
-                        link.url ? (
-                            <button
-                                key={index}
-                                type="button"
-                                onClick={() => router.get(link.url!, {}, { preserveState: true })}
-                                className={`rounded-md px-3 py-1.5 text-xs ${
-                                    link.active
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300'
-                                }`}
-                            >
-                                {pageLabel(link.label)}
-                            </button>
-                        ) : (
-                            <span key={index} className="rounded-md px-3 py-1.5 text-xs text-slate-400">
-                                {pageLabel(link.label)}
-                            </span>
-                        )
-                    )}
-                </div>
-            )}
+            <Pagination links={items.links} lastPage={items.meta.last_page} className="mt-6" />
 
             <Modal
                 open={detail !== null}
@@ -334,7 +317,7 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
                 {detail && (
                     <div className="grid gap-5 sm:grid-cols-2">
                         <div className="space-y-3">
-                            <div className="flex min-h-[160px] items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/60">
+                            <div className="flex min-h-[160px] items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-slate-800/60">
                                 {detail.is_image && detail.url ? (
                                     <img src={detail.url} alt={detail.alt ?? ''} className="max-h-60 object-contain" />
                                 ) : detail.url ? (

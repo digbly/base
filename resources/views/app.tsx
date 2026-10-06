@@ -1,6 +1,7 @@
 import '../css/app.css';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
+import { ThemeProvider } from './components/ThemeProvider';
 import { resolvePage } from './lib/inertia-pages';
 import './lib/route';
 
@@ -17,6 +18,10 @@ createInertiaApp({
 
         window.__routes = routes ?? {};
 
-        createRoot(el).render(<App {...props} />);
+        createRoot(el).render(
+            <ThemeProvider>
+                <App {...props} />
+            </ThemeProvider>
+        );
     },
 });

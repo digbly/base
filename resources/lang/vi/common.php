@@ -41,6 +41,16 @@ return [
         'admin' => 'Quản trị',
         'user' => 'Người dùng',
     ],
+    'shell' => [
+        'toggleSidebar' => 'Thu gọn thanh bên',
+        'viewSite' => 'Xem trang',
+    ],
+    'theme' => [
+        'dark' => 'Tối',
+        'light' => 'Sáng',
+        'system' => 'Hệ thống',
+        'toggle' => 'Đổi giao diện',
+    ],
     'topbar' => [
         'closeMenu' => 'Đóng menu điều hướng',
         'openMenu' => 'Mở menu điều hướng',

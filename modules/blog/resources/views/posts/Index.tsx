@@ -2,13 +2,16 @@ import { useState, type FormEvent } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Loader2, Newspaper, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import Input from '@/components/ui/Input';
+import PageHeader from '@/components/ui/PageHeader';
+import Select from '@/components/ui/Select';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { SharedProps } from '@/types';
-import Badge from '@/components/ui/Badge';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Pagination from '../components/Pagination';
 import type { AdminPost, BlogAbilities, Paginated } from '../types';
@@ -79,22 +82,19 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
 
     return (
         <AdminLayout title={title}>
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                    <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                        {t('blog.posts.subtitle', 'Write, publish and organise your articles.')}
-                    </p>
-                </div>
-
-                {abilities.create && (
-                    <Link href={route('admin.blog.posts.create')}>
-                        <Button leftIcon={<Plus className="h-4 w-4" />}>
-                            {t('blog.posts.add', 'Add post')}
-                        </Button>
-                    </Link>
-                )}
-            </div>
+            <PageHeader
+                title={title}
+                description={t('blog.posts.subtitle', 'Write, publish and organise your articles.')}
+                actions={
+                    abilities.create && (
+                        <Link href={route('admin.blog.posts.create')}>
+                            <Button leftIcon={<Plus className="h-4 w-4" />}>
+                                {t('blog.posts.add', 'Add post')}
+                            </Button>
+                        </Link>
+                    )
+                }
+            />
 
             {error && (
                 <div className="mb-4">
@@ -102,7 +102,7 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
                 </div>
             )}
 
-            <form onSubmit={onSearch} className="mb-4 flex flex-wrap gap-3">
+            <form onSubmit={onSearch} className="mb-4 flex flex-wrap items-center gap-3">
                 <div className="min-w-[200px] flex-1">
                     <Input
                         placeholder={t('blog.posts.searchPlaceholder', 'Search posts')}
@@ -112,28 +112,29 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
                     />
                 </div>
 
-                <select
-                    value={status}
-                    onChange={(event) => {
-                        setStatus(event.target.value);
-                        applyFilters({ status: event.target.value });
-                    }}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                >
-                    <option value="">{t('blog.posts.filters.allStatuses', 'All statuses')}</option>
-                    <option value="draft">{t('blog.posts.filters.draft', 'Draft')}</option>
-                    <option value="published">{t('blog.posts.filters.published', 'Published')}</option>
-                </select>
+                <div className="w-full sm:w-48">
+                    <Select
+                        value={status}
+                        onChange={(event) => {
+                            setStatus(event.target.value);
+                            applyFilters({ status: event.target.value });
+                        }}
+                    >
+                        <option value="">{t('blog.posts.filters.allStatuses', 'All statuses')}</option>
+                        <option value="draft">{t('blog.posts.filters.draft', 'Draft')}</option>
+                        <option value="published">{t('blog.posts.filters.published', 'Published')}</option>
+                    </Select>
+                </div>
 
                 <Button type="submit" variant="secondary">
                     {t('blog.posts.filters.search', 'Search')}
                 </Button>
             </form>
 
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/60 dark:shadow-black/20">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-left text-sm">
-                        <thead className="border-b border-slate-200 text-xs uppercase text-slate-500 dark:border-slate-800">
+                        <thead className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-400">
                             <tr>
                                 <th className="px-6 py-3 font-semibold">{t('blog.posts.table.post', 'Post')}</th>
                                 <th className="px-6 py-3 font-semibold">{t('blog.posts.table.status', 'Status')}</th>
@@ -146,14 +147,15 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                             {posts.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                            <Newspaper className="h-6 w-6 text-slate-400" />
-                                            <span>{t('blog.posts.empty', 'No posts match your filters.')}</span>
-                                        </div>
+                                    <td colSpan={5}>
+                                        <EmptyState
+                                            icon={Newspaper}
+                                            title={t('blog.posts.empty', 'No posts match your filters.')}
+                                            description={t('blog.posts.emptyHint', 'Try a different search or status filter.')}
+                                        />
                                     </td>
                                 </tr>
                             )}

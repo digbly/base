@@ -2,13 +2,16 @@ import { useState, type FormEvent } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { Check, MessageSquare, Search, ShieldAlert, Trash2, X } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import Input from '@/components/ui/Input';
+import PageHeader from '@/components/ui/PageHeader';
+import Select from '@/components/ui/Select';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { SharedProps } from '@/types';
-import Badge from '@/components/ui/Badge';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Pagination from '../components/Pagination';
 import type { AdminComment, BlogAbilities, CommentStatus, Paginated } from '../types';
@@ -102,12 +105,10 @@ export default function Comments({ title, comments, filters, abilities }: Commen
 
     return (
         <AdminLayout title={title}>
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                    {t('blog.comments.subtitle', 'Moderate the conversation on your posts.')}
-                </p>
-            </div>
+            <PageHeader
+                title={title}
+                description={t('blog.comments.subtitle', 'Moderate the conversation on your posts.')}
+            />
 
             {error && (
                 <div className="mb-4">
@@ -115,7 +116,7 @@ export default function Comments({ title, comments, filters, abilities }: Commen
                 </div>
             )}
 
-            <form onSubmit={onSearch} className="mb-4 flex flex-wrap gap-3">
+            <form onSubmit={onSearch} className="mb-4 flex flex-wrap items-center gap-3">
                 <div className="min-w-[200px] flex-1">
                     <Input
                         placeholder={t('blog.comments.searchPlaceholder', 'Search comments')}
@@ -125,30 +126,31 @@ export default function Comments({ title, comments, filters, abilities }: Commen
                     />
                 </div>
 
-                <select
-                    value={status}
-                    onChange={(event) => {
-                        setStatus(event.target.value);
-                        applyFilters({ status: event.target.value });
-                    }}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                >
-                    <option value="">{t('blog.comments.filters.allStatuses', 'All statuses')}</option>
-                    <option value="pending">{t('blog.comments.filters.pending', 'Pending')}</option>
-                    <option value="approved">{t('blog.comments.filters.approved', 'Approved')}</option>
-                    <option value="spam">{t('blog.comments.filters.spam', 'Spam')}</option>
-                    <option value="rejected">{t('blog.comments.filters.rejected', 'Rejected')}</option>
-                </select>
+                <div className="w-full sm:w-48">
+                    <Select
+                        value={status}
+                        onChange={(event) => {
+                            setStatus(event.target.value);
+                            applyFilters({ status: event.target.value });
+                        }}
+                    >
+                        <option value="">{t('blog.comments.filters.allStatuses', 'All statuses')}</option>
+                        <option value="pending">{t('blog.comments.filters.pending', 'Pending')}</option>
+                        <option value="approved">{t('blog.comments.filters.approved', 'Approved')}</option>
+                        <option value="spam">{t('blog.comments.filters.spam', 'Spam')}</option>
+                        <option value="rejected">{t('blog.comments.filters.rejected', 'Rejected')}</option>
+                    </Select>
+                </div>
 
                 <Button type="submit" variant="secondary">
                     {t('blog.comments.filters.search', 'Search')}
                 </Button>
             </form>
 
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/60 dark:shadow-black/20">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-left text-sm">
-                        <thead className="border-b border-slate-200 text-xs uppercase text-slate-500 dark:border-slate-800">
+                        <thead className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-400">
                             <tr>
                                 <th className="px-6 py-3 font-semibold">{t('blog.comments.table.author', 'Author')}</th>
                                 <th className="px-6 py-3 font-semibold">{t('blog.comments.table.comment', 'Comment')}</th>
@@ -159,14 +161,15 @@ export default function Comments({ title, comments, filters, abilities }: Commen
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                             {comments.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                            <MessageSquare className="h-6 w-6 text-slate-400" />
-                                            <span>{t('blog.comments.empty', 'No comments match your filters.')}</span>
-                                        </div>
+                                    <td colSpan={5}>
+                                        <EmptyState
+                                            icon={MessageSquare}
+                                            title={t('blog.comments.empty', 'No comments match your filters.')}
+                                            description={t('blog.comments.emptyHint', 'New comments will appear here for moderation.')}
+                                        />
                                     </td>
                                 </tr>
                             )}

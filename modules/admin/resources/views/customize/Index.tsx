@@ -13,6 +13,7 @@ import {
     X,
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useTranslation } from '@/hooks/useTranslation';
 import { route } from '@/lib/route';
 import type { SharedProps } from '@/types';
@@ -223,10 +224,10 @@ export default function Customize({
     };
 
     return (
-        <div className="flex h-screen overflow-hidden bg-slate-100 text-slate-800 dark:bg-[#090D16] dark:text-slate-100">
+        <div className="flex h-screen overflow-hidden bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
             <Head title={documentTitle} />
 
-            <aside className="flex h-full w-full flex-col border-r border-slate-200 bg-white dark:border-white/[0.08] dark:bg-[#0F1626] lg:w-[330px] lg:min-w-[300px]">
+            <aside className="flex h-full w-full flex-col border-r border-slate-200 bg-white dark:border-white/[0.08] dark:bg-slate-900 lg:w-[330px] lg:min-w-[300px]">
                 <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/[0.08]">
                     <div className="flex min-w-0 items-center gap-2">
                         <a
@@ -244,11 +245,14 @@ export default function Customize({
                         </div>
                     </div>
 
-                    {abilities.update && (
-                        <Button size="sm" onClick={handleSave} isLoading={isSaving}>
-                            {t('admin.customize.publish', 'Publish')}
-                        </Button>
-                    )}
+                    <div className="flex shrink-0 items-center gap-2">
+                        <ThemeToggle />
+                        {abilities.update && (
+                            <Button size="sm" onClick={handleSave} isLoading={isSaving}>
+                                {t('admin.customize.publish', 'Publish')}
+                            </Button>
+                        )}
+                    </div>
                 </header>
 
                 {view !== 'main' && (
@@ -366,7 +370,7 @@ export default function Customize({
             </aside>
 
             <section className="hidden h-full flex-1 flex-col lg:flex">
-                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 dark:border-white/[0.08] dark:bg-[#0F1626]">
+                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 dark:border-white/[0.08] dark:bg-slate-900">
                     <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         {t('admin.customize.livePreview', 'Live preview')}
                     </span>

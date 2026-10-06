@@ -41,6 +41,16 @@ return [
         'admin' => 'Admin',
         'user' => 'User',
     ],
+    'shell' => [
+        'toggleSidebar' => 'Toggle sidebar',
+        'viewSite' => 'View site',
+    ],
+    'theme' => [
+        'dark' => 'Dark',
+        'light' => 'Light',
+        'system' => 'System',
+        'toggle' => 'Toggle theme',
+    ],
     'topbar' => [
         'closeMenu' => 'Close navigation menu',
         'openMenu' => 'Open navigation menu',

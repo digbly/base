@@ -79,7 +79,7 @@ function SortableWidgetCard({
         <div
             ref={setNodeRef}
             style={{ transform: CSS.Transform.toString(transform), transition }}
-            className={`rounded-xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-[#0F1626] ${
+            className={`rounded-xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-slate-900 ${
                 isDragging ? 'opacity-60' : ''
             }`}
         >
@@ -262,13 +262,13 @@ export default function WidgetsEditor({
         );
     };
 
-    const card = 'rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900';
+    const card = 'rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-900';
 
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-1">
                 <div className={card}>
-                    <div className="border-b border-slate-200 px-4 py-3 text-sm font-semibold dark:border-slate-800">
+                    <div className="border-b border-slate-200 px-4 py-3 text-sm font-semibold dark:border-white/10">
                         {t('admin.widgets.availableWidgets', 'Available widgets')}
                     </div>
                     <div className="space-y-3 p-4">
@@ -345,7 +345,7 @@ export default function WidgetsEditor({
 
                     return (
                         <div key={sidebar.key} className={card}>
-                            <div className="border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+                            <div className="border-b border-slate-200 px-4 py-3 dark:border-white/10">
                                 <div className="text-sm font-semibold">{sidebar.label}</div>
                                 {sidebar.description && (
                                     <div className="text-xs text-slate-500 dark:text-slate-400">

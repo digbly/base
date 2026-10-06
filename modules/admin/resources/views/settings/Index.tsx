@@ -3,7 +3,10 @@ import { useForm } from 'react-hook-form';
 import { Globe, Save } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
+import Checkbox from '@/components/ui/Checkbox';
 import Input from '@/components/ui/Input';
+import PageHeader from '@/components/ui/PageHeader';
 import MediaField from '../components/MediaField';
 import type { MediaItemSummary } from '../components/MediaPickerModal';
 import { submitForm } from '@/lib/inertia-form';
@@ -81,25 +84,28 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
 
     return (
         <AdminLayout title={title}>
-            <h1 className="mb-6 text-2xl font-bold">{title}</h1>
+            <PageHeader
+                title={title}
+                description={t('admin.settings.subtitle', 'Configure your site identity, branding and account options.')}
+            />
 
             <form onSubmit={onSubmit} className="max-w-3xl space-y-6">
-                <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <Card className="p-6">
                     <div className="mb-4 flex items-center justify-between">
-                        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                             <Globe className="h-4 w-4" />
                             {t('admin.settings.general.title', 'General')}
                         </h2>
-                        <div className="flex gap-1 rounded-lg border border-slate-200 p-1 dark:border-slate-700">
+                        <div className="flex gap-1 rounded-xl border border-slate-200 p-1 dark:border-white/10">
                             {locales.map((locale) => (
                                 <button
                                     key={locale}
                                     type="button"
                                     onClick={() => setActiveLocale(locale)}
-                                    className={`rounded px-3 py-1 text-xs font-medium uppercase ${
+                                    className={`rounded-lg px-3 py-1 text-xs font-medium uppercase transition ${
                                         activeLocale === locale
-                                            ? 'bg-indigo-600 text-white'
-                                            : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                            ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                                            : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
                                     }`}
                                 >
                                     {locale}
@@ -121,7 +127,7 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
                             </label>
                             <textarea
                                 rows={3}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-2.5 text-sm dark:border-white/[0.08] dark:bg-slate-900/60"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-2.5 text-sm text-slate-900 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-white/[0.08] dark:bg-slate-900/60 dark:text-white"
                                 {...register(`description.${activeLocale}` as const, { maxLength: 500 })}
                             />
                         </div>
@@ -132,10 +138,10 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
                             {...register('sitename', { maxLength: 120 })}
                         />
                     </div>
-                </section>
+                </Card>
 
-                <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                <Card className="p-6">
+                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         {t('admin.settings.branding.title', 'Branding')}
                     </h2>
 
@@ -150,33 +156,25 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
                             />
                         ))}
                     </div>
-                </section>
+                </Card>
 
-                <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+                <Card className="p-6">
+                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                         {t('admin.settings.users.title', 'Users')}
                     </h2>
 
                     <div className="space-y-3">
-                        <label className="flex items-center gap-3 text-sm">
-                            <input
-                                type="checkbox"
-                                className="h-4 w-4 rounded border-slate-300 text-indigo-600"
-                                {...register('user_registration')}
-                            />
-                            {t('admin.settings.fields.userRegistration', 'Allow user registration')}
-                        </label>
+                        <Checkbox
+                            label={t('admin.settings.fields.userRegistration', 'Allow user registration')}
+                            {...register('user_registration')}
+                        />
 
-                        <label className="flex items-center gap-3 text-sm">
-                            <input
-                                type="checkbox"
-                                className="h-4 w-4 rounded border-slate-300 text-indigo-600"
-                                {...register('user_verification')}
-                            />
-                            {t('admin.settings.fields.userVerification', 'Require email verification')}
-                        </label>
+                        <Checkbox
+                            label={t('admin.settings.fields.userVerification', 'Require email verification')}
+                            {...register('user_verification')}
+                        />
                     </div>
-                </section>
+                </Card>
 
                 <Button type="submit" isLoading={isSubmitting} leftIcon={<Save className="h-4 w-4" />}>
                     {t('admin.settings.save', 'Save settings')}

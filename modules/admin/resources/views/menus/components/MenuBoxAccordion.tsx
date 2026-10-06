@@ -108,7 +108,7 @@ export default function MenuBoxAccordion({ box, onAddItems }: MenuBoxAccordionPr
     };
 
     return (
-        <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-white/[0.07] dark:bg-[#0F1626]">
+        <div className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-white/[0.07] dark:bg-slate-900">
             <button
                 type="button"
                 onClick={() => setIsOpen((value) => !value)}

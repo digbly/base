@@ -1,11 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { Link, router } from '@inertiajs/react';
 import { useForm } from 'react-hook-form';
-import { KeyRound, Pencil, Plus, RotateCcw, Send, Trash2 } from 'lucide-react';
+import { KeyRound, Pencil, Plus, RotateCcw, Send, Trash2, Users as UsersIcon } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
+import Select from '@/components/ui/Select';
+import TableCard from '@/components/ui/TableCard';
 import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
 import { MIN_PASSWORD_LENGTH } from '@/lib/validation';
@@ -45,8 +51,8 @@ interface ResetPasswordForm {
     password_confirmation: string;
 }
 
-/** Decode the two HTML entities Laravel ships in pagination labels. */
-const pageLabel = (label: string): string => label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
+const actionButton =
+    'rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800';
 
 export default function Users({ title, users, filters, roles }: UsersProps) {
     const { t } = useTranslation();
@@ -84,18 +90,14 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
             return;
         }
 
-        return submitForm(
-            route('admin.users.password', { user: resetTarget.id }),
-            data,
-            {
-                method: 'put',
-                setError: resetForm.setError,
-                onSuccess: () => {
-                    resetForm.reset();
-                    setResetTarget(null);
-                },
-            }
-        );
+        return submitForm(route('admin.users.password', { user: resetTarget.id }), data, {
+            method: 'put',
+            setError: resetForm.setError,
+            onSuccess: () => {
+                resetForm.reset();
+                setResetTarget(null);
+            },
+        });
     });
 
     const confirmDelete = () => {
@@ -111,15 +113,20 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
 
     return (
         <AdminLayout title={title}>
-            <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-2xl font-bold">{title}</h1>
-                <Link href={route('admin.users.create')}>
-                    <Button leftIcon={<Plus className="h-4 w-4" />}>{t('admin.users.addUser', 'Add user')}</Button>
-                </Link>
-            </div>
+            <PageHeader
+                title={title}
+                description={t('admin.users.subtitle', 'Manage accounts, roles and access.')}
+                actions={
+                    <Link href={route('admin.users.create')}>
+                        <Button leftIcon={<Plus className="h-4 w-4" />}>
+                            {t('admin.users.addUser', 'Add user')}
+                        </Button>
+                    </Link>
+                }
+            />
 
-            <form onSubmit={onSearch} className="mb-4 flex flex-wrap gap-3">
-                <div className="flex-1 min-w-[200px]">
+            <form onSubmit={onSearch} className="mb-4 flex flex-wrap items-center gap-3">
+                <div className="min-w-[200px] flex-1">
                     <Input
                         placeholder={t('admin.users.searchPlaceholder', 'Search users...')}
                         value={search}
@@ -127,188 +134,157 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
                     />
                 </div>
 
-                <select
-                    value={filters.role ?? ''}
-                    onChange={(event) => applyFilters({ role: event.target.value })}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                >
-                    <option value="">{t('admin.users.filters.allRoles', 'All roles')}</option>
-                    {roles.map((role) => (
-                        <option key={role} value={role}>
-                            {role}
-                        </option>
-                    ))}
-                </select>
+                <div className="w-full sm:w-48">
+                    <Select value={filters.role ?? ''} onChange={(event) => applyFilters({ role: event.target.value })}>
+                        <option value="">{t('admin.users.filters.allRoles', 'All roles')}</option>
+                        {roles.map((role) => (
+                            <option key={role} value={role}>
+                                {role}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
 
-                <select
-                    value={filters.trashed ?? ''}
-                    onChange={(event) => applyFilters({ trashed: event.target.value })}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                >
-                    <option value="">{t('admin.users.filters.active', 'Active')}</option>
-                    <option value="with">{t('admin.users.filters.withTrashed', 'With trashed')}</option>
-                    <option value="only">{t('admin.users.filters.onlyTrashed', 'Trashed only')}</option>
-                </select>
+                <div className="w-full sm:w-48">
+                    <Select
+                        value={filters.trashed ?? ''}
+                        onChange={(event) => applyFilters({ trashed: event.target.value })}
+                    >
+                        <option value="">{t('admin.users.filters.active', 'Active')}</option>
+                        <option value="with">{t('admin.users.filters.withTrashed', 'With trashed')}</option>
+                        <option value="only">{t('admin.users.filters.onlyTrashed', 'Trashed only')}</option>
+                    </Select>
+                </div>
 
                 <Button type="submit" variant="secondary">
                     {t('admin.users.filters.search', 'Search')}
                 </Button>
             </form>
 
-            <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <table className="w-full text-left text-sm">
-                    <thead className="border-b border-slate-200 text-xs uppercase text-slate-500 dark:border-slate-800">
-                        <tr>
-                            <th className="px-4 py-3">{t('admin.users.table.name', 'Name')}</th>
-                            <th className="px-4 py-3">{t('admin.users.table.roles', 'Roles')}</th>
-                            <th className="px-4 py-3">{t('admin.users.table.status', 'Status')}</th>
-                            <th className="px-4 py-3 text-right">{t('admin.users.table.actions', 'Actions')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.data.length === 0 && (
-                            <tr>
-                                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
-                                    {t('admin.users.empty', 'No users found.')}
-                                </td>
-                            </tr>
-                        )}
+            <TableCard
+                head={
+                    <tr>
+                        <th className="px-4 py-3">{t('admin.users.table.name', 'Name')}</th>
+                        <th className="px-4 py-3">{t('admin.users.table.roles', 'Roles')}</th>
+                        <th className="px-4 py-3">{t('admin.users.table.status', 'Status')}</th>
+                        <th className="px-4 py-3 text-right">{t('admin.users.table.actions', 'Actions')}</th>
+                    </tr>
+                }
+            >
+                {users.data.length === 0 && (
+                    <tr>
+                        <td colSpan={4}>
+                            <EmptyState
+                                icon={UsersIcon}
+                                title={t('admin.users.empty', 'No users found.')}
+                                description={t('admin.users.emptyHint', 'Try adjusting your search or filters.')}
+                            />
+                        </td>
+                    </tr>
+                )}
 
-                        {users.data.map((user) => (
-                            <tr
-                                key={user.id}
-                                className="border-b border-slate-100 last:border-0 dark:border-slate-800/60"
-                            >
-                                <td className="px-4 py-3">
-                                    <div className="font-medium">{user.name}</div>
-                                    <div className="text-xs text-slate-500">{user.email}</div>
-                                </td>
-                                <td className="px-4 py-3">
-                                    <div className="flex flex-wrap gap-1">
-                                        {user.is_super_admin && (
-                                            <span className="rounded bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-600 dark:text-indigo-400">
-                                                {t('admin.users.table.superAdmin', 'Super admin')}
-                                            </span>
-                                        )}
-                                        {user.roles.map((role) => (
-                                            <span
-                                                key={role}
-                                                className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                                            >
-                                                {role}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </td>
-                                <td className="px-4 py-3">
-                                    {user.deleted_at ? (
-                                        <span className="text-xs text-rose-500">
-                                            {t('admin.users.status.deleted', 'Deleted')}
-                                        </span>
-                                    ) : user.email_verified_at ? (
-                                        <span className="text-xs text-emerald-600">
-                                            {t('admin.users.status.verified', 'Verified')}
-                                        </span>
-                                    ) : (
-                                        <span className="text-xs text-amber-600">
-                                            {t('admin.users.status.unverified', 'Unverified')}
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="px-4 py-3">
-                                    <div className="flex justify-end gap-1">
-                                        {user.deleted_at ? (
+                {users.data.map((user) => (
+                    <tr key={user.id} className="transition hover:bg-slate-50/70 dark:hover:bg-white/[0.03]">
+                        <td className="px-4 py-3">
+                            <div className="font-medium text-slate-800 dark:text-slate-100">{user.name}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">{user.email}</div>
+                        </td>
+                        <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1.5">
+                                {user.is_super_admin && (
+                                    <Badge variant="violet" size="sm">
+                                        {t('admin.users.table.superAdmin', 'Super admin')}
+                                    </Badge>
+                                )}
+                                {user.roles.map((role) => (
+                                    <Badge key={role} variant="slate" size="sm">
+                                        {role}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </td>
+                        <td className="px-4 py-3">
+                            {user.deleted_at ? (
+                                <Badge variant="rose" dot size="sm">
+                                    {t('admin.users.status.deleted', 'Deleted')}
+                                </Badge>
+                            ) : user.email_verified_at ? (
+                                <Badge variant="emerald" dot size="sm">
+                                    {t('admin.users.status.verified', 'Verified')}
+                                </Badge>
+                            ) : (
+                                <Badge variant="amber" dot size="sm">
+                                    {t('admin.users.status.unverified', 'Unverified')}
+                                </Badge>
+                            )}
+                        </td>
+                        <td className="px-4 py-3">
+                            <div className="flex justify-end gap-0.5">
+                                {user.deleted_at ? (
+                                    <button
+                                        type="button"
+                                        title={t('admin.users.actions.restore', 'Restore')}
+                                        onClick={() =>
+                                            router.post(
+                                                route('admin.users.restore', { user: user.id }),
+                                                {},
+                                                { preserveScroll: true }
+                                            )
+                                        }
+                                        className={actionButton}
+                                    >
+                                        <RotateCcw className="h-4 w-4" />
+                                    </button>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href={route('admin.users.edit', { user: user.id })}
+                                            title={t('admin.users.actions.edit', 'Edit')}
+                                            className={actionButton}
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            title={t('admin.users.actions.resetPassword', 'Reset password')}
+                                            onClick={() => setResetTarget(user)}
+                                            className={actionButton}
+                                        >
+                                            <KeyRound className="h-4 w-4" />
+                                        </button>
+                                        {!user.email_verified_at && (
                                             <button
                                                 type="button"
-                                                title={t('admin.users.actions.restore', 'Restore')}
+                                                title={t('admin.users.actions.resendVerification', 'Resend verification')}
                                                 onClick={() =>
                                                     router.post(
-                                                        route('admin.users.restore', { user: user.id }),
+                                                        route('admin.users.resend-verification', { user: user.id }),
                                                         {},
                                                         { preserveScroll: true }
                                                     )
                                                 }
-                                                className="rounded p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                className={actionButton}
                                             >
-                                                <RotateCcw className="h-4 w-4" />
+                                                <Send className="h-4 w-4" />
                                             </button>
-                                        ) : (
-                                            <>
-                                                <Link
-                                                    href={route('admin.users.edit', { user: user.id })}
-                                                    title={t('admin.users.actions.edit', 'Edit')}
-                                                    className="rounded p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Link>
-                                                <button
-                                                    type="button"
-                                                    title={t('admin.users.actions.resetPassword', 'Reset password')}
-                                                    onClick={() => setResetTarget(user)}
-                                                    className="rounded p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                >
-                                                    <KeyRound className="h-4 w-4" />
-                                                </button>
-                                                {!user.email_verified_at && (
-                                                    <button
-                                                        type="button"
-                                                        title={t('admin.users.actions.resendVerification', 'Resend verification')}
-                                                        onClick={() =>
-                                                            router.post(
-                                                                route('admin.users.resend-verification', {
-                                                                    user: user.id,
-                                                                }),
-                                                                {},
-                                                                { preserveScroll: true }
-                                                            )
-                                                        }
-                                                        className="rounded p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                                    >
-                                                        <Send className="h-4 w-4" />
-                                                    </button>
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    title={t('admin.users.actions.delete', 'Delete')}
-                                                    onClick={() => setDeleteTarget(user)}
-                                                    className="rounded p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            </>
                                         )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                                        <button
+                                            type="button"
+                                            title={t('admin.users.actions.delete', 'Delete')}
+                                            onClick={() => setDeleteTarget(user)}
+                                            className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </TableCard>
 
-            {users.meta.last_page > 1 && (
-                <div className="mt-4 flex justify-center gap-1">
-                    {users.links.map((link, index) =>
-                        link.url ? (
-                            <button
-                                key={index}
-                                type="button"
-                                onClick={() => router.get(link.url!, {}, { preserveState: true })}
-                                className={`rounded-md px-3 py-1.5 text-xs ${
-                                    link.active
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300'
-                                }`}
-                            >
-                                {pageLabel(link.label)}
-                            </button>
-                        ) : (
-                            <span key={index} className="rounded-md px-3 py-1.5 text-xs text-slate-400">
-                                {pageLabel(link.label)}
-                            </span>
-                        )
-                    )}
-                </div>
-            )}
+            <Pagination links={users.links} lastPage={users.meta.last_page} />
 
             <Modal
                 open={deleteTarget !== null}
@@ -341,7 +317,10 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
                         error={resetForm.formState.errors.password?.message}
                         {...resetForm.register('password', {
                             required: 'Password is required',
-                            minLength: { value: MIN_PASSWORD_LENGTH, message: `Min ${MIN_PASSWORD_LENGTH} characters` },
+                            minLength: {
+                                value: MIN_PASSWORD_LENGTH,
+                                message: `Min ${MIN_PASSWORD_LENGTH} characters`,
+                            },
                         })}
                     />
                     <Input

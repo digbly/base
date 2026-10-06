@@ -1,12 +1,18 @@
 import { useRef, useState, type FormEvent } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import { Controller, useForm } from 'react-hook-form';
-import { Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { FileText, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 import Input from '@/components/ui/Input';
 import Modal from '@/components/ui/Modal';
+import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import Select from '@/components/ui/Select';
+import TableCard from '@/components/ui/TableCard';
 import MediaPickerModal from '../components/MediaPickerModal';
 import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
@@ -59,7 +65,8 @@ const slugify = (value: string): string =>
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
 
-const pageLabel = (label: string): string => label.replace(/&laquo;/g, '«').replace(/&raquo;/g, '»');
+const actionButton =
+    'rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800';
 
 export default function Pages({ title, pages, filters, abilities }: PagesProps) {
     const { t } = useTranslation();
@@ -145,16 +152,19 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
 
     return (
         <AdminLayout title={title}>
-            <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-2xl font-bold">{title}</h1>
-                {abilities.create && (
-                    <Button onClick={openCreate} leftIcon={<Plus className="h-4 w-4" />}>
-                        {t('admin.pages.addPage', 'Add page')}
-                    </Button>
-                )}
-            </div>
+            <PageHeader
+                title={title}
+                description={t('admin.pages.subtitle', 'Create and manage the static pages of your site.')}
+                actions={
+                    abilities.create && (
+                        <Button onClick={openCreate} leftIcon={<Plus className="h-4 w-4" />}>
+                            {t('admin.pages.addPage', 'Add page')}
+                        </Button>
+                    )
+                }
+            />
 
-            <form onSubmit={onSearch} className="mb-4 flex flex-wrap gap-3">
+            <form onSubmit={onSearch} className="mb-4 flex flex-wrap items-center gap-3">
                 <div className="min-w-[200px] flex-1">
                     <Input
                         placeholder={t('admin.pages.filters.searchPlaceholder', 'Search pages...')}
@@ -163,119 +173,100 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
                         onChange={(event) => setSearch(event.target.value)}
                     />
                 </div>
-                <select
-                    value={filters.status ?? ''}
-                    onChange={(event) => applyFilters({ status: event.target.value })}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
-                >
-                    <option value="">{t('admin.pages.filters.allStatuses', 'All statuses')}</option>
-                    <option value="published">{t('admin.pages.status.published', 'Published')}</option>
-                    <option value="draft">{t('admin.pages.status.draft', 'Draft')}</option>
-                </select>
+                <div className="w-full sm:w-48">
+                    <Select
+                        value={filters.status ?? ''}
+                        onChange={(event) => applyFilters({ status: event.target.value })}
+                    >
+                        <option value="">{t('admin.pages.filters.allStatuses', 'All statuses')}</option>
+                        <option value="published">{t('admin.pages.status.published', 'Published')}</option>
+                        <option value="draft">{t('admin.pages.status.draft', 'Draft')}</option>
+                    </Select>
+                </div>
                 <Button type="submit" variant="secondary">
                     {t('admin.pages.filters.search', 'Search')}
                 </Button>
             </form>
 
-            <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <table className="w-full text-left text-sm">
-                    <thead className="border-b border-slate-200 text-xs uppercase text-slate-500 dark:border-slate-800">
-                        <tr>
-                            <th className="px-4 py-3">{t('admin.pages.form.title', 'Title')}</th>
-                            <th className="px-4 py-3">{t('admin.pages.form.slug', 'Slug')}</th>
-                            <th className="px-4 py-3">{t('admin.pages.form.status', 'Status')}</th>
-                            <th className="px-4 py-3 text-right">{t('admin.users.table.actions', 'Actions')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pages.data.length === 0 && (
-                            <tr>
-                                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
-                                    {t('admin.pages.empty', 'No pages found.')}
-                                </td>
-                            </tr>
-                        )}
+            <TableCard
+                head={
+                    <tr>
+                        <th className="px-4 py-3">{t('admin.pages.form.title', 'Title')}</th>
+                        <th className="px-4 py-3">{t('admin.pages.form.slug', 'Slug')}</th>
+                        <th className="px-4 py-3">{t('admin.pages.form.status', 'Status')}</th>
+                        <th className="px-4 py-3 text-right">{t('admin.users.table.actions', 'Actions')}</th>
+                    </tr>
+                }
+            >
+                {pages.data.length === 0 && (
+                    <tr>
+                        <td colSpan={4}>
+                            <EmptyState
+                                icon={FileText}
+                                title={t('admin.pages.empty', 'No pages found.')}
+                                description={t('admin.pages.emptyHint', 'Create your first page to get started.')}
+                            />
+                        </td>
+                    </tr>
+                )}
 
-                        {pages.data.map((page) => (
-                            <tr key={page.id} className="border-b border-slate-100 last:border-0 dark:border-slate-800/60">
-                                <td className="px-4 py-3 font-medium">{page.title}</td>
-                                <td className="px-4 py-3 text-slate-500">/{page.slug}</td>
-                                <td className="px-4 py-3">
-                                    <span
-                                        className={`rounded px-2 py-0.5 text-xs ${
-                                            page.status === 'published'
-                                                ? 'bg-emerald-500/10 text-emerald-600'
-                                                : 'bg-amber-500/10 text-amber-600'
-                                        }`}
-                                    >
-                                        {page.status === 'published'
-                                            ? t('admin.pages.status.published', 'Published')
-                                            : t('admin.pages.status.draft', 'Draft')}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-3">
-                                    <div className="flex justify-end gap-1">
-                                        {abilities.update && (
-                                            <button
-                                                type="button"
-                                                onClick={() => openEdit(page)}
-                                                className="rounded p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </button>
-                                        )}
-                                        {abilities.delete && (
-                                            <button
-                                                type="button"
-                                                onClick={() => setDeleteTarget(page)}
-                                                className="rounded p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {pages.meta.last_page > 1 && (
-                <div className="mt-4 flex justify-center gap-1">
-                    {pages.links.map((link, index) =>
-                        link.url ? (
-                            <button
-                                key={index}
-                                type="button"
-                                onClick={() => router.get(link.url!, {}, { preserveState: true })}
-                                className={`rounded-md px-3 py-1.5 text-xs ${
-                                    link.active
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300'
-                                }`}
+                {pages.data.map((page) => (
+                    <tr key={page.id} className="transition hover:bg-slate-50/70 dark:hover:bg-white/[0.03]">
+                        <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">{page.title}</td>
+                        <td className="px-4 py-3 font-mono text-xs text-slate-500 dark:text-slate-400">
+                            /{page.slug}
+                        </td>
+                        <td className="px-4 py-3">
+                            <Badge
+                                variant={page.status === 'published' ? 'emerald' : 'amber'}
+                                dot
+                                size="sm"
                             >
-                                {pageLabel(link.label)}
-                            </button>
-                        ) : (
-                            <span key={index} className="rounded-md px-3 py-1.5 text-xs text-slate-400">
-                                {pageLabel(link.label)}
-                            </span>
-                        )
-                    )}
-                </div>
-            )}
+                                {page.status === 'published'
+                                    ? t('admin.pages.status.published', 'Published')
+                                    : t('admin.pages.status.draft', 'Draft')}
+                            </Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                            <div className="flex justify-end gap-0.5">
+                                {abilities.update && (
+                                    <button type="button" onClick={() => openEdit(page)} className={actionButton}>
+                                        <Pencil className="h-4 w-4" />
+                                    </button>
+                                )}
+                                {abilities.delete && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setDeleteTarget(page)}
+                                        className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 dark:hover:bg-rose-500/10"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </TableCard>
+
+            <Pagination links={pages.links} lastPage={pages.meta.last_page} />
 
             <Modal
                 open={formOpen}
-                title={editing ? t('admin.pages.form.editTitle', 'Edit page') : t('admin.pages.form.createTitle', 'Create page')}
+                title={
+                    editing
+                        ? t('admin.pages.form.editTitle', 'Edit page')
+                        : t('admin.pages.form.createTitle', 'Create page')
+                }
                 onClose={() => setFormOpen(false)}
             >
                 <form onSubmit={submit} className="space-y-4" noValidate>
                     <Input
                         label={t('admin.pages.form.title', 'Title')}
                         error={form.formState.errors.title?.message}
-                        {...form.register('title', { required: t('admin.pages.form.titleRequired', 'Title is required') })}
+                        {...form.register('title', {
+                            required: t('admin.pages.form.titleRequired', 'Title is required'),
+                        })}
                     />
                     <Input
                         label={t('admin.pages.form.slug', 'Slug')}
@@ -308,18 +299,10 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
                         {...form.register('description', { maxLength: 500 })}
                     />
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                                {t('admin.pages.form.status', 'Status')}
-                            </label>
-                            <select
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3.5 py-2.5 text-sm dark:border-white/[0.08] dark:bg-slate-900/60"
-                                {...form.register('status')}
-                            >
-                                <option value="published">{t('admin.pages.status.published', 'Published')}</option>
-                                <option value="draft">{t('admin.pages.status.draft', 'Draft')}</option>
-                            </select>
-                        </div>
+                        <Select label={t('admin.pages.form.status', 'Status')} {...form.register('status')}>
+                            <option value="published">{t('admin.pages.status.published', 'Published')}</option>
+                            <option value="draft">{t('admin.pages.status.draft', 'Draft')}</option>
+                        </Select>
                         <Input
                             label={t('admin.pages.form.template', 'Template')}
                             placeholder="landing"

@@ -244,7 +244,7 @@ function SortableCard({
         <div
             ref={setNodeRef}
             style={{ transform: CSS.Transform.toString(transform), transition }}
-            className={`rounded-xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-[#0F1626] ${
+            className={`rounded-xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-slate-900 ${
                 isDragging ? 'opacity-60' : ''
             }`}
         >

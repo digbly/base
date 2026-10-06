@@ -2,12 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { Link, router } from '@inertiajs/react';
 import { FolderTree, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+import EmptyState from '@/components/ui/EmptyState';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import Input from '@/components/ui/Input';
+import PageHeader from '@/components/ui/PageHeader';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
-import Badge from '@/components/ui/Badge';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Pagination from '../components/Pagination';
 import type { AdminCategory, BlogAbilities, Paginated } from '../types';
@@ -67,22 +69,19 @@ export default function Categories({ title, categories, filters, abilities }: Ca
 
     return (
         <AdminLayout title={title}>
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-                    <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                        {t('blog.categories.subtitle', 'Group your posts into navigable categories.')}
-                    </p>
-                </div>
-
-                {abilities.create && (
-                    <Link href={route('admin.blog.categories.create')}>
-                        <Button leftIcon={<Plus className="h-4 w-4" />}>
-                            {t('blog.categories.add', 'Add category')}
-                        </Button>
-                    </Link>
-                )}
-            </div>
+            <PageHeader
+                title={title}
+                description={t('blog.categories.subtitle', 'Group your posts into navigable categories.')}
+                actions={
+                    abilities.create && (
+                        <Link href={route('admin.blog.categories.create')}>
+                            <Button leftIcon={<Plus className="h-4 w-4" />}>
+                                {t('blog.categories.add', 'Add category')}
+                            </Button>
+                        </Link>
+                    )
+                }
+            />
 
             {error && (
                 <div className="mb-4">
@@ -90,7 +89,7 @@ export default function Categories({ title, categories, filters, abilities }: Ca
                 </div>
             )}
 
-            <form onSubmit={onSearch} className="mb-4 flex flex-wrap gap-3">
+            <form onSubmit={onSearch} className="mb-4 flex flex-wrap items-center gap-3">
                 <div className="min-w-[200px] flex-1">
                     <Input
                         placeholder={t('blog.categories.searchPlaceholder', 'Search categories')}
@@ -105,10 +104,10 @@ export default function Categories({ title, categories, filters, abilities }: Ca
                 </Button>
             </form>
 
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/60 dark:shadow-black/20">
                 <div className="overflow-x-auto">
                     <table className="w-full border-collapse text-left text-sm">
-                        <thead className="border-b border-slate-200 text-xs uppercase text-slate-500 dark:border-slate-800">
+                        <thead className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-400">
                             <tr>
                                 <th className="px-6 py-3 font-semibold">{t('blog.categories.table.name', 'Name')}</th>
                                 <th className="px-6 py-3 font-semibold">{t('blog.categories.table.slug', 'Slug')}</th>
@@ -119,14 +118,15 @@ export default function Categories({ title, categories, filters, abilities }: Ca
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                        <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
                             {categories.data.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center">
-                                        <div className="flex flex-col items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                            <FolderTree className="h-6 w-6 text-slate-400" />
-                                            <span>{t('blog.categories.empty', 'No categories yet.')}</span>
-                                        </div>
+                                    <td colSpan={5}>
+                                        <EmptyState
+                                            icon={FolderTree}
+                                            title={t('blog.categories.empty', 'No categories yet.')}
+                                            description={t('blog.categories.emptyHint', 'Create your first category to organise posts.')}
+                                        />
                                     </td>
                                 </tr>
                             )}
