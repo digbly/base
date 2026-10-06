@@ -175,7 +175,8 @@ routes/
 config/
   modules.php  themes.php  l5-swagger.php
 docs/
-  admin-modules.md  themes.md
+  the-basics/                              # Settings, menus, widgets, pages
+  modules/  themes/                        # Module and theme guides
 ```
 
 ### Modules
@@ -211,9 +212,12 @@ The admin is a single Inertia React app:
 
 ## Documentation
 
-- [`docs/admin-modules.md`](docs/admin-modules.md) — admin module conventions and
-  internals.
-- [`docs/themes.md`](docs/themes.md) — theme architecture and commands.
+Full documentation lives in [`docs/`](docs/):
+
+- [`docs/modules/information.md`](docs/modules/information.md) — module
+  architecture and how modules are built.
+- [`docs/themes/information.md`](docs/themes/information.md) — theme
+  architecture, commands and SSR.
 
 ## License
 
