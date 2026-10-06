@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Auth\Http\Requests\ResetPasswordRequest;
@@ -28,7 +29,10 @@ class ResetPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user, string $password): void {
-                $user->forceFill(['password' => $password]);
+                $user->forceFill([
+                    'password' => $password,
+                    'remember_token' => Str::random(60),
+                ]);
                 $user->save();
 
                 event(new PasswordReset($user));

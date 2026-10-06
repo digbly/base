@@ -5,6 +5,7 @@ namespace Modules\Auth\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -56,6 +57,9 @@ class ProfileController extends Controller
 
         $user->forceFill(['password' => $request->post('password')]);
         $user->save();
+
+        // Invalidate sessions on other devices while keeping this one signed in.
+        Auth::guard('web')->logoutOtherDevices($request->post('password'));
 
         return back()->with('success', __('admin_auth.profile.notices.passwordUpdated'));
     }

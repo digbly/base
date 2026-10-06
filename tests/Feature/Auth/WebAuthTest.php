@@ -241,4 +241,49 @@ class WebAuthTest extends TestCase
 
         $this->assertTrue(Hash::check('OldPassword123!', $user->fresh()->password));
     }
+
+    public function test_changing_password_keeps_the_current_session_authenticated(): void
+    {
+        $user = User::factory()->create(['password' => 'OldPassword123!']);
+
+        $this->actingAs($user, 'web')
+            ->put('/profile/password', [
+                'current_password' => 'OldPassword123!',
+                'password' => 'NewPassword123!',
+                'password_confirmation' => 'NewPassword123!',
+            ])
+            ->assertRedirect();
+
+        $this->get('/profile')->assertOk();
+    }
+
+    public function test_changing_password_invalidates_other_device_sessions(): void
+    {
+        $user = User::factory()->create(['password' => 'OldPassword123!']);
+        $oldHash = $user->password;
+
+        $this->actingAs($user, 'web')
+            ->put('/profile/password', [
+                'current_password' => 'OldPassword123!',
+                'password' => 'NewPassword123!',
+                'password_confirmation' => 'NewPassword123!',
+            ])
+            ->assertRedirect();
+
+        $this->flushSession();
+
+        $this->withSession(['password_hash_web' => $oldHash])
+            ->actingAs($user->fresh(), 'web')
+            ->get('/profile')
+            ->assertRedirect('/login');
+    }
+
+    public function test_social_routes_redirect_authenticated_users(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'web')
+            ->get('/auth/social/google/redirect')
+            ->assertRedirect(admin_url());
+    }
 }

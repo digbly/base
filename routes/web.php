@@ -12,5 +12,9 @@ Route::post('/login', [LoginController::class, 'store'])
     ->name('login.attempt');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/auth/social/{driver}/redirect', [SocialLoginController::class, 'redirect'])->name('social.redirect');
-Route::get('/auth/social/{driver}/callback', [SocialLoginController::class, 'callback'])->name('social.callback');
+Route::get('/auth/social/{driver}/redirect', [SocialLoginController::class, 'redirect'])
+    ->middleware('guest:web')
+    ->name('social.redirect');
+Route::get('/auth/social/{driver}/callback', [SocialLoginController::class, 'callback'])
+    ->middleware('guest:web')
+    ->name('social.callback');
