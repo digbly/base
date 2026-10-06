@@ -2,22 +2,24 @@
 
 namespace App\Support;
 
+use App\Facades\AdminTranslation;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Lang;
 
 /**
- * Resolves where the admin SPA translation namespaces live: application
- * `resources/lang` by default, or an owning module's `lang` directory for
- * strings that belong to a feature module (e.g. the auth screens).
+ * Resolves where the admin SPA translation namespaces live. Namespaces are
+ * registered by their owner (the application shell or a feature module) through
+ * the {@see AdminTranslation} registry; this service turns them into the
+ * payload the Inertia frontend and the settings screen consume.
  */
 class AdminTranslations
 {
     /**
-     * @return array<string, array{group: string, module?: string}>
+     * @return array<string, array{group: string, path?: string}>
      */
     public function namespaces(): array
     {
-        return config('admin-translations.namespaces', []);
+        return AdminTranslation::all();
     }
 
     /**
@@ -30,32 +32,28 @@ class AdminTranslations
 
     /**
      * Translation key (`group` or `namespace::group`) used to resolve a
-     * namespace through the translator.
+     * namespace through the translator. Module namespaces carry a `path` and
+     * are resolved through their own translation namespace; application
+     * namespaces resolve against the global `resources/lang`.
      */
     public function translationKey(string $namespace): string
     {
-        $group = $this->group($namespace);
+        $definition = $this->namespaces()[$namespace] ?? [];
 
-        return isset($this->namespaces()[$namespace]['module']) ? $namespace.'::'.$group : $group;
+        return isset($definition['path']) ? $namespace.'::'.$definition['group'] : $definition['group'];
     }
 
     /**
      * Register every module-owned language directory as a translation
-     * namespace. Modules are not activated in every environment, so this runs
-     * for the configured owners regardless of activation status.
+     * namespace. The owning provider only boots when the module is enabled, so
+     * this mirrors the namespace registry itself.
      */
     public function registerNamespaces(): void
     {
         foreach ($this->namespaces() as $namespace => $definition) {
-            $module = $definition['module'] ?? null;
+            $path = $definition['path'] ?? null;
 
-            if ($module === null) {
-                continue;
-            }
-
-            $path = module_path($module, 'resources/lang');
-
-            if (File::isDirectory($path)) {
+            if ($path !== null && File::isDirectory($path)) {
                 Lang::addNamespace($namespace, $path);
             }
         }
@@ -83,16 +81,15 @@ class AdminTranslations
     }
 
     /**
-     * Language directories owned by the configured modules.
+     * Language directories owned by the registered module namespaces.
      *
      * @return list<string>
      */
     protected function moduleLangPaths(): array
     {
         return collect($this->namespaces())
-            ->pluck('module')
+            ->pluck('path')
             ->filter()
-            ->map(fn (string $module) => module_path($module, 'resources/lang'))
             ->values()
             ->all();
     }

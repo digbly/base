@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\AdminTranslation as AdminTranslationContract;
 use App\Contracts\Menu as MenuContract;
 use App\Contracts\MenuBox as MenuBoxContract;
 use App\Contracts\NavMenu as NavMenuContract;
@@ -11,6 +12,8 @@ use App\Contracts\Setting as SettingContract;
 use App\Contracts\Sidebar as SidebarContract;
 use App\Contracts\ThemeSetting as ThemeSettingContract;
 use App\Contracts\Widget as WidgetContract;
+use App\Facades\AdminTranslation;
+use App\Support\AdminTranslationRepository;
 use App\Support\Customizes\CustomizeRegistry;
 use App\Support\MenuBoxRepository;
 use App\Support\MenuRepository;
@@ -39,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(AdminTranslationContract::class, AdminTranslationRepository::class);
         $this->app->singleton(SettingContract::class, SettingRepository::class);
         $this->app->singleton(ThemeSettingContract::class, ThemeSettingRepository::class);
         $this->app->singleton(MenuContract::class, MenuRepository::class);
@@ -56,6 +60,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // The shared admin shell strings live in the application resources/lang.
+        AdminTranslation::make('common', fn (): array => ['group' => 'common']);
+
         Passport::tokensCan([
             'profile' => 'Read the authenticated user profile',
         ]);

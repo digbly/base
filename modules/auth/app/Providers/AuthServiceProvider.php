@@ -2,6 +2,7 @@
 
 namespace Modules\Auth\Providers;
 
+use App\Facades\AdminTranslation;
 use Illuminate\Support\Facades\Gate;
 use Modules\Auth\Models\User;
 use Nwidart\Modules\Support\ModuleServiceProvider;
@@ -45,5 +46,18 @@ class AuthServiceProvider extends ModuleServiceProvider
         Gate::before(
             static fn (User $user): ?bool => $user->isSuperAdmin() ? true : null
         );
+
+        $this->registerAdminTranslations();
+    }
+
+    /**
+     * Register the admin SPA translation namespace owned by this module.
+     */
+    protected function registerAdminTranslations(): void
+    {
+        AdminTranslation::make($this->nameLower, fn (): array => [
+            'group' => 'admin_auth',
+            'path' => module_path($this->name, 'resources/lang'),
+        ]);
     }
 }

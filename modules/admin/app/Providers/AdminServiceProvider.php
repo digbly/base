@@ -2,6 +2,7 @@
 
 namespace Modules\Admin\Providers;
 
+use App\Facades\AdminTranslation;
 use App\Facades\Menu;
 use App\Facades\NavMenu;
 use App\Facades\Setting;
@@ -54,6 +55,18 @@ class AdminServiceProvider extends ModuleServiceProvider
         $this->registerNavigation();
         $this->registerMenuLocations();
         $this->registerSettings();
+        $this->registerAdminTranslations();
+    }
+
+    /**
+     * Register the admin SPA translation namespace owned by this module.
+     */
+    protected function registerAdminTranslations(): void
+    {
+        AdminTranslation::make($this->nameLower, fn (): array => [
+            'group' => 'admin',
+            'path' => module_path($this->name, 'resources/lang'),
+        ]);
     }
 
     /**

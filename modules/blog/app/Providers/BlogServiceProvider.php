@@ -2,6 +2,7 @@
 
 namespace Modules\Blog\Providers;
 
+use App\Facades\AdminTranslation;
 use App\Facades\Menu;
 use App\Facades\MenuBox;
 use App\Support\MenuRepository;
@@ -40,6 +41,18 @@ class BlogServiceProvider extends ModuleServiceProvider
 
         $this->registerNavigation();
         $this->registerMenuBoxes();
+        $this->registerAdminTranslations();
+    }
+
+    /**
+     * Register the admin SPA translation namespace owned by this module.
+     */
+    protected function registerAdminTranslations(): void
+    {
+        AdminTranslation::make($this->nameLower, fn (): array => [
+            'group' => 'blog',
+            'path' => module_path($this->name, 'resources/lang'),
+        ]);
     }
 
     /**

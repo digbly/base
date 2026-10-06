@@ -172,7 +172,7 @@ admin/
 routes/
   web.php  api.php  console.php
 config/
-  modules.php  themes.php  admin-translations.php  l5-swagger.php
+  modules.php  themes.php  l5-swagger.php
 docs/
   admin-modules.md  themes.md
 ```

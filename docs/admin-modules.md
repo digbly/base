@@ -59,13 +59,18 @@ export const ReportsView = lazy(() =>
 ### 3. Add translations
 
 The admin SPA has no bundled translations: every string is served by the
-backend from language files declared in `config/admin-translations.php`. Give
-the module its own i18next namespace so it owns its strings.
+backend from the owning module's `resources/lang` directory. Register the
+module's i18next namespace from its service provider so it owns its strings.
 
-1. Declare the namespace in `config/admin-translations.php`:
+1. Register the namespace in the module service provider:
 
 ```php
-'reports' => ['group' => 'reports', 'module' => 'Reports'],
+use App\Facades\AdminTranslation;
+
+AdminTranslation::make('reports', fn (): array => [
+    'group' => 'reports',
+    'path' => module_path('Reports', 'resources/lang'),
+]);
 ```
 
 2. Create the language files in the owning module:
@@ -85,12 +90,12 @@ return [
 ```
 
 3. Load it in the view with `const { t } = useTranslation();` and use
-   `t('reports:title')`. Shared shell strings fall back to the `common`
+   `t('reports.title')`. Shared shell strings fall back to the `common`
    namespace, so they need no prefix.
 
 A module that only adds pages to the existing admin shell can instead add keys
 under the `admin` group in `modules/admin/resources/lang/{en,vi}/admin.php` and use
-`t('admin:pages.title')`.
+`t('admin.pages.title')`.
 
 ### 4. Describe the module
 
@@ -268,12 +273,12 @@ is not authorization.
 ## i18n
 
 The admin SPA loads its strings at runtime from the backend, one i18next
-namespace per module. A single public request to
-`GET /api/v1/translations/{locale}` (no authentication) returns every
-namespace at once; the custom backend in `src/i18n/index.ts` fetches it once
-per language and serves each namespace from cache. `TranslationController`
-builds the response from the language files described in
-`config/admin-translations.php`:
+namespace per module. `HandleInertiaRequests` shares a `translations` prop on
+every Inertia response, keyed by namespace; `App\Support\AdminTranslations`
+builds it from the namespaces registered through the `AdminTranslation`
+registry. Each owner registers its own namespace from its service provider —
+the application shell registers `common`, each module registers its own — so a
+new module never requires editing a central configuration file:
 
 | i18next namespace | Backend group | Stored in |
 | ----------------- | ------------- | --------- |
@@ -283,14 +288,13 @@ builds the response from the language files described in
 | `blog`            | `blog`        | `modules/blog/resources/lang/{en,vi}/blog.php` |
 
 `App\Support\AdminTranslations` resolves each namespace to its backend group
-and owning module. `registerNamespaces()` registers module directories as
-translation namespaces independently of module activation. Add a namespace to `config/admin-translations.php` with
-its `group` and optional `module` to make it available.
+and owning module. `registerNamespaces()` exposes module directories as
+translation namespaces; because a module's provider only boots when the module
+is enabled, a disabled module contributes no namespace or locale.
 
-Components call `useTranslation()` and reference the namespace inline with
-i18next's `namespace:key` syntax (`t('blog:posts.title')`). Keys without a
-namespace prefix resolve against `common`
-(`defaultNS`/`fallbackNS: 'common'`) for shared shell strings:
+Components call `useTranslation()` and reference the namespace inline with a
+dot: the first segment is the namespace (`t('blog.posts.title')`). Keys without
+a namespace prefix resolve against `common` for shared shell strings:
 
 ```
 common:  topbar.*, userMenu.*, role.*, forbidden.*, comingSoon,
@@ -303,7 +307,7 @@ blog:    nav.* (also read by the backend menu), posts.*, categories.*,
 ```
 
 Cross-namespace references are explicit: the blog post form uses
-`t('blog:posts.title')` for its own strings and `t('admin:media.insertImage')`
+`t('blog.posts.title')` for its own strings and `t('admin.media.insertImage')`
 for the shared media picker.
 
 Locales are discovered from the directories in `resources/lang/` and every
@@ -312,8 +316,8 @@ owning module's `resources/lang/`; the frontend is limited to the codes listed i
 
 The `nav.*` labels live in the `admin`/`blog` namespaces and are read by both
 sides: the backend menu uses `__('admin.nav.dashboard')` /
-`__('blog.nav.blogPosts')`, and the shell uses `t('admin:nav.dashboard')` /
-`t('admin:nav.menuLabel')`.
+`__('blog.nav.blogPosts')`, and the shell uses `t('admin.nav.dashboard')` /
+`t('admin.nav.menuLabel')`.
 
 ## Conventions and gotchas
 
@@ -326,7 +330,7 @@ sides: the backend menu uses `__('admin.nav.dashboard')` /
 - Do not add translation JSON to the frontend. Strings live in the backend:
   the shared shell in `resources/lang/{en,vi}/common.php`, and each module's
   own strings in that module's `resources/lang/` directory. Reference them with
-  `useTranslation()` + `t('<namespace>:key')`.
+  `useTranslation()` + `t('<namespace>.<key>')`.
 
 ## Verify
 
@@ -346,7 +350,7 @@ php artisan test tests/Unit/Auth tests/Feature/Auth
 
 - [ ] `modules/<name>/views/XxxView.tsx` created
 - [ ] `modules/<name>/lazy.ts` exports the lazy component
-- [ ] Namespace declared in `config/admin-translations.php`; strings added to the owning module's `resources/lang/{en,vi}/<group>.php`
+- [ ] Namespace registered via `AdminTranslation::make()` in the owning module's service provider; strings added to `resources/lang/{en,vi}/<group>.php`
 - [ ] `modules/<name>/module.tsx` exports the `AdminModule`
 - [ ] `src/app/modules.ts` registers the module
 - [ ] Sidebar item registered in the owning module's service provider via `Menu::make()` with label, `to`, icon and permission
