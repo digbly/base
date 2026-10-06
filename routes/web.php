@@ -4,9 +4,11 @@ use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\Web\LoginController;
 use Modules\Auth\Http\Controllers\Web\SocialLoginController;
 
-Route::get('/login', [LoginController::class, 'show'])->name('login');
+Route::get('/login', [LoginController::class, 'show'])
+    ->middleware('guest:web')
+    ->name('login');
 Route::post('/login', [LoginController::class, 'store'])
-    ->middleware('throttle:login')
+    ->middleware(['guest:web', 'throttle:login'])
     ->name('login.attempt');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 

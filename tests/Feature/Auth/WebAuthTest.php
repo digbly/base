@@ -45,6 +45,15 @@ class WebAuthTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'new-user@example.com']);
     }
 
+    public function test_login_page_redirects_authenticated_user_to_admin(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'web')
+            ->get('/login')
+            ->assertRedirect(admin_url());
+    }
+
     public function test_login_attempts_are_rate_limited(): void
     {
         User::factory()->create(['email' => 'limited@example.com']);

@@ -24,6 +24,7 @@ use App\Support\SettingRepository;
 use App\Support\SidebarRepository;
 use App\Support\ThemeSettingRepository;
 use App\Support\WidgetRepository;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -62,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // The shared admin shell strings live in the application resources/lang.
         AdminTranslation::make('common', fn (): array => ['group' => 'common']);
+
+        // Authenticated users who hit a guest-only route (e.g. /login) are
+        // sent to the admin dashboard instead of the site root.
+        RedirectIfAuthenticated::redirectUsing(fn (): string => admin_url());
 
         Passport::tokensCan([
             'profile' => 'Read the authenticated user profile',
