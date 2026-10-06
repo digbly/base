@@ -312,8 +312,6 @@ return [
         'social' => [
             'clientId' => 'Client ID',
             'clientSecret' => 'Client secret',
-            'envHint' => 'Để trống để dùng giá trị từ biến môi trường (.env).',
-            'redirect' => 'Redirect URI',
             'subtitle' => 'Cho phép khách truy cập đăng nhập bằng nhà cung cấp bên ngoài. Thông tin để trống sẽ dùng cấu hình từ biến môi trường.',
             'title' => 'Đăng nhập mạng xã hội',
         ],

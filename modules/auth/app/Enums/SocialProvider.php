@@ -71,11 +71,9 @@ enum SocialProvider: string
         return $this->setting($this->settingKey('client_secret')) ?? $this->configValue('client_secret');
     }
 
-    public function redirect(): ?string
+    public function redirect(): string
     {
-        return $this->setting($this->settingKey('redirect'))
-            ?? $this->configValue('redirect')
-            ?? route('social.callback', ['driver' => $this->value]);
+        return route('social.callback', ['driver' => $this->value]);
     }
 
     public function isConfigured(): bool

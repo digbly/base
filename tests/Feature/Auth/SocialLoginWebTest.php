@@ -23,13 +23,10 @@ class SocialLoginWebTest extends TestCase
         config([
             'services.google.client_id' => 'fake-google-id',
             'services.google.client_secret' => 'fake-google-secret',
-            'services.google.redirect' => 'http://localhost/auth/social/google/callback',
             'services.facebook.client_id' => 'fake-facebook-id',
             'services.facebook.client_secret' => 'fake-facebook-secret',
-            'services.facebook.redirect' => 'http://localhost/auth/social/facebook/callback',
             'services.github.client_id' => 'fake-github-id',
             'services.github.client_secret' => 'fake-github-secret',
-            'services.github.redirect' => 'http://localhost/auth/social/github/callback',
         ]);
     }
 
@@ -121,7 +118,6 @@ class SocialLoginWebTest extends TestCase
             config([
                 "services.{$driver}.client_id" => "fake-{$driver}-id",
                 "services.{$driver}.client_secret" => "fake-{$driver}-secret",
-                "services.{$driver}.redirect" => "http://localhost/auth/social/{$driver}/callback",
             ]);
 
             Socialite::fake($driver, SocialiteUser::fake());

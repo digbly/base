@@ -312,8 +312,6 @@ return [
         'social' => [
             'clientId' => 'Client ID',
             'clientSecret' => 'Client secret',
-            'envHint' => 'Leave blank to use the value from the environment (.env).',
-            'redirect' => 'Redirect URI',
             'subtitle' => 'Allow visitors to sign in with an external provider. Credentials left blank fall back to the environment configuration.',
             'title' => 'Social login',
         ],

@@ -261,12 +261,6 @@ class AdminServiceProvider extends ModuleServiceProvider
                 ->rules(['nullable', 'string', 'max:255'])
                 ->disableShowApi()
                 ->add();
-
-            Setting::make($provider->settingKey('redirect'))
-                ->type('string')
-                ->rules(['nullable', 'url', 'max:255'])
-                ->disableShowApi()
-                ->add();
         }
     }
 

@@ -134,7 +134,6 @@ class SettingsPageTest extends TestCase
                 'social_login_linkedin-openid_enabled' => true,
                 'social_login_linkedin-openid_client_id' => 'linkedin-client-id',
                 'social_login_linkedin-openid_client_secret' => 'linkedin-client-secret',
-                'social_login_linkedin-openid_redirect' => 'https://example.com/auth/social/linkedin-openid/callback',
             ])
             ->assertRedirect();
 

@@ -64,7 +64,6 @@ const socialDefaults = (
         defaults[`social_login_${value}_client_secret`] = String(
             settings[`social_login_${value}_client_secret`] ?? ''
         );
-        defaults[`social_login_${value}_redirect`] = String(settings[`social_login_${value}_redirect`] ?? '');
     }
 
     return defaults;
@@ -239,17 +238,6 @@ export default function Settings({ title, settings, media, locales, socialProvid
                                         type="password"
                                         autoComplete="off"
                                         {...register(`social_login_${provider.value}_client_secret`, {
-                                            maxLength: 255,
-                                        })}
-                                    />
-
-                                    <Input
-                                        label={t('admin.settings.social.redirect', 'Redirect URI')}
-                                        hint={t(
-                                            'admin.settings.social.envHint',
-                                            'Leave blank to use the value from the environment (.env).'
-                                        )}
-                                        {...register(`social_login_${provider.value}_redirect`, {
                                             maxLength: 255,
                                         })}
                                     />
