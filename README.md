@@ -2,7 +2,9 @@
 
 A CMS platform built on Laravel 12. It ships with a modular architecture: features
 live in `modules/`, presentation lives in `themes/`, and both are discovered,
-activated and booted through their own registries.
+activated and booted through their own registries. The front ends are built with
+Inertia (React): the admin app is assembled from every enabled module, and the
+public site is rendered by the active theme.
 
 ## Features
 
@@ -10,21 +12,23 @@ activated and booted through their own registries.
 - **Themes** — full theme packages (`theme.json`, views, assets, translations,
   config, routes), modelled after `nwidart/laravel-modules`.
   The bundled `default` theme renders the public site with its own self-contained
-  Inertia (React) front end, built via `php artisan theme:build`.
+  Inertia (React) front end, built into `public/themes/default` via
+  `php artisan theme:build`.
 - **Blog module** — posts, categories and comments with translatable content.
 - **Auth module** — session login/registration, email verification, password
-  reset, profile management, social login (Google / Facebook / GitHub) via
-  Socialite, and an OAuth2 server via Passport.
+  reset and profile management, plus social login (Google / Facebook / GitHub)
+  via Socialite. Passport is wired up for OAuth2/token infrastructure.
 - **Appearance tools** — pages + page blocks, navigation menus, widgets,
   sidebars and a live customizer.
 - **Settings & localization** — settings, languages and editable translations.
 - **Media library** — powered by `spatie/laravel-medialibrary`.
 - **Permissions** — `spatie/laravel-permission`.
 - **Audit log** — `spatie/laravel-activitylog`.
-- **API docs** — OpenAPI/Swagger generated with `darkaonline/l5-swagger`.
-- **Two React front ends** — an Inertia SSR-style admin rendered from Blade
-  (`resources/js`) and a standalone admin SPA (`admin/`) that talks to the JSON
-  API.
+- **OpenAPI schema annotations** — resources and form requests are annotated for
+  `darkaonline/l5-swagger`.
+- **Inertia admin** — a single React app built from `resources/views`, whose
+  pages are contributed by each module under `modules/*/resources/views` (for
+  example `Admin::dashboard/Index`, `Blog::posts/Index`).
 
 ## Tech stack
 
@@ -36,10 +40,11 @@ activated and booted through their own registries.
 | Permissions | `spatie/laravel-permission` |
 | Media | `spatie/laravel-medialibrary` |
 | Translations | `astrotomic/laravel-translatable`, `spatie/laravel-translation-loader` |
-| API docs | `darkaonline/l5-swagger` |
-| Inertia admin | React 19, Inertia, TypeScript, Tailwind CSS 4, Vite 7 |
-| Admin SPA | React 19, Redux Toolkit, TanStack Query, react-router, i18next, Tailwind CSS 4, Vite 8 |
-| Tests | PHPUnit 11, Pest-style module suites |
+| Activity log | `spatie/laravel-activitylog` |
+| API schema | `darkaonline/l5-swagger` |
+| Admin front end | React 19, Inertia, TypeScript, Tailwind CSS 4, Vite 7, lucide-react, react-hook-form, dnd-kit |
+| Theme front end | React 19, Inertia, Tailwind CSS 4, Vite 7 |
+| Tests | PHPUnit 11 |
 | Code style | Laravel Pint |
 
 ## Requirements
@@ -65,15 +70,13 @@ php artisan migrate --seed
 # 4. Generate the permissions registry
 php artisan permission:generate
 
-# 5. Build the Inertia admin front end
+# 5. Build the admin Inertia front end
 npm install
 npm run build
 
-# 6. Build the default theme's Inertia front end
+# 6. Install the default theme's dependencies and build its front end
+cd themes/default && npm install && cd ../..
 php artisan theme:build default
-
-# 7. Build the standalone admin SPA
-cd admin && npm install && npm run build && cd ..
 ```
 
 Then start the application:
@@ -82,7 +85,8 @@ Then start the application:
 php artisan serve
 ```
 
-The seeded test user is `test@example.com`. Create a super admin with:
+The seeded test user is `test@example.com` (password `password`). Create a super
+admin with:
 
 ```bash
 php artisan make:user --super-admin
@@ -96,26 +100,24 @@ Key `.env` values:
 | --- | --- |
 | `APP_URL` | Base URL of the installation |
 | `DB_CONNECTION` | `sqlite` (default), `mysql`, `pgsql`, ... |
-| `ADMIN_PREFIX` | URL prefix for the web admin (default `admin`) |
+| `ADMIN_PREFIX` | URL prefix for the admin (default `admin`) |
 | `THEME_DEFAULT` | Fallback theme alias (default `default`) |
 | `THEMES_ACTIVATOR` | `database` or `file` |
+| `MODULES_ACTIVATOR` | `database` (default), `file` or `testing` |
 | `GOOGLE_*`, `FACEBOOK_*`, `GITHUB_*` | Social login credentials |
-| `FRONTEND_URL` | Base URL of the standalone admin SPA |
 
 ## Development
 
-Run the backend, queue listener and root Vite dev server together:
+Run the backend, queue listener and the admin Vite dev server together:
 
 ```bash
 composer dev
 ```
 
-The standalone admin SPA is developed separately and proxies `/api` to the
-Laravel backend (configurable through `VITE_OAUTH_BASE_URL`):
+The active theme has its own Vite setup and is served separately:
 
 ```bash
-cd admin
-npm run dev
+php artisan theme:build default --dev
 ```
 
 ## Testing
@@ -142,7 +144,7 @@ php artisan module:make <name>            # Scaffold a module
 
 # Themes
 php artisan theme:list                    # List themes and their status
-php artisan theme:make blog               # Scaffold and enable a theme
+php artisan theme:make blog               # Scaffold themes/Blog and enable it
 php artisan theme:enable Blog             # Enable a theme
 php artisan theme:disable Blog            # Disable a theme
 php artisan theme:publish                 # Publish theme assets
@@ -161,16 +163,15 @@ app/
   Modules/                                 # Module registry (repository + activators)
   Http/ Models/ Providers/ ...
 modules/
-  admin/   auth/   blog/                   # Feature modules (own routes, migrations, lang, tests)
+  admin/ auth/ blog/                       # Feature modules
+                                           #   routes, migrations, lang, tests and React views
 themes/
-  default/                                 # Theme packages + statuses.json
+  default/                                 # Theme packages (theme.json, own Inertia front end)
 resources/
-  js/                                      # Inertia admin (React 19) + Blade entry
-  views/                                   # app.blade.php, auth views
-admin/
-  src/                                     # Standalone admin SPA (registry-based modules)
+  css/                                     # Tailwind entry for the admin front end
+  views/                                   # Admin Inertia app (app.tsx), components, lib, auth views
 routes/
-  web.php  api.php  console.php
+  web.php  console.php
 config/
   modules.php  themes.php  l5-swagger.php
 docs/
@@ -180,8 +181,11 @@ docs/
 ### Modules
 
 Every feature is an `nwidart/laravel-modules` package with its own service
-provider, routes (`routes/web.php`, `routes/api.php`), migrations, language
-files and tests. Modules are registered through their `module.json` manifest.
+provider, routes (`routes/web.php`), migrations, language files, tests and
+Inertia (React) views under `resources/views`. Modules are registered through
+their `module.json` manifest. The `Admin` and `Auth` modules are core and always
+loaded from `bootstrap/providers.php`; every other module is loaded by
+`App\Modules\ModulesServiceProvider` from the activator settings.
 
 ### Themes
 
@@ -189,20 +193,26 @@ A theme is a complete package (`theme.json`, service provider, Blade views,
 assets, translations, config and routes) living in `themes/`. The registry
 mirrors modules so the model is identical: *discover → activate → register →
 boot*. The active theme is stored in the settings and applied by the
-`ThemeManager`.
+`ThemeManager`. The bundled `default` theme also ships a self-contained Inertia
+front end (`resources/views/app.tsx`, pages, layouts, components) built into
+`public/themes/default`.
 
-### Admin front ends
+### Admin front end
 
-- **Inertia admin** (`resources/js`) is rendered by the Blade entry
-  (`resources/views/app.blade.php`) for the web routes under `ADMIN_PREFIX`.
-- **Admin SPA** (`admin/`) is a standalone React app with its own module
-  registry, Redux store and TanStack Query data layer; it consumes the JSON API
-  under `/api`.
+The admin is a single Inertia React app:
+
+- The entry point is `resources/views/app.tsx`, rendered by the Blade template
+  `resources/views/app.blade.php` and built by the root Vite config.
+- Module pages live in `modules/<name>/resources/views` and are referenced by
+  their namespaced component name (`Admin::dashboard/Index`,
+  `Auth::auth/Login`, `Blog::posts/Index`); `resources/views/lib/inertia-pages.ts`
+  resolves them at runtime.
+- The public site is the active theme's own Inertia app, not the admin app.
 
 ## Documentation
 
-- [`docs/admin-modules.md`](docs/admin-modules.md) — how to add a feature module
-  to the admin SPA.
+- [`docs/admin-modules.md`](docs/admin-modules.md) — admin module conventions and
+  internals.
 - [`docs/themes.md`](docs/themes.md) — theme architecture and commands.
 
 ## License

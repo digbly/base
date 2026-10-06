@@ -1,361 +1,326 @@
 # Admin Modules
 
-The admin SPA lives in `admin/` and is built as a **single app with a module
-registry**. Each feature module owns its routes, sidebar entries, and
-translations. The shell (`AdminLayout`) and the registry (`src/app`) stay
-feature-agnostic.
+The admin is a **single Inertia (React) application**. There is no standalone
+SPA and no JSON API: every module contributes its own backend routes, Inertia
+pages, navigation entries and translations, and the shell composes them into one
+app.
+
+## How the admin is assembled
+
+- The entry point is `resources/views/app.tsx`, rendered by the Blade root
+  template `resources/views/app.blade.php` and built by the root Vite config
+  (`vite.config.ts`).
+- Shared UI and helpers live in `resources/views`: `components/ui/*` (buttons,
+  inputs, modals, tables, ...), `components/NavIcon.tsx`, `components/ThemeProvider.tsx`,
+  `hooks/` (`useTranslation`, `useDropdown`, `useFocusTrap`) and `lib/`
+  (`route`, `url`, `inertia-form`, `validation`, `theme`, `inertia-pages`).
+- Module pages live in `modules/<name>/resources/views` and are referenced by
+  their namespaced component name from the controller, for example
+  `Inertia::render('Admin::dashboard/Index')`, `'Auth::auth/Login'`,
+  `'Blog::posts/Index'`.
+- `resources/views/lib/inertia-pages.ts` resolves those names by globbing
+  `resources/views/pages/**/*.{tsx,jsx}` (core pages) and
+  `modules/*/resources/views/**/*.{tsx,jsx}` (module pages). The namespace
+  (`Admin`, `Auth`, `Blog`, ...) is matched case-insensitively against the
+  module directory name.
+- Vite aliases configure imports: `@` points at `resources/views` and `@modules`
+  at `modules/`.
 
 ## Directory layout
 
 ```
-admin/src/
-  app/
-    types.ts        # AdminModule
-    registry.ts     # registerModules(), getAdminRoutes(), getPublicRoutes()
-    routes.tsx      # builds the RouteObject[] via useRoutes()
-    modules.ts      # registers every module (imported for side effects)
-  modules/
-    auth/
-      module.tsx    # publicRoutes only (login/register/...)
-      lazy.ts       # React.lazy wrappers (kept out of module.tsx)
-      layout/AuthLayout.tsx
-      views/*.tsx
-    dashboard/
-      module.tsx    # nav + routes
-      lazy.ts
-      views/DashboardView.tsx
-    users/ settings/ ...
-  components/       # shared UI, layout shell, route guards
-  store/ utils/     # shared state and helpers
+resources/views/
+  app.tsx                  # Inertia entry (createInertiaApp)
+  components/ui/           # shared design-system components
+  components/NavIcon.tsx   # lucide icon registry used by the sidebar
+  hooks/                   # useTranslation, useDropdown, useFocusTrap
+  lib/                     # route(), url helpers, form/validation, page resolver
+  types/                   # SharedProps, NavItem, AuthUser, ...
+modules/<name>/resources/views/
+  <area>/Index.tsx         # list pages
+  <area>/Form.tsx          # create/edit pages
+  components/              # module-specific components
+  layouts/                 # AdminLayout (admin), AuthLayout (auth)
 ```
+
+The admin shell lives in `modules/admin/resources/views/layouts/AdminLayout.tsx`
+with `components/AdminSidebar.tsx` and `components/UserMenu.tsx`.
 
 ## Create a module (example: `reports`)
 
-### 1. Create the view
+### 1. Scaffold and wire the module
 
-`admin/src/modules/reports/views/ReportsView.tsx`
-
-```tsx
-export const ReportsView = () => {
-  return <div>{/* feature UI */}</div>;
-};
+```bash
+php artisan module:make Reports
 ```
 
-### 2. Add a lazy wrapper
+The module gets a service provider (extending
+`Nwidart\Modules\Support\ModuleServiceProvider`) and a `RouteServiceProvider`
+that maps `routes/web.php`. Add the module to the activator (or enable it) so
+`App\Modules\ModulesServiceProvider` boots it. `Admin` and `Auth` are core and
+always loaded from `bootstrap/providers.php`.
 
-`module.tsx` must not declare components (the `react-refresh` lint rule flags
-files that both export config and define components). Put `React.lazy` here:
+### 2. Add the routes
 
-`admin/src/modules/reports/lazy.ts`
-
-```ts
-import { lazy } from 'react';
-
-export const ReportsView = lazy(() =>
-  import('./views/ReportsView').then((module) => ({ default: module.ReportsView }))
-);
-```
-
-### 3. Add translations
-
-The admin SPA has no bundled translations: every string is served by the
-backend from the owning module's `resources/lang` directory. Register the
-module's i18next namespace from its service provider so it owns its strings.
-
-1. Register the namespace in the module service provider:
+`modules/reports/routes/web.php`:
 
 ```php
-use App\Facades\AdminTranslation;
+use Illuminate\Support\Facades\Route;
+use Modules\Admin\Http\Middleware\RequireAdminPermission;
+use Modules\Reports\Enums\Permission;
+use Modules\Reports\Http\Controllers\Web\ReportController;
 
-AdminTranslation::make('reports', fn (): array => [
-    'group' => 'reports',
-    // Optional; defaults to modules/<Studly(namespace)>/resources/lang.
-    'path' => module_path('Reports', 'resources/lang'),
-]);
+Route::middleware(['auth:web'])
+    ->prefix(config('app.admin_prefix', 'admin'))
+    ->group(function () {
+        Route::prefix('reports')->name('admin.reports.')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])
+                ->middleware(RequireAdminPermission::class.':'.Permission::View->value)
+                ->name('index');
+        });
+    });
 ```
 
-2. Create the language files in the owning module:
+### 3. Return an Inertia page from the controller
 
 ```php
-// modules/reports/resources/lang/en/reports.php
-return [
-    'title' => 'Reports',
-];
-```
-
-```php
-// modules/reports/resources/lang/vi/reports.php
-return [
-    'title' => 'Báo cáo',
-];
-```
-
-3. Load it in the view with `const { t } = useTranslation();` and use
-   `t('reports.title')`. Shared shell strings fall back to the `common`
-   namespace, so they need no prefix.
-
-A module that only adds pages to the existing admin shell can instead add keys
-under the `admin` group in `modules/admin/resources/lang/{en,vi}/admin.php` and use
-`t('admin.pages.title')`.
-
-### 4. Describe the module
-
-`admin/src/modules/reports/module.tsx`
-
-```tsx
-import type { AdminModule } from '../../app/types';
-import { ReportsView } from './lazy';
-
-export const reportsModule: AdminModule = {
-  routes: [
-    {
-      path: '/reports',
-      element: <ReportsView />,
-      handle: { permission: 'reports.view' },
-    },
-  ],
-};
-```
-
-The sidebar entry is **not** declared here. It is registered on the backend
-through the `Menu` repository (see "Navigation and titles").
-
-### 5. Register the module
-
-`admin/src/app/modules.ts`
-
-```ts
-import { reportsModule } from '../modules/reports/module';
-
-registerModules([authModule, adminModule, blogModule, reportsModule]);
-```
-
-That is all: the route, the sidebar entry and the topbar title are wired
-automatically; translations come from the namespace declared earlier.
-
-## Module contract
-
-Defined in `admin/src/app/types.ts`:
-
-```ts
-interface AdminModule {
-  routes?: RouteObject[];        // inside ProtectedRoute + AdminLayout
-  publicRoutes?: RouteObject[];  // outside the admin shell (e.g. auth pages)
+public function index(Request $request): \Inertia\Response
+{
+    return Inertia::render('Reports::reports/Index', [
+        'title' => __('reports.title'),
+        'reports' => ReportResource::collection(
+            Report::query()->paginate()
+        ),
+    ]);
 }
 ```
 
-All fields are optional, so `auth` only provides `publicRoutes`, while feature
-modules provide `routes` (and optionally `standaloneRoutes`). Translations are
-not part of the module contract; they are served by the backend namespaces.
+Validate writes with a `FormRequest` and serialise models with an API
+`Resource`, exactly as the other modules do.
 
-The sidebar navigation has its own contract, returned by the backend
-(`admin/src/types/navigation.ts`):
+### 4. Add the React page
 
-```ts
-interface NavigationItem {
-  id: string;
-  label: string;        // already translated by the API
-  to: string | null;    // SPA path (no website prefix), null for groups
-  icon: string;         // lucide icon name, mapped in utils/navIcons.ts
-  permission: string | null;
-  children: NavigationItem[];
+`modules/reports/resources/views/reports/Index.tsx`:
+
+```tsx
+import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
+import { useTranslation } from '@/hooks/useTranslation';
+
+interface ReportsProps {
+    title: string;
+    reports: { data: unknown[] };
+}
+
+export default function Reports({ title, reports }: ReportsProps) {
+    const { t } = useTranslation();
+
+    return (
+        <AdminLayout title={title}>
+            <h1>{t('reports.title')}</h1>
+            {/* feature UI */}
+        </AdminLayout>
+    );
 }
 ```
 
-## Routing and lazy loading
+Pages are default-exported components. They receive the props passed by the
+controller plus the shared props (see below).
 
-`src/app/routes.tsx` composes the tree. Admin routes are nested under
-`ProtectedRoute > AdminLayout`; public routes are top-level:
+### 5. Register the sidebar entry
 
-```tsx
-const routes: RouteObject[] = [
-  ...getPublicRoutes(),
-  {
-    element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,
-    children: getAdminRoutes(),
-  },
-  { path: '/', element: <Navigate to="/dashboard" replace /> },
-  { path: '*', element: <Navigate to="/auth/login" replace /> },
-];
-return useRoutes(routes);
-```
-
-Every view is `React.lazy`, so it ships as its own chunk. Suspense boundaries
-are provided by the shell, which keeps the sidebar/topbar visible while a page
-loads:
-
-- `AdminLayout` wraps `<Outlet />` in `<Suspense fallback={<PageLoader />}>`.
-- `AuthLayout` wraps its `<Outlet />`.
-- `/auth/callback` is wrapped in `auth/module.tsx`.
-
-Do not add a top-level Suspense around `AppRoutes`; it would unmount the shell
-during navigation.
-
-## Navigation and titles
-
-The website-admin sidebar is **dynamic**: the frontend fetches it from
-`GET /api/v1/admin/navigation`. It is not declared in the
-frontend modules.
-
-Backend registration (in the owning module's service provider, e.g.
-`Modules\Blog\Providers\BlogServiceProvider` for a blog item, or
-`Modules\Admin\Providers\AdminServiceProvider` for core admin items):
+Navigation is registered on the **backend** (not in the page) from the module
+service provider's `boot()`, so a disabled module contributes nothing:
 
 ```php
+use App\Facades\Menu;
+use App\Support\MenuRepository;
+
 Menu::make('reports', fn () => [
-    'label' => __('admin.nav.reports'),   // literal label, translated per request
-    'to' => '/reports',                   // SPA path, no website prefix
-    'icon' => 'file-bar-chart',           // lucide icon name
-    'permission' => 'reports.view',
+    'label' => __('reports.nav.reports'),
+    'to' => '/reports',                    // SPA path, relative to the admin prefix
+    'icon' => 'file-text',                 // lucide icon name (see NavIcon)
+    'permission' => Permission::View->value,
     'position' => MenuRepository::POSITION_ADMIN,
     'priority' => 70,
 ]);
 ```
 
-- An item with a `parent` key becomes a child of that parent (collapsible group);
-  the parent item itself usually has no `to`.
-- Registering in the owning module means a disabled module contributes no
-  sidebar items.
-- `priority` controls ordering. Labels live in the owning module's language
-  file (`modules/admin/resources/lang/{en,vi}/admin.php`, `modules/blog/resources/lang/{en,vi}/blog.php`)
-  and follow the request `Accept-Language` header.
-- The route stays in the frontend module (`routes` + `handle.permission`); the
-  menu only controls what the sidebar shows.
+- `to` is a path inside the admin app (no `ADMIN_PREFIX`); the frontend joins it
+  with the shared `admin_prefix`.
+- An item with a `parent` key becomes a child of that parent (collapsible
+  group); the parent usually has no `to`.
+- `priority` controls ordering.
+- New icons must be added to `resources/views/components/NavIcon.tsx`; unknown
+  names fall back to a plain circle.
 
-Frontend consumption:
+### 6. Register translations
 
-- `AdminSidebar` renders `useGetNavigationQuery()`, filtered by
-  `state.auth.user.permissions` (`utils/navigation.ts` + `utils/permission.ts`).
-- `AdminTopbar` resolves the title from the same navigation via
-  `resolveNavigationTitle(pathname)`, so detail/form pages inherit the section
-  title. New icons must be added to `admin/src/utils/navIcons.ts`.
+Register the module's namespace from its service provider so it owns its
+strings. When `path` is omitted the convention
+`modules/<Studly(namespace)>/resources/lang` is used:
+
+```php
+use App\Facades\AdminTranslation;
+
+AdminTranslation::make($this->nameLower, fn (): array => [
+    'group' => 'reports',
+    'path' => module_path($this->name, 'resources/lang'),
+]);
+```
+
+Create `modules/reports/resources/lang/en/reports.php` and the matching `vi`
+file, then read them in the page with
+`const { t } = useTranslation();` and `t('reports.title')` — the first segment is
+the namespace.
+
+### 7. Register permissions
+
+Declare permissions in a PHP enum (`modules/reports/app/Enums/Permission.php`)
+with a `values()` method, add them to `App\Providers\PermissionServiceProvider`,
+and run:
+
+```bash
+php artisan permission:generate
+```
+
+Use the same string on the route middleware (`RequireAdminPermission`), the menu
+item (`permission`) and the enum case.
+
+### 8. Build
+
+```bash
+npm run build
+```
+
+The page glob is resolved by Vite at build time, so a new page is not available
+until the admin front end is rebuilt.
+
+## Shared props
+
+`App\Http\Middleware\HandleInertiaRequests::share()` sends these to every
+Inertia response:
+
+| Prop | Description |
+| --- | --- |
+| `auth.user` | Current user (`id`, `name`, `email`, `avatar_url`, `is_super_admin`, `permissions`) or `null` |
+| `flash` | `success`, `error`, `warning` from the session |
+| `admin_menu` | The permission-filtered sidebar tree (`NavItem[]`) |
+| `admin_prefix` | Value of `ADMIN_PREFIX` (default `admin`) |
+| `locale` | Current application locale |
+| `translations` | Translation namespaces keyed by frontend namespace |
+| `routes` | Named Laravel routes keyed by name, exposed to `route()` |
+
+## Frontend helpers
+
+- `route(name, params?)` (`resources/views/lib/route.ts`) builds a URL from the
+  shared `routes` prop: `route('admin.blog.posts.index')`,
+  `route('admin.blog.posts.destroy', { post: id })`. Placeholders use `{param}`;
+  extra keys become a query string. It is also exposed globally as
+  `window.route`.
+- `useTranslation()` (`resources/views/hooks/useTranslation.ts`) resolves
+  `'<namespace>.<key.path>'` from the shared `translations` prop and accepts an
+  optional fallback: `t('admin.nav.dashboard', 'Dashboard')`.
+- `AdminLayout` reads `admin_menu`, `admin_prefix`, `flash` and `auth.user`,
+  renders the sidebar/topbar, and accepts a `title` prop.
+
+## Navigation contract
+
+The sidebar tree is built server-side by `Menu::tree('admin')` and filtered in
+`HandleInertiaRequests::adminMenu()` against the user's permissions (super
+admins see everything). The serialised item shape (`NavItem`):
+
+```ts
+interface NavItem {
+    key: string;
+    label: string;               // already translated for the request
+    to: string | null;           // SPA path (no admin prefix), null for groups
+    icon: string | null;         // lucide icon name, mapped in NavIcon.tsx
+    permission: string | null;
+    children: NavItem[];
+}
+```
+
+`AdminSidebar` renders this tree and highlights the active item from the current
+Inertia URL.
 
 ## Permissions
 
-Permission checks are split between the API (the real boundary) and the UI
-(usability).
+Authorization is enforced on the **backend**; the frontend only mirrors it for
+usability.
 
-Frontend:
-
-- `NavigationItem.permission` hides the sidebar entry when the user lacks it.
-- `route.handle.permission` is read by `RequirePermission` (via `useMatches`,
-  deepest match wins) and renders `ForbiddenView` when access is denied.
-- `admin/src/utils/permission.ts` treats **unknown** permissions as allowed so
-  a not-yet-loaded profile never blocks the UI. The API remains authoritative.
-
-Backend contract (`modules/auth`):
-
-- The permission catalog is declared in code via the module permission enums
-  (`Modules\Auth\Enums\Permission`, `Modules\Admin\Enums\*`,
-  `Modules\Blog\Enums\Permission`, ...), then registered in
-  `App\Providers\PermissionServiceProvider` through `App\Support\PermissionRegistry`.
-  Run `php artisan permission:generate` to persist the catalog as Spatie
-  permissions (the provider itself never writes to the database).
-- Permission resolution is lenient: assigning a permission that has not been
-  generated yet is skipped instead of throwing, so a missing
-  `permission:generate` run never breaks the app.
-- Spatie is the single source of truth for authorization: roles are dynamic
-  (admin-defined) and users get permissions through their roles.
-- `User::isSuperAdmin()` (column `users.is_super_admin`) bypasses every check
-  via a `Gate::before` hook.
+- The catalog is declared in code through module permission enums
+  (`Modules\Auth\Enums\Permission`, `Modules\Admin\Enums\*Permission`,
+  `Modules\Blog\Enums\Permission`, ...), registered in
+  `App\Providers\PermissionServiceProvider` via `App\Support\PermissionRegistry`.
+  Run `php artisan permission:generate` to persist them as Spatie permissions.
+- Web routes are guarded per action by `RequireAdminPermission` (e.g.
+  `RequireAdminPermission::class.':'.Permission::View->value`).
+- Controllers expose per-action `abilities` (via the `AuthorizesAdmin` trait)
+  so pages can hide controls the user cannot use.
+- `User::isSuperAdmin()` (`users.is_super_admin`) bypasses every check.
 - `User::permissionNames()` returns the Spatie permission names, or `['*']` for
   super admins.
-- `UserResource` returns `permissions`, `roles` and `is_super_admin` in every
-  user payload.
+- `admin_menu` is already filtered by permission server-side.
 
-If a module introduces a new permission, add it to the relevant enum
-(`Permission`, `MenuPermission`, `PagePermission`) and use the same string on
-the backend menu item and `handle.permission`; register it in
-`PermissionServiceProvider` and run `permission:generate`.
-When the module adds admin-only API endpoints, enforce the permission
-server-side as well (e.g. `permission:users.manage`) — the UI guard
-is not authorization.
+When a module adds a permission, add it to its enum, register it in
+`PermissionServiceProvider`, and run `permission:generate`. Use the same string
+on the route, the menu item and the enum case.
 
 ## i18n
 
-The admin SPA loads its strings at runtime from the backend, one i18next
-namespace per module. `HandleInertiaRequests` shares a `translations` prop on
-every Inertia response, keyed by namespace; `App\Support\AdminTranslations`
-builds it from the namespaces registered through the `AdminTranslation`
-registry. Each owner registers its own namespace from its service provider —
-the application shell registers `common`, each module registers its own — so a
-new module never requires editing a central configuration file:
+The frontend loads its strings at runtime from the backend, one namespace per
+owner. `HandleInertiaRequests` shares a `translations` prop keyed by namespace;
+`App\Support\AdminTranslations` builds it from the namespaces registered through
+the `AdminTranslation` registry. Each owner registers its own namespace from its
+service provider, so adding a module never requires editing a central file:
 
-| i18next namespace | Backend group | Stored in |
-| ----------------- | ------------- | --------- |
-| `common`          | `common`      | `resources/lang/{en,vi}/common.php` (shell + auth layout) |
-| `admin`           | `admin`       | `modules/admin/resources/lang/{en,vi}/admin.php` (also holds the backend navigation labels) |
-| `auth`            | `admin_auth`  | `modules/auth/resources/lang/{en,vi}/admin_auth.php` |
-| `blog`            | `blog`        | `modules/blog/resources/lang/{en,vi}/blog.php` |
+| Namespace | Backend group | Stored in |
+| --- | --- | --- |
+| `common` | `common` | `resources/lang/{en,vi}/common.php` (shell + auth layout) |
+| `admin` | `admin` | `modules/admin/resources/lang/{en,vi}/admin.php` (also holds backend menu labels) |
+| `auth` | `admin_auth` | `modules/auth/resources/lang/{en,vi}/admin_auth.php` |
+| `blog` | `blog` | `modules/blog/resources/lang/{en,vi}/blog.php` |
 
-`App\Support\AdminTranslations` resolves each namespace to its backend group
-and owning module. `registerNamespaces()` exposes module directories as
-translation namespaces; because a module's provider only boots when the module
-is enabled, a disabled module contributes no namespace or locale.
-
-Components call `useTranslation()` and reference the namespace inline with a
-dot: the first segment is the namespace (`t('blog.posts.title')`). Keys without
-a namespace prefix resolve against `common` for shared shell strings:
-
-```
-common:  topbar.*, userMenu.*, role.*, forbidden.*, comingSoon,
-         brandDesc, version, layout.*
-admin:   nav.* (also read by the backend menu), dashboard.*, users.*,
-         settings.*, media.*, menus.*, widgets.*, customize.*, pages.*
-auth:    login.*, register.*, forgotPassword.*, resetPassword.*, verifyEmail.*, oauth.*
-blog:    nav.* (also read by the backend menu), posts.*, categories.*,
-         comments.*, pagination.*
-```
-
-Cross-namespace references are explicit: the blog post form uses
-`t('blog.posts.title')` for its own strings and `t('admin.media.insertImage')`
-for the shared media picker.
-
-Locales are discovered from the directories in `resources/lang/` and every
-owning module's `resources/lang/`; the frontend is limited to the codes listed in
-`supportedLngs` (`['en', 'vi']`). Unknown locales or namespaces return `404`.
-
-The `nav.*` labels live in the `admin`/`blog` namespaces and are read by both
-sides: the backend menu uses `__('admin.nav.dashboard')` /
-`__('blog.nav.blogPosts')`, and the shell uses `t('admin.nav.dashboard')` /
-`t('admin.nav.menuLabel')`.
+`registerNamespaces()` exposes each module's language directory as a translation
+namespace; because a module provider only boots when the module is enabled, a
+disabled module contributes no namespace or locale.
 
 ## Conventions and gotchas
 
-- Keep `module.tsx` free of component definitions; put `React.lazy` in `lazy.ts`.
-- Admin route paths are absolute (`/reports`) and rendered inside the shell.
-- One route entry per page; group a module's pages under a path prefix when it
-  grows (e.g. `/reports`, `/reports/settings`).
-- Backend modules should namespace their API routes per module
-  (`api/v1/reports/...`) to avoid collisions.
+- There is no `admin/` SPA and no `/api` admin layer. Pages come from
+  `modules/*/resources/views`; controllers return `Inertia::render(...)` and
+  redirects, not JSON resources.
+- Inertia page components are **default exports**.
+- Admin route names are prefixed `admin.` and grouped under
+  `config('app.admin_prefix')`; the frontend builds URLs from those names with
+  `route()`.
+- Keep module pages free of cross-module imports except for the shared shell
+  (`AdminLayout`) and shared UI under `@/components`.
 - Do not add translation JSON to the frontend. Strings live in the backend:
   the shared shell in `resources/lang/{en,vi}/common.php`, and each module's
-  own strings in that module's `resources/lang/` directory. Reference them with
-  `useTranslation()` + `t('<namespace>.<key>')`.
+  own strings in that module's `resources/lang/` directory.
+- New sidebar icons must be registered in
+  `resources/views/components/NavIcon.tsx`.
+- Name module pages `<area>/Index.tsx` and `<area>/Form.tsx` for consistency
+  with the existing admin and blog modules.
 
 ## Verify
 
 ```bash
-cd admin
-npm run lint     # 0 errors
-npm run build    # tsc -b + vite build
-```
-
-Backend, when permissions/endpoints change:
-
-```bash
-php artisan test tests/Unit/Auth tests/Feature/Auth
+npm run build          # build the admin front end (tsc via Vite)
+php artisan test       # AdminModule / BlogModule suites
+vendor/bin/pint        # PHP code style
 ```
 
 ## Checklist
 
-- [ ] `modules/<name>/views/XxxView.tsx` created
-- [ ] `modules/<name>/lazy.ts` exports the lazy component
-- [ ] Namespace registered via `AdminTranslation::make()` in the owning module's service provider; strings added to `resources/lang/{en,vi}/<group>.php`
-- [ ] `modules/<name>/module.tsx` exports the `AdminModule`
-- [ ] `src/app/modules.ts` registers the module
-- [ ] Sidebar item registered in the owning module's service provider via `Menu::make()` with label, `to`, icon and permission
-- [ ] Label added to the owning module's language file; icon added to `src/utils/navIcons.ts` if new
-- [ ] New permission (if any) added to a backend permission enum, registered in `PermissionServiceProvider` + run `php artisan permission:generate`
-- [ ] `handle.permission` on the route and `permission` on the menu item match the backend string
-- [ ] `npm run lint` and `npm run build` pass
+- [ ] Module scaffolded and enabled so its service provider boots
+- [ ] `routes/web.php` maps the module's admin routes under the admin prefix
+- [ ] Controller returns `Inertia::render('<Module>::<area>/<Page>', [...])`
+- [ ] `FormRequest` + `Resource` used for writes and serialisation
+- [ ] React page added under `modules/<name>/resources/views/<area>/` with a default export
+- [ ] Sidebar item registered via `Menu::make()` with `to`, `icon`, `permission` and `priority`
+- [ ] New icon (if any) added to `resources/views/components/NavIcon.tsx`
+- [ ] Namespace registered via `AdminTranslation::make()`; `resources/lang/{en,vi}/<group>.php` added
+- [ ] New permission (if any) added to a permission enum and registered in `PermissionServiceProvider`, then `php artisan permission:generate`
+- [ ] `npm run build` and `php artisan test` pass
