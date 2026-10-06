@@ -71,14 +71,14 @@ the module its own i18next namespace so it owns its strings.
 2. Create the language files in the owning module:
 
 ```php
-// modules/reports/lang/en/reports.php
+// modules/reports/resources/lang/en/reports.php
 return [
     'title' => 'Reports',
 ];
 ```
 
 ```php
-// modules/reports/lang/vi/reports.php
+// modules/reports/resources/lang/vi/reports.php
 return [
     'title' => 'Báo cáo',
 ];
@@ -89,7 +89,7 @@ return [
    namespace, so they need no prefix.
 
 A module that only adds pages to the existing admin shell can instead add keys
-under the `admin` group in `modules/admin/lang/{en,vi}/admin.php` and use
+under the `admin` group in `modules/admin/resources/lang/{en,vi}/admin.php` and use
 `t('admin:pages.title')`.
 
 ### 4. Describe the module
@@ -211,7 +211,7 @@ Menu::make('reports', fn () => [
 - Registering in the owning module means a disabled module contributes no
   sidebar items.
 - `priority` controls ordering. Labels live in the owning module's language
-  file (`modules/admin/lang/{en,vi}/admin.php`, `modules/blog/lang/{en,vi}/blog.php`)
+  file (`modules/admin/resources/lang/{en,vi}/admin.php`, `modules/blog/resources/lang/{en,vi}/blog.php`)
   and follow the request `Accept-Language` header.
 - The route stays in the frontend module (`routes` + `handle.permission`); the
   menu only controls what the sidebar shows.
@@ -278,9 +278,9 @@ builds the response from the language files described in
 | i18next namespace | Backend group | Stored in |
 | ----------------- | ------------- | --------- |
 | `common`          | `common`      | `resources/lang/{en,vi}/common.php` (shell + auth layout) |
-| `admin`           | `admin`       | `modules/admin/lang/{en,vi}/admin.php` (also holds the backend navigation labels) |
-| `auth`            | `admin_auth`  | `modules/auth/lang/{en,vi}/admin_auth.php` |
-| `blog`            | `blog`        | `modules/blog/lang/{en,vi}/blog.php` |
+| `admin`           | `admin`       | `modules/admin/resources/lang/{en,vi}/admin.php` (also holds the backend navigation labels) |
+| `auth`            | `admin_auth`  | `modules/auth/resources/lang/{en,vi}/admin_auth.php` |
+| `blog`            | `blog`        | `modules/blog/resources/lang/{en,vi}/blog.php` |
 
 `App\Support\AdminTranslations` resolves each namespace to its backend group
 and owning module. `registerNamespaces()` registers module directories as
@@ -307,7 +307,7 @@ Cross-namespace references are explicit: the blog post form uses
 for the shared media picker.
 
 Locales are discovered from the directories in `resources/lang/` and every
-owning module's `lang/`; the frontend is limited to the codes listed in
+owning module's `resources/lang/`; the frontend is limited to the codes listed in
 `supportedLngs` (`['en', 'vi']`). Unknown locales or namespaces return `404`.
 
 The `nav.*` labels live in the `admin`/`blog` namespaces and are read by both
@@ -325,7 +325,7 @@ sides: the backend menu uses `__('admin.nav.dashboard')` /
   (`api/v1/reports/...`) to avoid collisions.
 - Do not add translation JSON to the frontend. Strings live in the backend:
   the shared shell in `resources/lang/{en,vi}/common.php`, and each module's
-  own strings in that module's `lang/` directory. Reference them with
+  own strings in that module's `resources/lang/` directory. Reference them with
   `useTranslation()` + `t('<namespace>:key')`.
 
 ## Verify
@@ -346,7 +346,7 @@ php artisan test tests/Unit/Auth tests/Feature/Auth
 
 - [ ] `modules/<name>/views/XxxView.tsx` created
 - [ ] `modules/<name>/lazy.ts` exports the lazy component
-- [ ] Namespace declared in `config/admin-translations.php`; strings added to the owning module's `lang/{en,vi}/<group>.php`
+- [ ] Namespace declared in `config/admin-translations.php`; strings added to the owning module's `resources/lang/{en,vi}/<group>.php`
 - [ ] `modules/<name>/module.tsx` exports the `AdminModule`
 - [ ] `src/app/modules.ts` registers the module
 - [ ] Sidebar item registered in the owning module's service provider via `Menu::make()` with label, `to`, icon and permission

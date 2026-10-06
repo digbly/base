@@ -53,7 +53,7 @@ class AdminTranslations
                 continue;
             }
 
-            $path = module_path($module, 'lang');
+            $path = module_path($module, 'resources/lang');
 
             if (File::isDirectory($path)) {
                 Lang::addNamespace($namespace, $path);
@@ -92,7 +92,7 @@ class AdminTranslations
         return collect($this->namespaces())
             ->pluck('module')
             ->filter()
-            ->map(fn (string $module) => module_path($module, 'lang'))
+            ->map(fn (string $module) => module_path($module, 'resources/lang'))
             ->values()
             ->all();
     }

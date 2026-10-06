@@ -9,7 +9,7 @@ return [
     |
     | Maps every i18next namespace used by the admin SPA to its backend
     | language group and the owner that stores it. `module` points at an
-    | nwidart module whose `lang/` directory holds the files; omitting it keeps
+    | nwidart module whose `resources/lang/` directory holds the files; omitting it keeps
     | the group in the application `resources/lang` directory.
     |
     | Module namespaces are registered explicitly (independently of module
