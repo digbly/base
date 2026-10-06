@@ -69,6 +69,7 @@ use App\Facades\AdminTranslation;
 
 AdminTranslation::make('reports', fn (): array => [
     'group' => 'reports',
+    // Optional; defaults to modules/<Studly(namespace)>/resources/lang.
     'path' => module_path('Reports', 'resources/lang'),
 ]);
 ```
