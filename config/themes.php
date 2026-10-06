@@ -90,6 +90,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Server Side Rendering
+    |--------------------------------------------------------------------------
+    |
+    | Each theme may ship its own SSR bundle and server. A theme declares them
+    | in `theme.json` under the `ssr` key (enabled, host, port, bundle); the
+    | values here are the defaults used when a theme omits them.
+    |
+    | `enabled` acts as a master switch: when set to false, theme SSR is
+    | disabled regardless of `theme.json`. Leave it unset to respect
+    | `inertia.ssr.enabled` (INERTIA_SSR_ENABLED).
+    |
+    | `output` is the directory, relative to the project root, where built
+    | per-theme bundles live. The default bundle for a theme is
+    | `<output>/<alias>/ssr.js`.
+    |
+    */
+
+    'ssr' => [
+        'enabled' => env('THEME_SSR_ENABLED'),
+        'host' => env('THEME_SSR_HOST', '127.0.0.1'),
+        'output' => 'bootstrap/ssr/themes',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Activators
     |--------------------------------------------------------------------------
     |

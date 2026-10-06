@@ -79,13 +79,17 @@ php artisan theme:publish              # copy every theme's resources/assets
 php artisan theme:publish Blog --force # clean + republish one theme
 php artisan theme:build default        # build a theme's Inertia front end (Vite)
 php artisan theme:build default --dev  # run the theme's Vite dev server
+php artisan theme:ssr default          # start the theme's Inertia SSR server
 ```
 
-`theme:make` generates `theme.json`, `composer.json`,
-`app/Providers/ThemeServiceProvider.php`, `resources/views/welcome.blade.php`,
-`config/config.php`, `routes/web.php` and `resources/assets/css/theme.css`, then
-runs `composer dump-autoload` so the new theme's PSR-4 mapping is registered.
-Stubs live in `resources/stubs/themes`.
+`theme:make` scaffolds a full Inertia (React) front end: `theme.json`,
+`composer.json`, `package.json`, `vite.config.js`, `tsconfig.json`,
+`app/Providers/ThemeServiceProvider.php`, `resources/views/theme.blade.php`,
+`resources/views/app.tsx`, a server-side-rendering entry
+`resources/views/ssr.tsx`, the client helpers (`lib/resolve-page.ts`,
+`lib/route.ts`), a `pages/Home.tsx`, `config/config.php`, `routes/web.php` and
+`resources/assets/css/app.css`. It then runs `composer dump-autoload` so the new
+theme's PSR-4 mapping is registered. Stubs live in `resources/stubs/themes`.
 
 ## theme.json
 
@@ -222,8 +226,10 @@ themes/default/
   resources/
     views/
       theme.blade.php            # Inertia root, guarded @vite('resources/views/app.tsx', 'themes/default')
-      app.tsx                    # createInertiaApp entry
+      app.tsx                    # createInertiaApp entry (client)
+      ssr.tsx                    # Inertia SSR server entry
       lib/resolve-page.ts        # resolves pages/**/*.tsx
+      lib/route.ts               # SSR-safe route() helper
       pages/                     # Home, Category, Post, Search, NotFound
       layouts/ components/       # layout, sidebar, widgets, blocks, comments
     assets/css/app.css           # Tailwind entry (imported by app.tsx)
@@ -243,6 +249,56 @@ Blade templates under `resources/views` (`pages/**/*.tsx`). Blade only compiles
 - Page blocks and widgets registered with a `component` (and an optional
   `data` resolver) are resolved to a JSON payload by `SidebarRenderer::payload()`
   and `PageBlockRenderer`, and rendered client-side.
+
+## Server-side rendering
+
+Each theme may ship its own SSR bundle and server. A theme opts in through the
+`ssr` key in its `theme.json`:
+
+```json
+{
+    "ssr": {
+        "enabled": true,
+        "host": "127.0.0.1",
+        "port": 13714,
+        "bundle": "bootstrap/ssr/themes/default/ssr.js"
+    }
+}
+```
+
+Only the active theme's configuration is applied, and only on theme routes: the
+`App\Http\Middleware\ThemeSsr` middleware (attached to every theme route by
+`Theme::registerRoutes()`) points Inertia's SSR gateway at the active theme via
+`Theme::registerSsr()`. The application's own Inertia pages are never affected.
+
+- `enabled` — opt the theme out of SSR.
+- `host` / `port` — where the theme's SSR server listens and where Inertia
+  dispatches. Give every theme its own port if you run several at once.
+- `bundle` — bundle path, absolute or relative to the project root. Defaults to
+  `<themes.ssr.output>/<alias>/ssr.js`.
+
+Build the client and SSR bundles with `theme:build` (the theme's `build` script
+runs `vite build && vite build --ssr`), then start the server:
+
+```bash
+php artisan theme:build default
+php artisan theme:ssr default
+```
+
+`theme:ssr` spawns `node bootstrap/ssr/themes/default/ssr.js` with `SSR_PORT`
+and `SSR_HOST` set from the theme's `ssr.port` / `ssr.host`. The SSR entry
+(`resources/views/ssr.tsx`) reads them and defaults to `13714` on `127.0.0.1`,
+so the server binds to the loopback interface unless a theme opts otherwise.
+
+Global defaults and the master switch live in `config/themes.php` under `ssr`:
+
+- `ssr.enabled` (`THEME_SSR_ENABLED`) — when `false`, theme SSR is disabled
+  regardless of `theme.json`; unset respects `inertia.ssr.enabled`.
+- `ssr.host` (`THEME_SSR_HOST`) — default host.
+- `ssr.output` — base directory for built per-theme bundles.
+
+A theme that declares no `ssr` block still enables SSR by default; if its bundle
+does not exist, Inertia simply falls back to client-side rendering.
 
 ## Configuration
 
@@ -280,7 +336,7 @@ Or manually:
    `"<Name>": true` to `themes/statuses.json`).
 5. Run `composer dump-autoload` and select it via `THEME_DEFAULT`.
 
-`theme_path('default', 'resources/views/welcome.blade.php')` is handy while
+`theme_path('default', 'resources/views/theme.blade.php')` is handy while
 scaffolding, and `theme:publish <Name>` copies assets into
 `public/themes/<alias>`.
 

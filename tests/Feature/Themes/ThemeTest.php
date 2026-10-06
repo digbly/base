@@ -234,6 +234,29 @@ class ThemeTest extends TestCase
         $this->get('/theme-probe')->assertOk()->assertSee('ok');
     }
 
+    public function test_theme_routes_register_ssr_gateway_for_the_active_theme(): void
+    {
+        $theme = $this->makeTheme('Blog', routes: <<<'PHP'
+        <?php
+
+        use Illuminate\Support\Facades\Route;
+
+        Route::get('/theme-ssr', fn () => response()->json([
+            'url' => config('inertia.ssr.url'),
+            'bundle' => config('inertia.ssr.bundle'),
+        ]))->name('theme.ssr');
+        PHP);
+
+        $this->manager()->activate($theme);
+
+        $this->get('/theme-ssr')
+            ->assertOk()
+            ->assertJson([
+                'url' => 'http://127.0.0.1:13714',
+                'bundle' => base_path('bootstrap/ssr/themes/blog/ssr.js'),
+            ]);
+    }
+
     public function test_make_command_scaffolds_and_enables_theme(): void
     {
         $this->artisan('theme:make', ['name' => 'Blog'])->assertSuccessful();
@@ -242,11 +265,23 @@ class ThemeTest extends TestCase
 
         $this->assertFileExists($directory.'/theme.json');
         $this->assertFileExists($directory.'/composer.json');
+        $this->assertFileExists($directory.'/package.json');
+        $this->assertFileExists($directory.'/vite.config.js');
+        $this->assertFileExists($directory.'/tsconfig.json');
         $this->assertFileExists($directory.'/app/Providers/ThemeServiceProvider.php');
-        $this->assertFileExists($directory.'/resources/views/welcome.blade.php');
+        $this->assertFileExists($directory.'/resources/views/theme.blade.php');
+        $this->assertFileExists($directory.'/resources/views/app.tsx');
+        $this->assertFileExists($directory.'/resources/views/ssr.tsx');
+        $this->assertFileExists($directory.'/resources/views/lib/resolve-page.ts');
+        $this->assertFileExists($directory.'/resources/views/lib/route.ts');
+        $this->assertFileExists($directory.'/resources/views/pages/Home.tsx');
         $this->assertFileExists($directory.'/config/config.php');
         $this->assertFileExists($directory.'/routes/web.php');
-        $this->assertFileExists($directory.'/resources/assets/css/theme.css');
+        $this->assertFileExists($directory.'/resources/assets/css/app.css');
+        $this->assertFileDoesNotExist($directory.'/resources/views/welcome.blade.php');
+
+        $manifest = json_decode($this->files->get($directory.'/theme.json'), true);
+        $this->assertSame('bootstrap/ssr/themes/blog/ssr.js', $manifest['ssr']['bundle'] ?? null);
 
         $this->assertTrue($this->repository()->findOrFail('Blog')->isEnabled());
     }

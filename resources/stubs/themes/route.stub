@@ -23,10 +23,6 @@ export function setRoutes(next: Record<string, string> = {}): void {
 
 /**
  * Build a URL from a named route shared by the backend.
- *
- * Values are resolved from the shared route map and any remaining parameters
- * are appended as a query string. Placeholders using `{param}` are replaced in
- * place.
  */
 export function route(name: string, params: Record<string, unknown> = {}): string {
     const map = (typeof window !== 'undefined' ? window.__routes : undefined) ?? routes;

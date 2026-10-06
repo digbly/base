@@ -48,11 +48,19 @@ class MakeThemeCommand extends Command
         $stubs = [
             'theme.json.stub' => 'theme.json',
             'composer.stub' => 'composer.json',
+            'package.stub' => 'package.json',
+            'vite.stub' => 'vite.config.js',
+            'tsconfig.stub' => 'tsconfig.json',
             'provider.stub' => 'app/Providers/ThemeServiceProvider.php',
-            'view.stub' => 'resources/views/welcome.blade.php',
+            'theme-view.stub' => 'resources/views/theme.blade.php',
+            'app.stub' => 'resources/views/app.tsx',
+            'ssr.stub' => 'resources/views/ssr.tsx',
+            'resolve-page.stub' => 'resources/views/lib/resolve-page.ts',
+            'route.stub' => 'resources/views/lib/route.ts',
+            'page.stub' => 'resources/views/pages/Home.tsx',
             'config.stub' => 'config/config.php',
             'routes.stub' => 'routes/web.php',
-            'asset-css.stub' => 'resources/assets/css/theme.css',
+            'app-css.stub' => 'resources/assets/css/app.css',
         ];
 
         foreach ($stubs as $stub => $target) {

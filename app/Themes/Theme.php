@@ -3,6 +3,7 @@
 namespace App\Themes;
 
 use App\Contracts\ThemeActivator;
+use App\Http\Middleware\ThemeSsr;
 use Illuminate\Container\Container;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Foundation\AliasLoader;
@@ -163,7 +164,7 @@ class Theme
             return;
         }
 
-        Route::middleware('web')->group($path);
+        Route::middleware(['web', ThemeSsr::class])->group($path);
 
         // Routes defined by a theme are registered dynamically (during boot or
         // when previewing a theme at runtime), after the router may have
@@ -208,6 +209,60 @@ class Theme
                 array_replace_recursive($this->app['config']->get($configKey, []), require $file)
             );
         }
+    }
+
+    /**
+     * Resolve the server-side rendering settings declared by the theme.
+     *
+     * `theme.json` may declare an `ssr` object with `enabled`, `host`, `port`
+     * and `bundle` keys. Missing values fall back to `config('themes.ssr')`.
+     *
+     * @return array{enabled: bool, host: string, port: int, bundle: string}
+     */
+    public function ssrSettings(): array
+    {
+        $ssr = (array) $this->get('ssr', []);
+
+        $bundle = $ssr['bundle']
+            ?? trim((string) config('themes.ssr.output', 'bootstrap/ssr/themes'), '/').'/'.$this->getLowerName().'/ssr.js';
+
+        return [
+            'enabled' => filter_var($ssr['enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+            'host' => (string) ($ssr['host'] ?? config('themes.ssr.host', '127.0.0.1')),
+            'port' => (int) ($ssr['port'] ?? 13714),
+            'bundle' => str_starts_with($bundle, '/') ? $bundle : base_path($bundle),
+        ];
+    }
+
+    /**
+     * Point Inertia's SSR gateway at this theme's bundle and server.
+     *
+     * Called on theme routes only, so the application's own Inertia pages keep
+     * using whatever SSR configuration they were given.
+     */
+    public function registerSsr(): void
+    {
+        $settings = $this->ssrSettings();
+
+        $enabled = $settings['enabled'] && (bool) config('inertia.ssr.enabled', true);
+
+        $global = config('themes.ssr.enabled');
+
+        if ($global !== null && $global !== '') {
+            $enabled = $enabled && filter_var($global, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        if (! $enabled) {
+            config(['inertia.ssr.enabled' => false]);
+
+            return;
+        }
+
+        config([
+            'inertia.ssr.enabled' => true,
+            'inertia.ssr.bundle' => $settings['bundle'],
+            'inertia.ssr.url' => sprintf('http://%s:%d', $settings['host'], $settings['port']),
+        ]);
     }
 
     public function getCachedServicesPath(): string

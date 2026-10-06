@@ -8,5 +8,11 @@
         "Themes\\{{ studly }}\\Providers\\ThemeServiceProvider"
     ],
     "aliases": {},
-    "files": []
+    "files": [],
+    "ssr": {
+        "enabled": true,
+        "host": "127.0.0.1",
+        "port": 13714,
+        "bundle": "bootstrap/ssr/themes/{{ alias }}/ssr.js"
+    }
 }
