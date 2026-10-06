@@ -7,6 +7,7 @@ use App\Models\MediaItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Modules\Admin\Tests\TestCase;
+use Modules\Auth\Enums\SocialProvider;
 use Modules\Auth\Models\User;
 
 class SettingsPageTest extends TestCase
@@ -86,5 +87,40 @@ class SettingsPageTest extends TestCase
             ->assertRedirect();
 
         $this->assertSame($media->id, app(SettingContract::class)->get('logo'));
+    }
+
+    public function test_super_admin_can_update_social_login_settings(): void
+    {
+        $admin = User::factory()->create(['is_super_admin' => true]);
+
+        $this->actingAs($admin, 'web')
+            ->put('/admin/settings', [
+                'social_login_google_enabled' => true,
+                'social_login_google_client_id' => 'google-client-id',
+                'social_login_google_client_secret' => 'google-client-secret',
+            ])
+            ->assertRedirect();
+
+        $settings = app(SettingContract::class);
+        $this->assertTrue($settings->boolean('social_login_google_enabled'));
+        $this->assertSame('google-client-id', $settings->get('social_login_google_client_id'));
+
+        $provider = SocialProvider::Google;
+        $provider->configure();
+
+        $this->assertSame('google-client-id', config('services.google.client_id'));
+        $this->assertSame('google-client-secret', config('services.google.client_secret'));
+        $this->assertTrue($provider->isConfigured());
+    }
+
+    public function test_social_provider_is_not_configured_when_disabled(): void
+    {
+        app(SettingContract::class)->sets([
+            'social_login_google_enabled' => false,
+            'social_login_google_client_id' => 'google-client-id',
+            'social_login_google_client_secret' => 'google-client-secret',
+        ]);
+
+        $this->assertFalse(SocialProvider::Google->isConfigured());
     }
 }

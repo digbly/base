@@ -309,6 +309,14 @@ return [
             'saved' => 'Lưu cài đặt thành công.',
         ],
         'save' => 'Lưu thay đổi',
+        'social' => [
+            'clientId' => 'Client ID',
+            'clientSecret' => 'Client secret',
+            'envHint' => 'Để trống để dùng giá trị từ biến môi trường (.env).',
+            'redirect' => 'Redirect URI',
+            'subtitle' => 'Cho phép khách truy cập đăng nhập bằng nhà cung cấp bên ngoài. Thông tin để trống sẽ dùng cấu hình từ biến môi trường.',
+            'title' => 'Đăng nhập mạng xã hội',
+        ],
         'subtitle' => 'Quản lý nhận diện công khai, thương hiệu và tùy chọn đăng ký của website này.',
         'title' => 'Cài đặt',
         'users' => [

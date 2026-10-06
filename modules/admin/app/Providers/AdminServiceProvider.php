@@ -14,6 +14,7 @@ use Modules\Admin\Enums\PagePermission;
 use Modules\Admin\Enums\ThemePermission;
 use Modules\Admin\Enums\WidgetPermission;
 use Modules\Auth\Enums\Permission as AuthPermission;
+use Modules\Auth\Enums\SocialProvider;
 use Nwidart\Modules\Support\ModuleServiceProvider;
 
 class AdminServiceProvider extends ModuleServiceProvider
@@ -230,6 +231,43 @@ class AdminServiceProvider extends ModuleServiceProvider
             ->type('boolean')
             ->rules(['nullable', 'boolean'])
             ->add();
+
+        $this->registerSocialLoginSettings();
+    }
+
+    /**
+     * Register the per-provider social login definitions. Credentials left
+     * empty fall back to the values from the environment configuration.
+     */
+    protected function registerSocialLoginSettings(): void
+    {
+        foreach (SocialProvider::cases() as $provider) {
+            Setting::make($provider->settingKey('enabled'))
+                ->label($provider->label().' login')
+                ->default($provider->hasEnvironmentCredentials())
+                ->type('boolean')
+                ->rules(['nullable', 'boolean'])
+                ->disableShowApi()
+                ->add();
+
+            Setting::make($provider->settingKey('client_id'))
+                ->type('string')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->disableShowApi()
+                ->add();
+
+            Setting::make($provider->settingKey('client_secret'))
+                ->type('string')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->disableShowApi()
+                ->add();
+
+            Setting::make($provider->settingKey('redirect'))
+                ->type('string')
+                ->rules(['nullable', 'url', 'max:255'])
+                ->disableShowApi()
+                ->add();
+        }
     }
 
     /**

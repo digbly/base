@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Globe, Save } from 'lucide-react';
+import { Globe, Save, Share2 } from 'lucide-react';
 import AdminLayout from '@modules/admin/resources/views/layouts/AdminLayout';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -13,6 +13,22 @@ import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 
+const SOCIAL_PROVIDERS = [
+    { key: 'google', label: 'Google' },
+    { key: 'facebook', label: 'Facebook' },
+    { key: 'github', label: 'GitHub' },
+] as const;
+
+type SocialProviderKey = (typeof SOCIAL_PROVIDERS)[number]['key'];
+
+type SocialSettingKey = `social_login_${SocialProviderKey}_${'enabled' | 'client_id' | 'client_secret' | 'redirect'}`;
+
+type SocialSettings = Partial<Record<SocialSettingKey, string | boolean | null>>;
+
+type SocialFormSettings = {
+    [K in SocialSettingKey]: K extends `social_login_${SocialProviderKey}_enabled` ? boolean : string;
+};
+
 interface SettingsProps {
     title: string;
     settings: {
@@ -24,7 +40,7 @@ interface SettingsProps {
         banner?: string | null;
         user_registration?: boolean | null;
         user_verification?: boolean | null;
-    };
+    } & SocialSettings;
     media: {
         logo: MediaItemSummary | null;
         favicon: MediaItemSummary | null;
@@ -33,7 +49,7 @@ interface SettingsProps {
     locales: string[];
 }
 
-interface SettingsForm {
+type SettingsForm = SocialFormSettings & {
     title: Record<string, string>;
     description: Record<string, string>;
     sitename: string;
@@ -42,7 +58,21 @@ interface SettingsForm {
     banner: string | null;
     user_registration: boolean;
     user_verification: boolean;
-}
+};
+
+const socialDefaults = (settings: SettingsProps['settings']): SocialFormSettings => {
+    const defaults = {} as SocialFormSettings;
+
+    for (const { key } of SOCIAL_PROVIDERS) {
+        defaults[`social_login_${key}_enabled`] = Boolean(settings[`social_login_${key}_enabled`]);
+        defaults[`social_login_${key}_client_id`] = (settings[`social_login_${key}_client_id`] as string) ?? '';
+        defaults[`social_login_${key}_client_secret`] =
+            (settings[`social_login_${key}_client_secret`] as string) ?? '';
+        defaults[`social_login_${key}_redirect`] = (settings[`social_login_${key}_redirect`] as string) ?? '';
+    }
+
+    return defaults;
+};
 
 export default function Settings({ title, settings, media, locales }: SettingsProps) {
     const { t } = useTranslation();
@@ -65,6 +95,7 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
             banner: settings.banner ?? null,
             user_registration: Boolean(settings.user_registration),
             user_verification: Boolean(settings.user_verification),
+            ...socialDefaults(settings),
         },
     });
 
@@ -173,6 +204,62 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
                             label={t('admin.settings.fields.userVerification', 'Require email verification')}
                             {...register('user_verification')}
                         />
+                    </div>
+                </Card>
+
+                <Card className="p-6">
+                    <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        <Share2 className="h-4 w-4" />
+                        {t('admin.settings.social.title', 'Social login')}
+                    </h2>
+                    <p className="mb-5 text-xs text-slate-500 dark:text-slate-400">
+                        {t(
+                            'admin.settings.social.subtitle',
+                            'Allow visitors to sign in with an external provider. Credentials left blank fall back to the environment configuration.'
+                        )}
+                    </p>
+
+                    <div className="space-y-6">
+                        {SOCIAL_PROVIDERS.map((provider) => (
+                            <div
+                                key={provider.key}
+                                className="rounded-xl border border-slate-200 p-4 dark:border-white/[0.08]"
+                            >
+                                <Checkbox
+                                    label={provider.label}
+                                    {...register(`social_login_${provider.key}_enabled`)}
+                                />
+
+                                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                                    <Input
+                                        label={t('admin.settings.social.clientId', 'Client ID')}
+                                        {...register(`social_login_${provider.key}_client_id` as const, {
+                                            maxLength: 255,
+                                        })}
+                                    />
+
+                                    <Input
+                                        label={t('admin.settings.social.clientSecret', 'Client secret')}
+                                        type="password"
+                                        autoComplete="off"
+                                        {...register(`social_login_${provider.key}_client_secret` as const, {
+                                            maxLength: 255,
+                                        })}
+                                    />
+
+                                    <Input
+                                        label={t('admin.settings.social.redirect', 'Redirect URI')}
+                                        hint={t(
+                                            'admin.settings.social.envHint',
+                                            'Leave blank to use the value from the environment (.env).'
+                                        )}
+                                        {...register(`social_login_${provider.key}_redirect` as const, {
+                                            maxLength: 255,
+                                        })}
+                                    />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </Card>
 

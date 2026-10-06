@@ -32,12 +32,15 @@ class SocialLoginController extends Controller
             $request->session()->put('url.intended', $redirect);
         }
 
+        $provider->configure();
+
         return Socialite::driver($provider->value)->redirect();
     }
 
     public function callback(Request $request, string $driver): RedirectResponse
     {
         $provider = $this->resolveProvider($driver);
+        $provider->configure();
 
         try {
             $socialUser = Socialite::driver($provider->value)->user();

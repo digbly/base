@@ -17,6 +17,18 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'banner', type: 'string', nullable: true, format: 'uuid'),
         new OA\Property(property: 'user_registration', type: 'boolean'),
         new OA\Property(property: 'user_verification', type: 'boolean'),
+        new OA\Property(property: 'social_login_google_enabled', type: 'boolean'),
+        new OA\Property(property: 'social_login_google_client_id', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_google_client_secret', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_google_redirect', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_facebook_enabled', type: 'boolean'),
+        new OA\Property(property: 'social_login_facebook_client_id', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_facebook_client_secret', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_facebook_redirect', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_github_enabled', type: 'boolean'),
+        new OA\Property(property: 'social_login_github_client_id', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_github_client_secret', type: 'string', nullable: true, maxLength: 255),
+        new OA\Property(property: 'social_login_github_redirect', type: 'string', nullable: true, maxLength: 255),
     ]
 )]
 class SettingRequest extends FormRequest
