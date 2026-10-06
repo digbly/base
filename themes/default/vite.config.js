@@ -9,7 +9,7 @@ export default defineConfig({
             input: ['resources/views/app.tsx'],
             refresh: ['resources/views/**/*.blade.php'],
             publicDirectory: '../../public',
-            buildDirectory: 'build/default',
+            buildDirectory: 'themes/default',
         }),
         react(),
         tailwindcss(),

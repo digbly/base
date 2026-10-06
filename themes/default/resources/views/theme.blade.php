@@ -7,9 +7,9 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        @if (file_exists(public_path('build/default/manifest.json')) || file_exists(public_path('hot')))
+        @if (file_exists(public_path('themes/default/manifest.json')) || file_exists(public_path('hot')))
             @viteReactRefresh
-            @vite('resources/views/app.tsx', 'build/default')
+            @vite('resources/views/app.tsx', 'themes/default')
         @endif
 
         @inertiaHead

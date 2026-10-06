@@ -216,12 +216,12 @@ Blade pages. The bundled `default` theme is the reference implementation:
 
 ```
 themes/default/
-  vite.config.js                 # laravel + react + tailwind, buildDirectory build/default
+  vite.config.js                 # laravel + react + tailwind, buildDirectory themes/default
   package.json                   # vite / react / @inertiajs/react
   tsconfig.json
   resources/
     views/
-      theme.blade.php            # Inertia root, guarded @vite('resources/views/app.tsx', 'build/default')
+      theme.blade.php            # Inertia root, guarded @vite('resources/views/app.tsx', 'themes/default')
       app.tsx                    # createInertiaApp entry
       lib/resolve-page.ts        # resolves pages/**/*.tsx
       pages/                     # Home, Category, Post, Search, NotFound
@@ -238,7 +238,7 @@ Blade templates under `resources/views` (`pages/**/*.tsx`). Blade only compiles
   The theme root view uses a distinct name (`theme.blade.php`) so it never
   shadows the application's `app` Inertia root view.
 - Build with `php artisan theme:build default` (or `--dev` for the Vite dev
-  server). Assets land in `public/build/default` from the theme's own Vite
+  server). Assets land in `public/themes/default` from the theme's own Vite
   config; the root template only injects them when the manifest exists.
 - Page blocks and widgets registered with a `component` (and an optional
   `data` resolver) are resolved to a JSON payload by `SidebarRenderer::payload()`
