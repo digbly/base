@@ -45,6 +45,22 @@ class WebAuthTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'new-user@example.com']);
     }
 
+    public function test_registration_sends_the_verification_email(): void
+    {
+        Notification::fake();
+
+        $this->post('/register', [
+            'name' => 'New User',
+            'email' => 'verify-me@example.com',
+            'password' => 'Password123!',
+            'password_confirmation' => 'Password123!',
+        ]);
+
+        $user = User::query()->where('email', 'verify-me@example.com')->firstOrFail();
+
+        Notification::assertSentTo($user, VerifyEmail::class);
+    }
+
     public function test_login_page_redirects_authenticated_user_to_admin(): void
     {
         $user = User::factory()->create();
@@ -75,6 +91,17 @@ class WebAuthTest extends TestCase
     {
         $this->post('/login', ['email' => ['x'], 'password' => 'secret'])
             ->assertSessionHasErrors('email');
+    }
+
+    public function test_login_rejects_backslash_open_redirect_target(): void
+    {
+        User::factory()->create(['email' => 'redirect@example.com']);
+
+        $this->post('/login', [
+            'email' => 'redirect@example.com',
+            'password' => 'password',
+            'redirect' => '/\\evil.example.com',
+        ])->assertRedirect(admin_url());
     }
 
     public function test_register_validation_fails_for_duplicate_email(): void

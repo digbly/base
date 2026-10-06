@@ -52,7 +52,7 @@ class SocialLoginController extends Controller
         Auth::guard('web')->login($user, true);
         $request->session()->regenerate();
 
-        return redirect()->intended('/');
+        return redirect()->intended(admin_url());
     }
 
     /**
