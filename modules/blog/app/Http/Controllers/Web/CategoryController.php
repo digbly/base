@@ -63,7 +63,7 @@ class CategoryController extends Controller
         return Inertia::render('Blog::categories/Form', [
             'title' => __('blog.categories.form.createTitle'),
             'category' => null,
-            'categories' => CategoryResource::collection($this->categoryOptions()),
+            'categories' => CategoryResource::collection($this->categoryOptions())->resolve(),
         ]);
     }
 
@@ -72,7 +72,7 @@ class CategoryController extends Controller
         return Inertia::render('Blog::categories/Form', [
             'title' => __('blog.categories.form.editTitle'),
             'category' => CategoryResource::make($category->load('translations')->loadCount('posts'))->resolve(),
-            'categories' => CategoryResource::collection($this->categoryOptions()),
+            'categories' => CategoryResource::collection($this->categoryOptions())->resolve(),
         ]);
     }
 

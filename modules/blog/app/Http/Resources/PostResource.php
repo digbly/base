@@ -61,8 +61,14 @@ class PostResource extends JsonResource
                 'author',
                 fn () => $this->resource->author ? AuthorResource::make($this->resource->author) : null
             ),
-            'categories' => CategoryResource::collection($this->whenLoaded('categories')),
-            'translations' => PostTranslationResource::collection($this->whenLoaded('translations')),
+            'categories' => $this->whenLoaded(
+                'categories',
+                fn () => CategoryResource::collection($this->categories)->resolve()
+            ),
+            'translations' => $this->whenLoaded(
+                'translations',
+                fn () => PostTranslationResource::collection($this->translations)->resolve()
+            ),
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
         ];

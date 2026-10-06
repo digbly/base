@@ -47,7 +47,10 @@ class CategoryResource extends JsonResource
             'parent_id' => $this->resource->parent_id,
             'is_home' => (bool) $this->resource->is_home,
             'posts_count' => $this->whenCounted('posts'),
-            'translations' => CategoryTranslationResource::collection($this->whenLoaded('translations')),
+            'translations' => $this->whenLoaded(
+                'translations',
+                fn () => CategoryTranslationResource::collection($this->translations)->resolve()
+            ),
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
         ];

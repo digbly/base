@@ -76,7 +76,7 @@ class PostController extends Controller
         return Inertia::render('Blog::posts/Form', [
             'title' => __('blog.posts.form.createTitle'),
             'post' => null,
-            'categories' => CategoryResource::collection($this->categoryOptions()),
+            'categories' => CategoryResource::collection($this->categoryOptions())->resolve(),
         ]);
     }
 
@@ -85,7 +85,7 @@ class PostController extends Controller
         return Inertia::render('Blog::posts/Form', [
             'title' => __('blog.posts.form.editTitle'),
             'post' => PostResource::make($post->load($this->resourceRelations()))->resolve(),
-            'categories' => CategoryResource::collection($this->categoryOptions()),
+            'categories' => CategoryResource::collection($this->categoryOptions())->resolve(),
         ]);
     }
 
