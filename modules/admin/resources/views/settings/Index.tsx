@@ -13,21 +13,12 @@ import { submitForm } from '@/lib/inertia-form';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 
-const SOCIAL_PROVIDERS = [
-    { key: 'google', label: 'Google' },
-    { key: 'facebook', label: 'Facebook' },
-    { key: 'github', label: 'GitHub' },
-] as const;
+interface SocialProvider {
+    value: string;
+    label: string;
+}
 
-type SocialProviderKey = (typeof SOCIAL_PROVIDERS)[number]['key'];
-
-type SocialSettingKey = `social_login_${SocialProviderKey}_${'enabled' | 'client_id' | 'client_secret' | 'redirect'}`;
-
-type SocialSettings = Partial<Record<SocialSettingKey, string | boolean | null>>;
-
-type SocialFormSettings = {
-    [K in SocialSettingKey]: K extends `social_login_${SocialProviderKey}_enabled` ? boolean : string;
-};
+type SocialFormFields = Record<`social_login_${string}`, string | boolean>;
 
 interface SettingsProps {
     title: string;
@@ -40,16 +31,17 @@ interface SettingsProps {
         banner?: string | null;
         user_registration?: boolean | null;
         user_verification?: boolean | null;
-    } & SocialSettings;
+    } & Record<`social_login_${string}`, string | boolean | null | undefined>;
     media: {
         logo: MediaItemSummary | null;
         favicon: MediaItemSummary | null;
         banner: MediaItemSummary | null;
     };
     locales: string[];
+    socialProviders: SocialProvider[];
 }
 
-type SettingsForm = SocialFormSettings & {
+type SettingsForm = SocialFormFields & {
     title: Record<string, string>;
     description: Record<string, string>;
     sitename: string;
@@ -60,21 +52,25 @@ type SettingsForm = SocialFormSettings & {
     user_verification: boolean;
 };
 
-const socialDefaults = (settings: SettingsProps['settings']): SocialFormSettings => {
-    const defaults = {} as SocialFormSettings;
+const socialDefaults = (
+    settings: SettingsProps['settings'],
+    providers: SocialProvider[]
+): SocialFormFields => {
+    const defaults = {} as SocialFormFields;
 
-    for (const { key } of SOCIAL_PROVIDERS) {
-        defaults[`social_login_${key}_enabled`] = Boolean(settings[`social_login_${key}_enabled`]);
-        defaults[`social_login_${key}_client_id`] = (settings[`social_login_${key}_client_id`] as string) ?? '';
-        defaults[`social_login_${key}_client_secret`] =
-            (settings[`social_login_${key}_client_secret`] as string) ?? '';
-        defaults[`social_login_${key}_redirect`] = (settings[`social_login_${key}_redirect`] as string) ?? '';
+    for (const { value } of providers) {
+        defaults[`social_login_${value}_enabled`] = Boolean(settings[`social_login_${value}_enabled`]);
+        defaults[`social_login_${value}_client_id`] = String(settings[`social_login_${value}_client_id`] ?? '');
+        defaults[`social_login_${value}_client_secret`] = String(
+            settings[`social_login_${value}_client_secret`] ?? ''
+        );
+        defaults[`social_login_${value}_redirect`] = String(settings[`social_login_${value}_redirect`] ?? '');
     }
 
     return defaults;
 };
 
-export default function Settings({ title, settings, media, locales }: SettingsProps) {
+export default function Settings({ title, settings, media, locales, socialProviders = [] }: SettingsProps) {
     const { t } = useTranslation();
     const [activeLocale, setActiveLocale] = useState(locales[0] ?? 'en');
 
@@ -95,7 +91,7 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
             banner: settings.banner ?? null,
             user_registration: Boolean(settings.user_registration),
             user_verification: Boolean(settings.user_verification),
-            ...socialDefaults(settings),
+            ...socialDefaults(settings, socialProviders),
         },
     });
 
@@ -220,20 +216,20 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
                     </p>
 
                     <div className="space-y-6">
-                        {SOCIAL_PROVIDERS.map((provider) => (
+                        {socialProviders.map((provider) => (
                             <div
-                                key={provider.key}
+                                key={provider.value}
                                 className="rounded-xl border border-slate-200 p-4 dark:border-white/[0.08]"
                             >
                                 <Checkbox
                                     label={provider.label}
-                                    {...register(`social_login_${provider.key}_enabled`)}
+                                    {...register(`social_login_${provider.value}_enabled`)}
                                 />
 
                                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                                     <Input
                                         label={t('admin.settings.social.clientId', 'Client ID')}
-                                        {...register(`social_login_${provider.key}_client_id` as const, {
+                                        {...register(`social_login_${provider.value}_client_id`, {
                                             maxLength: 255,
                                         })}
                                     />
@@ -242,7 +238,7 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
                                         label={t('admin.settings.social.clientSecret', 'Client secret')}
                                         type="password"
                                         autoComplete="off"
-                                        {...register(`social_login_${provider.key}_client_secret` as const, {
+                                        {...register(`social_login_${provider.value}_client_secret`, {
                                             maxLength: 255,
                                         })}
                                     />
@@ -253,7 +249,7 @@ export default function Settings({ title, settings, media, locales }: SettingsPr
                                             'admin.settings.social.envHint',
                                             'Leave blank to use the value from the environment (.env).'
                                         )}
-                                        {...register(`social_login_${provider.key}_redirect` as const, {
+                                        {...register(`social_login_${provider.value}_redirect`, {
                                             maxLength: 255,
                                         })}
                                     />

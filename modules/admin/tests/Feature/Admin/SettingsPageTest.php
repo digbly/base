@@ -33,6 +33,7 @@ class SettingsPageTest extends TestCase
                 ->component('Admin::settings/Index', false)
                 ->has('settings')
                 ->has('locales')
+                ->has('socialProviders', count(SocialProvider::cases()))
             );
     }
 
@@ -122,5 +123,28 @@ class SettingsPageTest extends TestCase
         ]);
 
         $this->assertFalse(SocialProvider::Google->isConfigured());
+    }
+
+    public function test_super_admin_can_update_hyphenated_social_provider(): void
+    {
+        $admin = User::factory()->create(['is_super_admin' => true]);
+
+        $this->actingAs($admin, 'web')
+            ->put('/admin/settings', [
+                'social_login_linkedin-openid_enabled' => true,
+                'social_login_linkedin-openid_client_id' => 'linkedin-client-id',
+                'social_login_linkedin-openid_client_secret' => 'linkedin-client-secret',
+                'social_login_linkedin-openid_redirect' => 'https://example.com/auth/social/linkedin-openid/callback',
+            ])
+            ->assertRedirect();
+
+        $settings = app(SettingContract::class);
+        $this->assertSame('linkedin-client-id', $settings->get('social_login_linkedin-openid_client_id'));
+
+        $provider = SocialProvider::LinkedInOpenId;
+        $provider->configure();
+
+        $this->assertSame('linkedin-client-id', config('services.linkedin-openid.client_id'));
+        $this->assertTrue($provider->isConfigured());
     }
 }

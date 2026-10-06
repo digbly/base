@@ -9,6 +9,12 @@ enum SocialProvider: string
     case Google = 'google';
     case Facebook = 'facebook';
     case Github = 'github';
+    case X = 'x';
+    case LinkedInOpenId = 'linkedin-openid';
+    case Gitlab = 'gitlab';
+    case Bitbucket = 'bitbucket';
+    case Slack = 'slack';
+    case Twitch = 'twitch';
 
     public function label(): string
     {
@@ -16,6 +22,12 @@ enum SocialProvider: string
             self::Google => 'Google',
             self::Facebook => 'Facebook',
             self::Github => 'GitHub',
+            self::X => 'X',
+            self::LinkedInOpenId => 'LinkedIn',
+            self::Gitlab => 'GitLab',
+            self::Bitbucket => 'Bitbucket',
+            self::Slack => 'Slack',
+            self::Twitch => 'Twitch',
         };
     }
 

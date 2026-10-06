@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Modules\Admin\Http\Requests\Admin\SettingRequest;
 use Modules\Admin\Support\MediaPreviewResolver;
+use Modules\Auth\Enums\SocialProvider;
 
 class SettingController extends Controller
 {
@@ -33,6 +34,12 @@ class SettingController extends Controller
             'settings' => $settings,
             'locales' => $translations->locales(),
             'media' => $this->mediaPreviews($settings),
+            'socialProviders' => collect(SocialProvider::cases())
+                ->map(fn (SocialProvider $provider): array => [
+                    'value' => $provider->value,
+                    'label' => $provider->label(),
+                ])
+                ->all(),
         ]);
     }
 

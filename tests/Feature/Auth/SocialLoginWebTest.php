@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
+use Modules\Auth\Enums\SocialProvider;
 use Modules\Auth\Models\User;
 use Modules\Auth\Models\UserSocialConnection;
 use Tests\TestCase;
@@ -107,5 +108,26 @@ class SocialLoginWebTest extends TestCase
     public function test_unsupported_driver_is_rejected(): void
     {
         $this->getJson('/auth/social/twitter/callback')->assertStatus(422);
+    }
+
+    public function test_social_redirect_supports_every_configured_driver(): void
+    {
+        $drivers = array_map(
+            static fn ($provider) => $provider->value,
+            SocialProvider::cases()
+        );
+
+        foreach ($drivers as $driver) {
+            config([
+                "services.{$driver}.client_id" => "fake-{$driver}-id",
+                "services.{$driver}.client_secret" => "fake-{$driver}-secret",
+                "services.{$driver}.redirect" => "http://localhost/auth/social/{$driver}/callback",
+            ]);
+
+            Socialite::fake($driver, SocialiteUser::fake());
+
+            $this->get("/auth/social/{$driver}/redirect")
+                ->assertRedirect("https://socialite.fake/{$driver}/authorize");
+        }
     }
 }
