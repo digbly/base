@@ -4,6 +4,8 @@ import Card from './Card';
 interface TableCardProps {
     head: ReactNode;
     children: ReactNode;
+    /** Optional footer, e.g. a pagination control rendered under the table. */
+    footer?: ReactNode;
     className?: string;
 }
 
@@ -11,7 +13,7 @@ interface TableCardProps {
  * Card-backed, horizontally scrollable table with a consistent header row.
  * `children` should be the `<tr>` rows rendered inside the table body.
  */
-export default function TableCard({ head, children, className = '' }: TableCardProps) {
+export default function TableCard({ head, children, footer, className = '' }: TableCardProps) {
     return (
         <Card className={`overflow-hidden ${className}`}>
             <div className="overflow-x-auto">
@@ -22,6 +24,10 @@ export default function TableCard({ head, children, className = '' }: TableCardP
                     <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">{children}</tbody>
                 </table>
             </div>
+
+            {footer && (
+                <div className="border-t border-slate-100 dark:border-white/[0.06]">{footer}</div>
+            )}
         </Card>
     );
 }

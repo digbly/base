@@ -112,12 +112,6 @@ return [
         'blogComments' => 'Blog Comments',
         'blogPosts' => 'Blog Posts',
     ],
-    'pagination' => [
-        'next' => 'Next',
-        'page' => 'Page {{current}} / {{total}}',
-        'previous' => 'Previous',
-        'summary' => 'Showing {{from}}-{{to}} of {{total}} items',
-    ],
     'posts' => [
         'actions' => [
             'delete' => 'Delete post',

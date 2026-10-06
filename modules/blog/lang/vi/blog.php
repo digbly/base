@@ -112,12 +112,6 @@ return [
         'blogComments' => 'Bình luận',
         'blogPosts' => 'Bài viết',
     ],
-    'pagination' => [
-        'next' => 'Sau',
-        'page' => 'Trang {{current}} / {{total}}',
-        'previous' => 'Trước',
-        'summary' => 'Hiển thị {{from}}-{{to}} trên {{total}} mục',
-    ],
     'posts' => [
         'actions' => [
             'delete' => 'Xóa bài viết',

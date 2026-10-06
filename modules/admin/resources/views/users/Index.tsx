@@ -27,18 +27,17 @@ interface UserRow {
     deleted_at: string | null;
 }
 
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    active: boolean;
+interface PaginationMeta {
+    current_page: number;
+    last_page: number;
+    total: number;
 }
 
 interface UsersProps {
     title: string;
     users: {
         data: UserRow[];
-        links: PaginationLink[];
-        meta: { current_page: number; last_page: number; total: number };
+        meta: PaginationMeta;
     };
     filters: { search: string | null; role: string | null; trashed: string | null };
     roles: string[];
@@ -170,6 +169,14 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
                         <th className="px-4 py-3 text-right">{t('admin.users.table.actions', 'Actions')}</th>
                     </tr>
                 }
+                footer={
+                    users.meta.last_page > 1 ? (
+                        <Pagination
+                            meta={users.meta}
+                            onPageChange={(page) => applyFilters({ page: String(page) })}
+                        />
+                    ) : undefined
+                }
             >
                 {users.data.length === 0 && (
                     <tr>
@@ -283,8 +290,6 @@ export default function Users({ title, users, filters, roles }: UsersProps) {
                     </tr>
                 ))}
             </TableCard>
-
-            <Pagination links={users.links} lastPage={users.meta.last_page} />
 
             <Modal
                 open={deleteTarget !== null}

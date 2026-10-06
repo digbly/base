@@ -8,12 +8,13 @@ import EmptyState from '@/components/ui/EmptyState';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import Input from '@/components/ui/Input';
 import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
 import Select from '@/components/ui/Select';
+import TableCard from '@/components/ui/TableCard';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { SharedProps } from '@/types';
 import ConfirmDialog from '../components/ConfirmDialog';
-import Pagination from '../components/Pagination';
 import type { AdminPost, BlogAbilities, Paginated } from '../types';
 
 interface PostsProps {
@@ -131,105 +132,103 @@ export default function Posts({ title, posts, filters, abilities }: PostsProps) 
                 </Button>
             </form>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/60 dark:shadow-black/20">
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-left text-sm">
-                        <thead className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-400">
-                            <tr>
-                                <th className="px-6 py-3 font-semibold">{t('blog.posts.table.post', 'Post')}</th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.posts.table.status', 'Status')}</th>
-                                <th className="px-6 py-3 font-semibold">
-                                    {t('blog.posts.table.categories', 'Categories')}
-                                </th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.posts.table.created', 'Created')}</th>
-                                <th className="px-6 py-3 text-right font-semibold">
-                                    {t('blog.posts.table.actions', 'Actions')}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
-                            {posts.data.length === 0 && (
-                                <tr>
-                                    <td colSpan={5}>
-                                        <EmptyState
-                                            icon={Newspaper}
-                                            title={t('blog.posts.empty', 'No posts match your filters.')}
-                                            description={t('blog.posts.emptyHint', 'Try a different search or status filter.')}
-                                        />
-                                    </td>
-                                </tr>
-                            )}
+            <TableCard
+                head={
+                    <tr>
+                        <th className="px-6 py-3 font-semibold">{t('blog.posts.table.post', 'Post')}</th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.posts.table.status', 'Status')}</th>
+                        <th className="px-6 py-3 font-semibold">
+                            {t('blog.posts.table.categories', 'Categories')}
+                        </th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.posts.table.created', 'Created')}</th>
+                        <th className="px-6 py-3 text-right font-semibold">
+                            {t('blog.posts.table.actions', 'Actions')}
+                        </th>
+                    </tr>
+                }
+                footer={
+                    posts.meta.last_page > 1 ? (
+                        <Pagination
+                            meta={posts.meta}
+                            onPageChange={(page) => applyFilters({ page: String(page) })}
+                        />
+                    ) : undefined
+                }
+            >
+                {posts.data.length === 0 && (
+                    <tr>
+                        <td colSpan={5}>
+                            <EmptyState
+                                icon={Newspaper}
+                                title={t('blog.posts.empty', 'No posts match your filters.')}
+                                description={t('blog.posts.emptyHint', 'Try a different search or status filter.')}
+                            />
+                        </td>
+                    </tr>
+                )}
 
-                            {posts.data.map((post) => (
-                                <tr key={post.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
-                                    <td className="px-6 py-4">
-                                        <p className="max-w-xs truncate text-sm font-medium text-slate-900 dark:text-white">
-                                            {post.title ?? '—'}
-                                        </p>
-                                        <p className="max-w-xs truncate text-xs text-slate-500 dark:text-slate-400">
-                                            /{post.slug ?? ''}
-                                        </p>
-                                    </td>
+                {posts.data.map((post) => (
+                    <tr key={post.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
+                        <td className="px-6 py-4">
+                            <p className="max-w-xs truncate text-sm font-medium text-slate-900 dark:text-white">
+                                {post.title ?? '—'}
+                            </p>
+                            <p className="max-w-xs truncate text-xs text-slate-500 dark:text-slate-400">
+                                /{post.slug ?? ''}
+                            </p>
+                        </td>
 
-                                    <td className="px-6 py-4">
-                                        <Badge variant={post.status === 'published' ? 'emerald' : 'amber'} size="sm" dot>
-                                            {post.status_label}
+                        <td className="px-6 py-4">
+                            <Badge variant={post.status === 'published' ? 'emerald' : 'amber'} size="sm" dot>
+                                {post.status_label}
+                            </Badge>
+                        </td>
+
+                        <td className="px-6 py-4">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                                {post.categories.length === 0 ? (
+                                    <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
+                                ) : (
+                                    post.categories.map((category) => (
+                                        <Badge key={category.id} variant="slate" size="sm">
+                                            {category.name}
                                         </Badge>
-                                    </td>
+                                    ))
+                                )}
+                            </div>
+                        </td>
 
-                                    <td className="px-6 py-4">
-                                        <div className="flex flex-wrap items-center gap-1.5">
-                                            {post.categories.length === 0 ? (
-                                                <span className="text-xs text-slate-400 dark:text-slate-500">—</span>
-                                            ) : (
-                                                post.categories.map((category) => (
-                                                    <Badge key={category.id} variant="slate" size="sm">
-                                                        {category.name}
-                                                    </Badge>
-                                                ))
-                                            )}
-                                        </div>
-                                    </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+                            {formatDate(post.created_at)}
+                        </td>
 
-                                    <td className="whitespace-nowrap px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
-                                        {formatDate(post.created_at)}
-                                    </td>
+                        <td className="px-6 py-4">
+                            <div className="flex items-center justify-end gap-1">
+                                {abilities.update && (
+                                    <Link
+                                        href={route('admin.blog.posts.edit', { post: post.id })}
+                                        title={t('blog.posts.actions.edit', 'Edit post')}
+                                        className="rounded-lg p-2 text-indigo-500 transition-colors hover:bg-indigo-500/10 hover:text-indigo-600 dark:text-indigo-400"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Link>
+                                )}
 
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-end gap-1">
-                                            {abilities.update && (
-                                                <Link
-                                                    href={route('admin.blog.posts.edit', { post: post.id })}
-                                                    title={t('blog.posts.actions.edit', 'Edit post')}
-                                                    className="rounded-lg p-2 text-indigo-500 transition-colors hover:bg-indigo-500/10 hover:text-indigo-600 dark:text-indigo-400"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Link>
-                                            )}
-
-                                            {abilities.delete && (
-                                                <button
-                                                    type="button"
-                                                    title={t('blog.posts.actions.delete', 'Delete post')}
-                                                    onClick={() => setDeleteTarget(post)}
-                                                    className="rounded-lg p-2 text-rose-500 transition-colors hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <Pagination
-                    meta={posts.meta}
-                    onPageChange={(page) => applyFilters({ page: String(page) })}
-                />
-            </div>
+                                {abilities.delete && (
+                                    <button
+                                        type="button"
+                                        title={t('blog.posts.actions.delete', 'Delete post')}
+                                        onClick={() => setDeleteTarget(post)}
+                                        className="rounded-lg p-2 text-rose-500 transition-colors hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </TableCard>
 
             <ConfirmDialog
                 isOpen={deleteTarget !== null}

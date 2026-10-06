@@ -30,18 +30,17 @@ interface PageRow {
     created_at: string;
 }
 
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    active: boolean;
+interface PaginationMeta {
+    current_page: number;
+    last_page: number;
+    total: number;
 }
 
 interface PagesProps {
     title: string;
     pages: {
         data: PageRow[];
-        links: PaginationLink[];
-        meta: { current_page: number; last_page: number; total: number };
+        meta: PaginationMeta;
     };
     filters: { search: string | null; status: string | null };
     abilities: { create: boolean; update: boolean; delete: boolean };
@@ -197,6 +196,14 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
                         <th className="px-4 py-3 text-right">{t('admin.users.table.actions', 'Actions')}</th>
                     </tr>
                 }
+                footer={
+                    pages.meta.last_page > 1 ? (
+                        <Pagination
+                            meta={pages.meta}
+                            onPageChange={(page) => applyFilters({ page: String(page) })}
+                        />
+                    ) : undefined
+                }
             >
                 {pages.data.length === 0 && (
                     <tr>
@@ -248,8 +255,6 @@ export default function Pages({ title, pages, filters, abilities }: PagesProps) 
                     </tr>
                 ))}
             </TableCard>
-
-            <Pagination links={pages.links} lastPage={pages.meta.last_page} />
 
             <Modal
                 open={formOpen}

@@ -41,6 +41,11 @@ return [
         'admin' => 'Admin',
         'user' => 'User',
     ],
+    'pagination' => [
+        'next' => 'Next page',
+        'previous' => 'Previous page',
+        'summary' => 'Showing {{from}}-{{to}} of {{total}} items',
+    ],
     'shell' => [
         'toggleSidebar' => 'Toggle sidebar',
         'viewSite' => 'View site',

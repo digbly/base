@@ -8,10 +8,11 @@ import EmptyState from '@/components/ui/EmptyState';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import Input from '@/components/ui/Input';
 import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
+import TableCard from '@/components/ui/TableCard';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 import ConfirmDialog from '../components/ConfirmDialog';
-import Pagination from '../components/Pagination';
 import type { AdminCategory, BlogAbilities, Paginated } from '../types';
 
 interface CategoriesProps {
@@ -104,85 +105,86 @@ export default function Categories({ title, categories, filters, abilities }: Ca
                 </Button>
             </form>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/60 dark:shadow-black/20">
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-left text-sm">
-                        <thead className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-400">
-                            <tr>
-                                <th className="px-6 py-3 font-semibold">{t('blog.categories.table.name', 'Name')}</th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.categories.table.slug', 'Slug')}</th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.categories.table.posts', 'Posts')}</th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.categories.table.home', 'Home')}</th>
-                                <th className="px-6 py-3 text-right font-semibold">
-                                    {t('blog.categories.table.actions', 'Actions')}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
-                            {categories.data.length === 0 && (
-                                <tr>
-                                    <td colSpan={5}>
-                                        <EmptyState
-                                            icon={FolderTree}
-                                            title={t('blog.categories.empty', 'No categories yet.')}
-                                            description={t('blog.categories.emptyHint', 'Create your first category to organise posts.')}
-                                        />
-                                    </td>
-                                </tr>
-                            )}
+            <TableCard
+                head={
+                    <tr>
+                        <th className="px-6 py-3 font-semibold">{t('blog.categories.table.name', 'Name')}</th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.categories.table.slug', 'Slug')}</th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.categories.table.posts', 'Posts')}</th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.categories.table.home', 'Home')}</th>
+                        <th className="px-6 py-3 text-right font-semibold">
+                            {t('blog.categories.table.actions', 'Actions')}
+                        </th>
+                    </tr>
+                }
+                footer={
+                    categories.meta.last_page > 1 ? (
+                        <Pagination
+                            meta={categories.meta}
+                            onPageChange={(page) => applyFilters({ page: String(page) })}
+                        />
+                    ) : undefined
+                }
+            >
+                {categories.data.length === 0 && (
+                    <tr>
+                        <td colSpan={5}>
+                            <EmptyState
+                                icon={FolderTree}
+                                title={t('blog.categories.empty', 'No categories yet.')}
+                                description={t('blog.categories.emptyHint', 'Create your first category to organise posts.')}
+                            />
+                        </td>
+                    </tr>
+                )}
 
-                            {categories.data.map((category) => (
-                                <tr key={category.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
-                                    <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
-                                        {category.name ?? '—'}
-                                    </td>
-                                    <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
-                                        {category.slug ?? '—'}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                                        {category.posts_count ?? 0}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <Badge variant={category.is_home ? 'emerald' : 'slate'} size="sm">
-                                            {category.is_home
-                                                ? t('blog.categories.homeYes', 'Yes')
-                                                : t('blog.categories.homeNo', 'No')}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-end gap-1">
-                                            {abilities.update && (
-                                                <Link
-                                                    href={route('admin.blog.categories.edit', {
-                                                        category: category.id,
-                                                    })}
-                                                    title={t('blog.categories.actions.edit', 'Edit category')}
-                                                    className="rounded-lg p-2 text-indigo-500 transition-colors hover:bg-indigo-500/10 hover:text-indigo-600 dark:text-indigo-400"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Link>
-                                            )}
+                {categories.data.map((category) => (
+                    <tr key={category.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
+                            {category.name ?? '—'}
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+                            {category.slug ?? '—'}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                            {category.posts_count ?? 0}
+                        </td>
+                        <td className="px-6 py-4">
+                            <Badge variant={category.is_home ? 'emerald' : 'slate'} size="sm">
+                                {category.is_home
+                                    ? t('blog.categories.homeYes', 'Yes')
+                                    : t('blog.categories.homeNo', 'No')}
+                            </Badge>
+                        </td>
+                        <td className="px-6 py-4">
+                            <div className="flex items-center justify-end gap-1">
+                                {abilities.update && (
+                                    <Link
+                                        href={route('admin.blog.categories.edit', {
+                                            category: category.id,
+                                        })}
+                                        title={t('blog.categories.actions.edit', 'Edit category')}
+                                        className="rounded-lg p-2 text-indigo-500 transition-colors hover:bg-indigo-500/10 hover:text-indigo-600 dark:text-indigo-400"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                    </Link>
+                                )}
 
-                                            {abilities.delete && (
-                                                <button
-                                                    type="button"
-                                                    title={t('blog.categories.actions.delete', 'Delete category')}
-                                                    onClick={() => setDeleteTarget(category)}
-                                                    className="rounded-lg p-2 text-rose-500 transition-colors hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <Pagination meta={categories.meta} onPageChange={(page) => applyFilters({ page: String(page) })} />
-            </div>
+                                {abilities.delete && (
+                                    <button
+                                        type="button"
+                                        title={t('blog.categories.actions.delete', 'Delete category')}
+                                        onClick={() => setDeleteTarget(category)}
+                                        className="rounded-lg p-2 text-rose-500 transition-colors hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </TableCard>
 
             <ConfirmDialog
                 isOpen={deleteTarget !== null}

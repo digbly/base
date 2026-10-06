@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
 import { Check, Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { useDropdown } from '@/hooks/useDropdown';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { Theme } from '@/lib/theme';
 
@@ -20,41 +20,16 @@ const options: { value: Theme; labelKey: string; fallback: string; Icon: typeof 
 export default function ThemeToggle({ className = '' }: ThemeToggleProps) {
     const { theme, resolvedTheme, setTheme } = useTheme();
     const { t } = useTranslation();
-    const [open, setOpen] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-
-        const onPointerDown = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setOpen(false);
-            }
-        };
-        const onKey = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', onPointerDown);
-        document.addEventListener('keydown', onKey);
-
-        return () => {
-            document.removeEventListener('mousedown', onPointerDown);
-            document.removeEventListener('keydown', onKey);
-        };
-    }, [open]);
+    const { open, toggle, setOpen, containerRef, triggerRef, menuRef, onMenuKeyDown } = useDropdown();
 
     const TriggerIcon = resolvedTheme === 'dark' ? Moon : Sun;
 
     return (
         <div ref={containerRef} className={`relative ${className}`}>
             <button
+                ref={triggerRef}
                 type="button"
-                onClick={() => setOpen((prev) => !prev)}
+                onClick={toggle}
                 aria-label={t('common.theme.toggle', 'Toggle theme')}
                 aria-haspopup="menu"
                 aria-expanded={open}
@@ -65,7 +40,9 @@ export default function ThemeToggle({ className = '' }: ThemeToggleProps) {
 
             {open && (
                 <div
+                    ref={menuRef}
                     role="menu"
+                    onKeyDown={onMenuKeyDown}
                     className="absolute right-0 z-50 mt-2 w-40 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10 dark:border-white/10 dark:bg-slate-900 dark:shadow-black/40"
                 >
                     {options.map(({ value, labelKey, fallback, Icon }) => {

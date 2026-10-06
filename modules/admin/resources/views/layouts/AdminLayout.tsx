@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ChevronsRight, ExternalLink, Menu as MenuIcon, PanelLeft, Sparkles, X } from 'lucide-react';
 import AdminSidebar from '@modules/admin/resources/views/components/AdminSidebar';
@@ -7,6 +7,7 @@ import Alert from '@/components/ui/Alert';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { route } from '@/lib/route';
 import { normalizePath } from '@/lib/url';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { SharedProps } from '@/types';
 
@@ -35,6 +36,11 @@ export default function AdminLayout({ title, children }: AdminLayoutProps) {
         return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === '1';
     });
     const [dismissedFlash, setDismissedFlash] = useState(false);
+    const drawerRef = useRef<HTMLElement>(null);
+
+    const closeMobile = () => setMobileOpen(false);
+
+    useFocusTrap(mobileOpen, drawerRef, closeMobile);
 
     useEffect(() => {
         window.localStorage.setItem(SIDEBAR_STORAGE_KEY, collapsed ? '1' : '0');
@@ -43,8 +49,6 @@ export default function AdminLayout({ title, children }: AdminLayoutProps) {
     useEffect(() => {
         setDismissedFlash(false);
     }, [flash?.success, flash?.error, flash?.warning]);
-
-    const closeMobile = () => setMobileOpen(false);
 
     const logout = () => {
         router.post('/logout');
@@ -162,7 +166,13 @@ export default function AdminLayout({ title, children }: AdminLayoutProps) {
                         onClick={closeMobile}
                     />
 
-                    <aside className="relative flex w-72 flex-col bg-white dark:bg-slate-950">
+                    <aside
+                        ref={drawerRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-label={t('common.topbar.openMenu', 'Navigation menu')}
+                        className="relative flex w-72 flex-col bg-white dark:bg-slate-950"
+                    >
                         <div className="flex h-16 items-center justify-between px-4">
                             <span className="flex items-center gap-2 text-sm font-bold tracking-tight">
                                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 text-white">

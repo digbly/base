@@ -41,6 +41,11 @@ return [
         'admin' => 'Quản trị',
         'user' => 'Người dùng',
     ],
+    'pagination' => [
+        'next' => 'Trang sau',
+        'previous' => 'Trang trước',
+        'summary' => 'Hiển thị {{from}}-{{to}} trên {{total}} mục',
+    ],
     'shell' => [
         'toggleSidebar' => 'Thu gọn thanh bên',
         'viewSite' => 'Xem trang',

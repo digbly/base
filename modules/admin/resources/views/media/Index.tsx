@@ -33,18 +33,17 @@ interface MediaRow {
     is_image: boolean;
 }
 
-interface PaginationLink {
-    url: string | null;
-    label: string;
-    active: boolean;
+interface PaginationMeta {
+    current_page: number;
+    last_page: number;
+    total: number;
 }
 
 interface MediaProps {
     title: string;
     items: {
         data: MediaRow[];
-        links: PaginationLink[];
-        meta: { current_page: number; last_page: number; total: number };
+        meta: PaginationMeta;
     };
     filters: { search: string | null; type: string | null; month: string | null };
     abilities: { create: boolean; update: boolean; delete: boolean };
@@ -307,7 +306,11 @@ export default function Media({ title, items, filters, abilities }: MediaProps) 
                 </div>
             )}
 
-            <Pagination links={items.links} lastPage={items.meta.last_page} className="mt-6" />
+            <Pagination
+                meta={items.meta}
+                onPageChange={(page) => applyFilters({ page: String(page) })}
+                className="mt-6"
+            />
 
             <Modal
                 open={detail !== null}

@@ -8,12 +8,13 @@ import EmptyState from '@/components/ui/EmptyState';
 import ErrorAlert from '@/components/ui/ErrorAlert';
 import Input from '@/components/ui/Input';
 import PageHeader from '@/components/ui/PageHeader';
+import Pagination from '@/components/ui/Pagination';
 import Select from '@/components/ui/Select';
+import TableCard from '@/components/ui/TableCard';
 import { route } from '@/lib/route';
 import { useTranslation } from '@/hooks/useTranslation';
 import type { SharedProps } from '@/types';
 import ConfirmDialog from '../components/ConfirmDialog';
-import Pagination from '../components/Pagination';
 import type { AdminComment, BlogAbilities, CommentStatus, Paginated } from '../types';
 
 interface CommentsProps {
@@ -147,106 +148,107 @@ export default function Comments({ title, comments, filters, abilities }: Commen
                 </Button>
             </form>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 dark:border-white/10 dark:bg-slate-900/60 dark:shadow-black/20">
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-left text-sm">
-                        <thead className="border-b border-slate-200/80 bg-slate-50/70 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-slate-900/40 dark:text-slate-400">
-                            <tr>
-                                <th className="px-6 py-3 font-semibold">{t('blog.comments.table.author', 'Author')}</th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.comments.table.comment', 'Comment')}</th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.comments.table.status', 'Status')}</th>
-                                <th className="px-6 py-3 font-semibold">{t('blog.comments.table.created', 'Created')}</th>
-                                <th className="px-6 py-3 text-right font-semibold">
-                                    {t('blog.comments.table.actions', 'Actions')}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-white/[0.06]">
-                            {comments.data.length === 0 && (
-                                <tr>
-                                    <td colSpan={5}>
-                                        <EmptyState
-                                            icon={MessageSquare}
-                                            title={t('blog.comments.empty', 'No comments match your filters.')}
-                                            description={t('blog.comments.emptyHint', 'New comments will appear here for moderation.')}
-                                        />
-                                    </td>
-                                </tr>
-                            )}
+            <TableCard
+                head={
+                    <tr>
+                        <th className="px-6 py-3 font-semibold">{t('blog.comments.table.author', 'Author')}</th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.comments.table.comment', 'Comment')}</th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.comments.table.status', 'Status')}</th>
+                        <th className="px-6 py-3 font-semibold">{t('blog.comments.table.created', 'Created')}</th>
+                        <th className="px-6 py-3 text-right font-semibold">
+                            {t('blog.comments.table.actions', 'Actions')}
+                        </th>
+                    </tr>
+                }
+                footer={
+                    comments.meta.last_page > 1 ? (
+                        <Pagination
+                            meta={comments.meta}
+                            onPageChange={(page) => applyFilters({ page: String(page) })}
+                        />
+                    ) : undefined
+                }
+            >
+                {comments.data.length === 0 && (
+                    <tr>
+                        <td colSpan={5}>
+                            <EmptyState
+                                icon={MessageSquare}
+                                title={t('blog.comments.empty', 'No comments match your filters.')}
+                                description={t('blog.comments.emptyHint', 'New comments will appear here for moderation.')}
+                            />
+                        </td>
+                    </tr>
+                )}
 
-                            {comments.data.map((comment) => (
-                                <tr key={comment.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
-                                    <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
-                                        {comment.name || '—'}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <p className="line-clamp-2 max-w-md text-sm text-slate-600 dark:text-slate-300">
-                                            {comment.content}
-                                        </p>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <Badge variant={statusVariant(comment.status)} size="sm" dot>
-                                            {comment.status_label}
-                                        </Badge>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
-                                        {formatDate(comment.created_at)}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center justify-end gap-1">
-                                            {abilities.update && comment.status !== 'approved' && (
-                                                <button
-                                                    type="button"
-                                                    title={t('blog.comments.actions.approve', 'Approve')}
-                                                    onClick={() => changeStatus(comment, 'approved')}
-                                                    className="rounded-lg p-2 text-emerald-500 transition-colors hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400"
-                                                >
-                                                    <Check className="h-4 w-4" />
-                                                </button>
-                                            )}
+                {comments.data.map((comment) => (
+                    <tr key={comment.id} className="transition-colors hover:bg-slate-50/70 dark:hover:bg-white/[0.02]">
+                        <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
+                            {comment.name || '—'}
+                        </td>
+                        <td className="px-6 py-4">
+                            <p className="line-clamp-2 max-w-md text-sm text-slate-600 dark:text-slate-300">
+                                {comment.content}
+                            </p>
+                        </td>
+                        <td className="px-6 py-4">
+                            <Badge variant={statusVariant(comment.status)} size="sm" dot>
+                                {comment.status_label}
+                            </Badge>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+                            {formatDate(comment.created_at)}
+                        </td>
+                        <td className="px-6 py-4">
+                            <div className="flex items-center justify-end gap-1">
+                                {abilities.update && comment.status !== 'approved' && (
+                                    <button
+                                        type="button"
+                                        title={t('blog.comments.actions.approve', 'Approve')}
+                                        onClick={() => changeStatus(comment, 'approved')}
+                                        className="rounded-lg p-2 text-emerald-500 transition-colors hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400"
+                                    >
+                                        <Check className="h-4 w-4" />
+                                    </button>
+                                )}
 
-                                            {abilities.update && comment.status !== 'rejected' && (
-                                                <button
-                                                    type="button"
-                                                    title={t('blog.comments.actions.reject', 'Reject')}
-                                                    onClick={() => changeStatus(comment, 'rejected')}
-                                                    className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-500/10 hover:text-slate-700 dark:text-slate-400"
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </button>
-                                            )}
+                                {abilities.update && comment.status !== 'rejected' && (
+                                    <button
+                                        type="button"
+                                        title={t('blog.comments.actions.reject', 'Reject')}
+                                        onClick={() => changeStatus(comment, 'rejected')}
+                                        className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-500/10 hover:text-slate-700 dark:text-slate-400"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                )}
 
-                                            {abilities.update && comment.status !== 'spam' && (
-                                                <button
-                                                    type="button"
-                                                    title={t('blog.comments.actions.spam', 'Mark as spam')}
-                                                    onClick={() => changeStatus(comment, 'spam')}
-                                                    className="rounded-lg p-2 text-amber-500 transition-colors hover:bg-amber-500/10 hover:text-amber-600 dark:text-amber-400"
-                                                >
-                                                    <ShieldAlert className="h-4 w-4" />
-                                                </button>
-                                            )}
+                                {abilities.update && comment.status !== 'spam' && (
+                                    <button
+                                        type="button"
+                                        title={t('blog.comments.actions.spam', 'Mark as spam')}
+                                        onClick={() => changeStatus(comment, 'spam')}
+                                        className="rounded-lg p-2 text-amber-500 transition-colors hover:bg-amber-500/10 hover:text-amber-600 dark:text-amber-400"
+                                    >
+                                        <ShieldAlert className="h-4 w-4" />
+                                    </button>
+                                )}
 
-                                            {abilities.delete && (
-                                                <button
-                                                    type="button"
-                                                    title={t('blog.comments.actions.delete', 'Delete comment')}
-                                                    onClick={() => setDeleteTarget(comment)}
-                                                    className="rounded-lg p-2 text-rose-500 transition-colors hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                <Pagination meta={comments.meta} onPageChange={(page) => applyFilters({ page: String(page) })} />
-            </div>
+                                {abilities.delete && (
+                                    <button
+                                        type="button"
+                                        title={t('blog.comments.actions.delete', 'Delete comment')}
+                                        onClick={() => setDeleteTarget(comment)}
+                                        className="rounded-lg p-2 text-rose-500 transition-colors hover:bg-rose-500/10 hover:text-rose-600 dark:text-rose-400"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
+                ))}
+            </TableCard>
 
             <ConfirmDialog
                 isOpen={deleteTarget !== null}
