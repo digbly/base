@@ -86,6 +86,20 @@ class Theme
         return $this->getPath().'/'.trim(config('themes.paths.generator.routes', 'routes'), '/');
     }
 
+    /**
+     * Absolute path to the theme's Vite "hot" file.
+     *
+     * Each theme runs its own Vite server, so its hot file lives inside the
+     * theme build directory instead of the shared application `public/hot`.
+     * This keeps the theme bundle from being hijacked when the application's
+     * own Vite dev server is running.
+     */
+    public function getHotFilePath(): string
+    {
+        return rtrim((string) config('themes.paths.assets', public_path('themes')), '/')
+            .'/'.$this->getLowerName().'/hot';
+    }
+
     public function json(?string $file = null): Json
     {
         $file ??= 'theme.json';

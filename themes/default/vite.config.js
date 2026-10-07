@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
@@ -11,6 +12,7 @@ export default defineConfig({
             refresh: ['resources/views/**/*.blade.php'],
             publicDirectory: '../../public',
             buildDirectory: 'themes/default',
+            hotFile: path.resolve(import.meta.dirname, '../../public/themes/default/hot'),
             ssrOutputDirectory: '../../bootstrap/ssr/themes/default',
         }),
         react(),

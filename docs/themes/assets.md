@@ -24,6 +24,13 @@ themes/default/
 Assets land in `public/themes/default` from the theme's own Vite config; the root
 template only injects them when the manifest exists.
 
+Each theme dev server writes its own hot file to `public/themes/<alias>/hot`
+(`hotFile` in the theme's `vite.config.js`) instead of the shared `public/hot`.
+On theme routes `App\Http\Middleware\ThemeSsr` points Laravel's Vite instance at
+that hot file, so a running application Vite server cannot load the application
+front end on theme routes (and vice versa). When the theme dev server is not
+running, the built manifest is used.
+
 ## Server-side rendering
 
 Each theme may ship its own SSR bundle and server. A theme opts in through the

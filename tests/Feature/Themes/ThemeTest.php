@@ -201,6 +201,13 @@ class ThemeTest extends TestCase
         $this->assertSame('blog', config('themes.current'));
     }
 
+    public function test_hot_file_path_lives_in_the_theme_asset_directory(): void
+    {
+        $theme = $this->makeTheme('Blog');
+
+        $this->assertSame($this->assetsPath.'/blog/hot', $theme->getHotFilePath());
+    }
+
     public function test_activate_merges_theme_config(): void
     {
         $theme = $this->makeTheme('Blog', config: ['color' => 'red']);

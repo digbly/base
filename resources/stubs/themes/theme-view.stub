@@ -7,7 +7,7 @@
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-        @if (file_exists(public_path('themes/{{ alias }}/manifest.json')) || file_exists(public_path('hot')))
+        @if (Vite::isRunningHot() || file_exists(public_path('themes/{{ alias }}/manifest.json')))
             @viteReactRefresh
             @vite('resources/views/app.tsx', 'themes/{{ alias }}')
         @endif
