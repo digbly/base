@@ -54,3 +54,42 @@
         @apply bg-transparent p-0 text-slate-100;
     }
 }
+
+@keyframes brand-float {
+    0%,
+    100% {
+        transform: translateY(0);
+        box-shadow: 0 0 0 0 rgb(99 102 241 / 0.35);
+    }
+
+    50% {
+        transform: translateY(-3px);
+        box-shadow: 0 0 0 6px rgb(99 102 241 / 0);
+    }
+}
+
+@keyframes brand-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.brand-mark {
+    animation: brand-float 3.2s ease-in-out infinite;
+    transition: transform 0.2s ease;
+}
+
+.brand-mark:hover {
+    animation: brand-spin 0.7s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .brand-mark,
+    .brand-mark:hover {
+        animation: none;
+    }
+}

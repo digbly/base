@@ -2,21 +2,31 @@
 
 namespace Themes\Default\Support;
 
-use Illuminate\Support\Collection;
-use Modules\Blog\Models\Category;
+use App\Facades\Setting;
+use App\Models\Menus\Menu;
 
 class NavigationData
 {
     /**
-     * @return Collection<int, Category>
+     * Resolve the menu assigned to a location into a nested, presentable tree.
+     *
+     * @return array<int, array<string, mixed>>
      */
-    public function categories(int $limit = 6): Collection
+    public function menu(string $location = 'primary'): array
     {
-        return Category::query()
-            ->with('translations')
-            ->whereNull('parent_id')
-            ->orderBy('created_at')
-            ->limit($limit)
-            ->get();
+        $locations = (array) Setting::get('nav_location', []);
+        $menuId = $locations[$location] ?? null;
+
+        if (! is_string($menuId) || $menuId === '') {
+            return [];
+        }
+
+        $menu = Menu::withDataItems()->find($menuId);
+
+        if ($menu === null) {
+            return [];
+        }
+
+        return MenuPresenter::items($menu->items);
     }
 }

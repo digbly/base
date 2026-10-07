@@ -6,8 +6,8 @@ use App\Support\SidebarRenderer;
 use Illuminate\Routing\Controller as BaseController;
 use Inertia\Inertia;
 use Inertia\Response;
+use Themes\Default\Support\BrandData;
 use Themes\Default\Support\NavigationData;
-use Themes\Default\Support\PostPresenter;
 
 abstract class Controller extends BaseController
 {
@@ -19,13 +19,10 @@ abstract class Controller extends BaseController
     protected function render(string $component, array $props = []): Response
     {
         return Inertia::render($component, array_merge([
-            'siteName' => config('app.name'),
+            'siteName' => fn () => app(BrandData::class)->name(),
+            'siteLogo' => fn () => app(BrandData::class)->logoUrl(),
             'messages' => fn () => trans('default::messages'),
-            'navCategories' => fn () => app(NavigationData::class)
-                ->categories()
-                ->map(fn ($category) => PostPresenter::category($category))
-                ->values()
-                ->all(),
+            'navMenu' => fn () => app(NavigationData::class)->menu('primary'),
             'sidebarWidgets' => fn () => app(SidebarRenderer::class)->payload('sidebar'),
         ], $props))->rootView('default::theme');
     }

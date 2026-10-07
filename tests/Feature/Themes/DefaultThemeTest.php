@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Themes;
 
+use App\Facades\Setting;
+use App\Models\Menus\Menu;
 use App\Models\Pages\Page;
 use App\Themes\FileRepository;
 use App\Themes\ThemeManager;
@@ -237,6 +239,50 @@ class DefaultThemeTest extends TestCase
             ->assertNotFound()
             ->assertSee('Back to home')
             ->assertSee('"component":"NotFound"', false);
+    }
+
+    public function test_header_renders_brand_and_primary_menu(): void
+    {
+        Setting::set('sitename', 'My Site');
+
+        $menu = Menu::create(['name' => 'Main']);
+
+        $home = $menu->items()->create([
+            'box_key' => 'custom',
+            'link' => '/',
+            'is_home' => true,
+            'display_order' => 0,
+        ]);
+        $home->translations()->create(['locale' => 'en', 'label' => 'Home']);
+
+        $about = $menu->items()->create([
+            'box_key' => 'custom',
+            'link' => '/about',
+            'display_order' => 1,
+        ]);
+        $about->translations()->create(['locale' => 'en', 'label' => 'About']);
+
+        $team = $menu->items()->create([
+            'parent_id' => $about->id,
+            'box_key' => 'custom',
+            'link' => '/about/team',
+            'display_order' => 0,
+        ]);
+        $team->translations()->create(['locale' => 'en', 'label' => 'Team']);
+
+        Setting::set('nav_location', ['primary' => $menu->id]);
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('My Site')
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Home', false)
+                ->where('siteName', 'My Site')
+                ->where('siteLogo', null)
+                ->where('navMenu.0.label', 'Home')
+                ->where('navMenu.1.label', 'About')
+                ->where('navMenu.1.children.0.label', 'Team')
+                ->where('navMenu.1.children.0.url', '/about/team'));
     }
 
     public function test_home_page_renders_configured_blocks(): void

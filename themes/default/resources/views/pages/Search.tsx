@@ -3,12 +3,13 @@ import AppLayout from '@/layouts/AppLayout';
 import Pagination from '@/components/Pagination';
 import PostCard from '@/components/PostCard';
 import { route } from '@/lib/route';
-import type { Category, Paginated, Post, Widget } from '@/types';
+import type { NavItem, Paginated, Post, Widget } from '@/types';
 
 interface SearchProps {
     siteName: string;
+    siteLogo: string | null;
     messages: Record<string, string>;
-    navCategories: Category[];
+    navMenu: NavItem[];
     sidebarWidgets: Widget[];
     search: string;
     posts: Paginated<Post>;
@@ -16,14 +17,20 @@ interface SearchProps {
 
 export default function Search({
     siteName,
+    siteLogo,
     messages,
-    navCategories,
+    navMenu,
     sidebarWidgets,
     search,
     posts,
 }: SearchProps) {
     return (
-        <AppLayout siteName={siteName} navCategories={navCategories} sidebarWidgets={sidebarWidgets}>
+        <AppLayout
+            siteName={siteName}
+            siteLogo={siteLogo}
+            navMenu={navMenu}
+            sidebarWidgets={sidebarWidgets}
+        >
             <Head title="Search" />
 
             <header className="mb-8 space-y-4">

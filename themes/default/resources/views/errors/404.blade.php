@@ -4,12 +4,15 @@
         ->mapWithKeys(fn ($route) => [$route->getName() => '/'.ltrim($route->uri(), '/')])
         ->all();
 
+    $brand = app(\Themes\Default\Support\BrandData::class);
+
     $page = [
         'component' => 'NotFound',
         'props' => [
-            'siteName' => config('app.name'),
+            'siteName' => $brand->name(),
+            'siteLogo' => $brand->logoUrl(),
             'messages' => trans('default::messages'),
-            'navCategories' => [],
+            'navMenu' => app(\Themes\Default\Support\NavigationData::class)->menu('primary'),
             'sidebarWidgets' => [],
             'routes' => $routes,
         ],

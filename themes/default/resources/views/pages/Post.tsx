@@ -3,12 +3,13 @@ import AppLayout from '@/layouts/AppLayout';
 import CommentForm from '@/components/comments/CommentForm';
 import CommentList from '@/components/comments/CommentList';
 import Pagination from '@/components/Pagination';
-import type { Category, Comment, Paginated, Post as PostType, Widget } from '@/types';
+import type { Comment, NavItem, Paginated, Post as PostType, Widget } from '@/types';
 
 interface PostProps {
     siteName: string;
+    siteLogo: string | null;
     messages: Record<string, string>;
-    navCategories: Category[];
+    navMenu: NavItem[];
     sidebarWidgets: Widget[];
     post: PostType;
     comments: Paginated<Comment>;
@@ -29,15 +30,21 @@ const formatDate = (value: string | null): string => {
 
 export default function Post({
     siteName,
+    siteLogo,
     messages,
-    navCategories,
+    navMenu,
     sidebarWidgets,
     post,
     comments,
     commentStatus,
 }: PostProps) {
     return (
-        <AppLayout siteName={siteName} navCategories={navCategories} sidebarWidgets={sidebarWidgets}>
+        <AppLayout
+            siteName={siteName}
+            siteLogo={siteLogo}
+            navMenu={navMenu}
+            sidebarWidgets={sidebarWidgets}
+        >
             <Head title={post.title ?? ''} />
 
             <article>

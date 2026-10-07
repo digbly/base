@@ -3,12 +3,13 @@ import AppLayout from '@/layouts/AppLayout';
 import BlockRenderer from '@/components/BlockRenderer';
 import Pagination from '@/components/Pagination';
 import PostCard from '@/components/PostCard';
-import type { Block, Category, PageTemplate, Paginated, Post, Widget } from '@/types';
+import type { Block, NavItem, PageTemplate, Paginated, Post, Widget } from '@/types';
 
 interface HomeProps {
     siteName: string;
+    siteLogo: string | null;
     messages: Record<string, string>;
-    navCategories: Category[];
+    navMenu: NavItem[];
     sidebarWidgets: Widget[];
     heading: string;
     subheading: string | null;
@@ -19,8 +20,9 @@ interface HomeProps {
 
 export default function Home({
     siteName,
+    siteLogo,
     messages,
-    navCategories,
+    navMenu,
     sidebarWidgets,
     heading,
     subheading,
@@ -31,7 +33,12 @@ export default function Home({
     const hasBlocks = template !== null && Object.keys(blocks).length > 0;
 
     return (
-        <AppLayout siteName={siteName} navCategories={navCategories} sidebarWidgets={sidebarWidgets}>
+        <AppLayout
+            siteName={siteName}
+            siteLogo={siteLogo}
+            navMenu={navMenu}
+            sidebarWidgets={sidebarWidgets}
+        >
             <Head title={heading} />
 
             {hasBlocks ? (

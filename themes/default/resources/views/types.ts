@@ -7,6 +7,15 @@ export interface Category {
     url: string | null;
 }
 
+export interface NavItem {
+    id: string;
+    label: string | null;
+    url: string | null;
+    icon: string | null;
+    target: string | null;
+    children: NavItem[];
+}
+
 export interface Post {
     id: string;
     title: string | null;

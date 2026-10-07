@@ -1,23 +1,30 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/AppLayout';
 import { route } from '@/lib/route';
-import type { Category, Widget } from '@/types';
+import type { NavItem, Widget } from '@/types';
 
 interface NotFoundProps {
     siteName: string;
+    siteLogo: string | null;
     messages: Record<string, string>;
-    navCategories: Category[];
+    navMenu: NavItem[];
     sidebarWidgets: Widget[];
 }
 
 export default function NotFound({
     siteName,
+    siteLogo,
     messages,
-    navCategories,
+    navMenu,
     sidebarWidgets,
 }: NotFoundProps) {
     return (
-        <AppLayout siteName={siteName} navCategories={navCategories} sidebarWidgets={sidebarWidgets}>
+        <AppLayout
+            siteName={siteName}
+            siteLogo={siteLogo}
+            navMenu={navMenu}
+            sidebarWidgets={sidebarWidgets}
+        >
             <Head title={messages.not_found ?? 'Not found'} />
 
             <div className="rounded-3xl border border-slate-200 bg-white px-8 py-16 text-center">

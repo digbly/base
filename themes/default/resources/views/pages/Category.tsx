@@ -2,12 +2,13 @@ import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/AppLayout';
 import Pagination from '@/components/Pagination';
 import PostCard from '@/components/PostCard';
-import type { Category, Paginated, Post, Widget } from '@/types';
+import type { Category, NavItem, Paginated, Post, Widget } from '@/types';
 
 interface CategoryProps {
     siteName: string;
+    siteLogo: string | null;
     messages: Record<string, string>;
-    navCategories: Category[];
+    navMenu: NavItem[];
     sidebarWidgets: Widget[];
     category: Category;
     heading: string;
@@ -17,15 +18,21 @@ interface CategoryProps {
 
 export default function Category({
     siteName,
+    siteLogo,
     messages,
-    navCategories,
+    navMenu,
     sidebarWidgets,
     heading,
     subheading,
     posts,
 }: CategoryProps) {
     return (
-        <AppLayout siteName={siteName} navCategories={navCategories} sidebarWidgets={sidebarWidgets}>
+        <AppLayout
+            siteName={siteName}
+            siteLogo={siteLogo}
+            navMenu={navMenu}
+            sidebarWidgets={sidebarWidgets}
+        >
             <Head title={heading} />
 
             <header className="mb-8">
